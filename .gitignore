@@ -1,0 +1,39 @@
+# =========================
+# Global
+# =========================
+node_modules/
+dist/
+.env
+.env.test
+.DS_Store
+*.log
+*.tsbuildinfo
+coverage/
+
+# =========================
+# Vite (client/)
+# =========================
+client/.vite/
+client/node_modules/
+client/dist/
+
+# =========================
+# Express + TypeScript (server/)
+# =========================
+server/node_modules/
+server/dist/
+server/build/
+server/*.log
+
+# =========================
+# VS Code
+# =========================
+.vscode/
+.history/
+
+# =========================
+# Testing
+# =========================
+coverage/
+cypress/videos/
+cypress/screenshots/
