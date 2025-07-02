@@ -1,5 +1,5 @@
 import pool from '../db';
-import { RowDataPacket } from 'mysql2';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 export interface User extends RowDataPacket {
   id: number;
@@ -13,4 +13,32 @@ export const getAllUsers = async (): Promise<User[]> => {
     'SELECT id, name, email, created_at FROM users'
   );
   return rows;
+};
+
+export const createUser = async (
+  name: string,
+  email: string,
+  password: string
+): Promise<User> => {
+  const [result] = await pool.query<ResultSetHeader>(
+    `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`,
+    [name, email, password]
+  );
+
+  const [rows] = await pool.query<User[]>(
+    `SELECT id, name, email, created_at FROM users WHERE id = ?`,
+    [result.insertId]
+  );
+
+  return rows[0];
+};
+
+export const getUserByEmail = async (
+  email: string
+): Promise<User | undefined> => {
+  const [rows] = await pool.query<User[]>(
+    'SELECT id, name, email, created_at FROM users WHERE email = ?',
+    [email]
+  );
+  return rows[0];
 };
