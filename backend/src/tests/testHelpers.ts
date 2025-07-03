@@ -1,3 +1,4 @@
+import { hashPassword } from '../utils/hashPassword';
 import { validateEmail } from '../utils/validateEmail';
 import validatePassword from '../utils/validatePassword';
 
@@ -11,6 +12,9 @@ import validatePassword from '../utils/validatePassword';
 
     console.log('validating password...');
     console.log(validatePassword(password));
+
+    console.log('hashing password...');
+    console.log(await hashPassword(password));
 
     console.log('All validations passed.');
   } catch (err) {

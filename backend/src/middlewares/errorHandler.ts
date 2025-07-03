@@ -6,7 +6,7 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ) {
-  console.error(err);
+  console.error(err.message);
 
   const status = err.status || 500;
   const message = err.message || 'Internal Server Error';
@@ -14,7 +14,5 @@ export function errorHandler(
   res.status(status).json({
     errorCode: status,
     errorMessage: message,
-    // optionally include stack trace only in development
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 }

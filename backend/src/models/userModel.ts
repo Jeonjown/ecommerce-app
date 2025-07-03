@@ -42,3 +42,11 @@ export const getUserByEmail = async (
   );
   return rows[0];
 };
+
+export const getUserById = async (resultId: number) => {
+  const [row] = await pool.query<User[]>(
+    'SELECT id, name, created_at FROM users WHERE id = ?',
+    [resultId]
+  );
+  return row[0];
+};
