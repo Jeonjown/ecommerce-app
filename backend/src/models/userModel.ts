@@ -5,6 +5,7 @@ export interface User extends RowDataPacket {
   id: number;
   name: string;
   email: string;
+  password: string;
   created_at: Date;
 }
 
@@ -37,7 +38,7 @@ export const getUserByEmail = async (
   email: string
 ): Promise<User | undefined> => {
   const [rows] = await pool.query<User[]>(
-    'SELECT id, name, email, created_at FROM users WHERE email = ?',
+    'SELECT id, name, email, created_at, password FROM users WHERE email = ?',
     [email]
   );
   return rows[0];

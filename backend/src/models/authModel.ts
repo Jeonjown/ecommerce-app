@@ -1,6 +1,8 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import pool from '../db';
-import { getUserById } from './userModel';
+import { getUserByEmail, getUserById } from './userModel';
+import bcrypt from 'bcrypt';
+import { ApiError } from '../utils/ApiError';
 
 export interface User extends RowDataPacket {
   id: number;
@@ -22,4 +24,23 @@ export const signupUser = async (
   const newUser = await getUserById(result.insertId);
 
   return newUser;
+};
+
+export const loginUser = async (email: string, password: string) => {
+  // find email and password if match
+  const foundUser = await getUserByEmail(email);
+
+  if (!foundUser) {
+    throw new ApiError('user not found', 401);
+  }
+
+  const passwordMatch = await bcrypt.compare(password, foundUser.password);
+
+  if (!passwordMatch) {
+    throw new ApiError('Invalid credentials', 401);
+  }
+
+  const { password: _, ...userWithoutPassword } = foundUser;
+
+  return userWithoutPassword;
 };
