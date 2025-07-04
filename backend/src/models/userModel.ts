@@ -11,7 +11,7 @@ export interface User extends RowDataPacket {
 
 export const getAllUsers = async (): Promise<User[]> => {
   const [rows] = await pool.query<User[]>(
-    'SELECT id, name, email, created_at FROM users'
+    'SELECT id, name, email, role, created_at FROM users'
   );
   return rows;
 };
@@ -27,7 +27,7 @@ export const createUser = async (
   );
 
   const [rows] = await pool.query<User[]>(
-    `SELECT id, name, email, created_at FROM users WHERE id = ?`,
+    `SELECT id, name, email, role, created_at FROM users WHERE id = ?`,
     [result.insertId]
   );
 
@@ -38,7 +38,7 @@ export const getUserByEmail = async (
   email: string
 ): Promise<User | undefined> => {
   const [rows] = await pool.query<User[]>(
-    'SELECT id, name, email, created_at, password FROM users WHERE email = ?',
+    'SELECT id, name, email, role, created_at, password FROM users WHERE email = ?',
     [email]
   );
   return rows[0];
@@ -46,7 +46,7 @@ export const getUserByEmail = async (
 
 export const getUserById = async (resultId: number) => {
   const [row] = await pool.query<User[]>(
-    'SELECT id, name, created_at FROM users WHERE id = ?',
+    'SELECT id, name, role, created_at FROM users WHERE id = ?',
     [resultId]
   );
   return row[0];

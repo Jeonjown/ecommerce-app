@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { ApiError } from './ApiError';
 
-export const jwtSign = (userId: number) => {
+export const jwtSign = (id: number) => {
   const secretKey = process.env.JWT_SECRET;
   if (!secretKey) {
     throw new ApiError(
@@ -10,7 +10,7 @@ export const jwtSign = (userId: number) => {
     );
   }
 
-  const token = jwt.sign({ userId }, secretKey, { expiresIn: '24h' });
+  const token = jwt.sign({ id }, secretKey, { expiresIn: '24h' });
 
   return token;
 };

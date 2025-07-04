@@ -28,6 +28,6 @@ export const authenticateUser = (
 
     next();
   } catch (error) {
-    next(new ApiError('Invalid or expired token.', 401));
+    next();
   }
 };

@@ -3,11 +3,10 @@ import {
   createUserController,
   getUsersController,
 } from '../controllers/userControllers';
-import { getUserByEmail } from '../models/userModel';
 
 const router = express.Router();
 
-router.get('/test', getUsersController);
+router.get('/', getUsersController);
 
 router.post('/', createUserController);
 
