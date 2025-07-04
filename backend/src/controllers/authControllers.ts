@@ -5,6 +5,7 @@ import { loginUser, signupUser } from '../models/authModel';
 import { hashPassword } from '../utils/hashPassword';
 import { ApiError } from '../utils/ApiError';
 import { jwtSign } from '../utils/jwtSign';
+import setTokenCookie from '../utils/setTokenCookie';
 
 export const signupUserController = async (
   req: Request,
@@ -24,7 +25,11 @@ export const signupUserController = async (
     const hashPass = await hashPassword(password);
     const user = await signupUser(name, email, hashPass);
 
-    res.status(200).json({ message: 'user successsfully signed up.', user });
+    const token = jwtSign(user.id);
+
+    setTokenCookie(res, token);
+
+    res.status(201).json({ message: 'User successfully signed up.', user });
   } catch (error) {
     next(error);
   }
@@ -46,9 +51,9 @@ export const loginUserController = async (
 
     const token = jwtSign(user.id);
 
-    res
-      .status(200)
-      .json({ message: 'user successfully logged in ', user, token });
+    setTokenCookie(res, token);
+
+    res.status(200).json({ message: 'user successfully logged in ', user });
   } catch (error) {
     next(error);
   }
