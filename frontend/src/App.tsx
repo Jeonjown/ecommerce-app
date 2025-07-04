@@ -1,7 +1,13 @@
+import Navbar from "./components/Navbar";
+
 function App() {
   return (
     <>
-      <div className="p-4 pt-2">Hello</div>
+      <Navbar />
+
+      <main className="container mx-auto bg-gray-200 p-4">
+        this is container
+      </main>
     </>
   );
 }
