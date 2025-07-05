@@ -3,8 +3,10 @@ import { BsCartPlus } from "react-icons/bs";
 import { IoSearch } from "react-icons/io5";
 import HamburgerMenu from "./Hamburger";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const toggleMenu = () => setMenuOpen((prev) => !prev);
 
@@ -36,13 +38,25 @@ const Navbar = () => {
         {/* Icons */}
         <div className="ml-auto flex items-center space-x-4">
           <div className="flex items-center space-x-1">
-            <FaRegUser size={22} />
-            <span className="">Account</span>
-          </div>
-          <div className="flex items-center space-x-1">
             <BsCartPlus size={24} />
             <span className="">Cart</span>
           </div>
+
+          {isLoggedIn ? (
+            <div className="flex items-center space-x-1">
+              <FaRegUser size={22} />
+              <span className="">Account</span>
+            </div>
+          ) : (
+            <div className="space-x-2">
+              <Link to={"/login"}>
+                <button className="border px-2 py-1">Login</button>
+              </Link>
+              <Link to={"/signup"}>
+                <button className="border px-2 py-1">Signup</button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Hamburger */}
