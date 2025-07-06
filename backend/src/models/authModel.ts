@@ -3,19 +3,13 @@ import pool from '../db';
 import { getUserByEmail, getUserById } from './userModel';
 import bcrypt from 'bcrypt';
 import { ApiError } from '../utils/ApiError';
-
-export interface User extends RowDataPacket {
-  id: number;
-  name: string;
-  email: string;
-  created_at: Date;
-}
+import { User } from '../types/models/user';
 
 export const signupUser = async (
   name: string,
   validEmail: string,
   hashPassword: string
-) => {
+): Promise<User> => {
   const [result]: [ResultSetHeader, any] = await pool.query(
     'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
     [name, validEmail, hashPassword]
@@ -26,7 +20,10 @@ export const signupUser = async (
   return newUser;
 };
 
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (
+  email: string,
+  password: string
+): Promise<Omit<User, 'password'>> => {
   // find email and password if match
   const foundUser = await getUserByEmail(email);
 

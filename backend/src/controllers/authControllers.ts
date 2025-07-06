@@ -6,6 +6,7 @@ import { hashPassword } from '../utils/hashPassword';
 import { ApiError } from '../utils/ApiError';
 import { jwtSign } from '../utils/jwtSign';
 import setTokenCookie from '../utils/setTokenCookie';
+import { loginSchema, signupSchema } from '../validation/authSchemas';
 
 export const signupUserController = async (
   req: Request,
@@ -13,14 +14,19 @@ export const signupUserController = async (
   next: NextFunction
 ) => {
   try {
-    const { name, email, password } = req.body;
+    const result = signupSchema.safeParse(req.body);
 
-    if (!name || !email || !password) {
-      throw new ApiError('Please provide all required fields', 400);
+    if (!result.success) {
+      return res.status(400).json({
+        message: 'Validation failed',
+        errors: result.error.issues.map((issue) => ({
+          path: issue.path.join('.'),
+          message: issue.message,
+        })),
+      });
     }
 
-    validateEmail(email);
-    validatePassword(password);
+    const { name, email, password } = result.data;
 
     const hashPass = await hashPassword(password);
     const user = await signupUser(name, email, hashPass);
@@ -41,7 +47,19 @@ export const loginUserController = async (
   next: NextFunction
 ) => {
   try {
-    const { email, password } = req.body;
+    const result = loginSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        message: 'Validation failed',
+        errors: result.error.issues.map((issue) => ({
+          path: issue.path.join('.'),
+          message: issue.message,
+        })),
+      });
+    }
+
+    const { email, password } = result.data;
 
     if (!email || !password) {
       throw new ApiError('Please provide all required fields', 400);

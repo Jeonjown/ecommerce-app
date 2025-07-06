@@ -1,13 +1,6 @@
 import pool from '../db';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
-
-export interface User extends RowDataPacket {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  created_at: Date;
-}
+import { User } from '../types/models/user';
 
 export const getAllUsers = async (): Promise<User[]> => {
   const [rows] = await pool.query<User[]>(
