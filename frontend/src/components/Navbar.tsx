@@ -4,9 +4,12 @@ import { IoSearch } from "react-icons/io5";
 import HamburgerMenu from "./Hamburger";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useGetLoggedInUser } from "../hooks/useGetLoggedInUser";
+import { useLogoutUser } from "../hooks/useLogoutUser";
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { data } = useGetLoggedInUser();
+  const { mutate } = useLogoutUser();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const toggleMenu = () => setMenuOpen((prev) => !prev);
 
@@ -42,10 +45,13 @@ const Navbar = () => {
             <span className="">Cart</span>
           </div>
 
-          {isLoggedIn ? (
+          {data ? (
             <div className="flex items-center space-x-1">
               <FaRegUser size={22} />
-              <span className="">Account</span>
+              <span>{data.user.name}</span>
+              <button className="border" onClick={() => mutate()}>
+                Log out
+              </button>
             </div>
           ) : (
             <div className="space-x-2">

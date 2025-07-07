@@ -2,8 +2,10 @@ import { NextFunction, Request, Response } from 'express';
 import { ApiError } from '../utils/ApiError';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
-interface AuthenticatedRequest extends Request {
-  user?: jwt.JwtPayload;
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    id: number;
+  };
 }
 
 export const authenticateUser = (
@@ -19,15 +21,22 @@ export const authenticateUser = (
     }
 
     if (!process.env.JWT_SECRET) {
-      throw new ApiError('No JWT provided', 400);
+      throw new ApiError('No JWT secret configured.', 500);
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
+      id?: number;
+    };
 
-    req.user = decoded;
+    if (!decoded || typeof decoded.id !== 'number') {
+      throw new ApiError('Invalid token payload.', 401);
+    }
+
+    req.user = { id: decoded.id };
 
     next();
   } catch (error) {
-    next();
+    console.error('Auth error:', error);
+    next(new ApiError('Unauthorized.', 401));
   }
 };

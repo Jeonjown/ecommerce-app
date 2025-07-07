@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { validateEmail } from '../utils/validateEmail';
-import validatePassword from '../utils/validatePassword';
+
 import { loginUser, signupUser } from '../models/authModel';
 import { hashPassword } from '../utils/hashPassword';
 import { ApiError } from '../utils/ApiError';
 import { jwtSign } from '../utils/jwtSign';
 import setTokenCookie from '../utils/setTokenCookie';
-import { loginSchema, signupSchema } from '../validation/authSchemas';
+import { validateEmail } from '../utils/validateEmail';
+import validatePassword from '../utils/validatePassword';
 
 export const signupUserController = async (
   req: Request,
@@ -14,19 +14,14 @@ export const signupUserController = async (
   next: NextFunction
 ) => {
   try {
-    const result = signupSchema.safeParse(req.body);
+    const { name, email, password, confirmPassword } = req.body;
 
-    if (!result.success) {
-      return res.status(400).json({
-        message: 'Validation failed',
-        errors: result.error.issues.map((issue) => ({
-          path: issue.path.join('.'),
-          message: issue.message,
-        })),
-      });
+    if (password !== confirmPassword) {
+      throw new ApiError('Passwords do not match.', 400);
     }
 
-    const { name, email, password } = result.data;
+    validateEmail(email);
+    validatePassword(password);
 
     const hashPass = await hashPassword(password);
     const user = await signupUser(name, email, hashPass);
@@ -47,23 +42,13 @@ export const loginUserController = async (
   next: NextFunction
 ) => {
   try {
-    const result = loginSchema.safeParse(req.body);
-
-    if (!result.success) {
-      return res.status(400).json({
-        message: 'Validation failed',
-        errors: result.error.issues.map((issue) => ({
-          path: issue.path.join('.'),
-          message: issue.message,
-        })),
-      });
-    }
-
-    const { email, password } = result.data;
+    const { email, password } = req.body;
 
     if (!email || !password) {
       throw new ApiError('Please provide all required fields', 400);
     }
+
+    validateEmail(email);
 
     const user = await loginUser(email, password);
 
@@ -74,5 +59,26 @@ export const loginUserController = async (
     res.status(200).json({ message: 'user successfully logged in ', user });
   } catch (error) {
     next(error);
+  }
+};
+
+export const logoutUserController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    res.clearCookie('authToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
+    });
+
+    res.status(200).json({ message: 'Logged out successfully' });
+    return;
+  } catch (error) {
+    console.error();
+    next(new ApiError('Error logging out', 500));
   }
 };

@@ -28,7 +28,7 @@ export const loginUser = async (
   const foundUser = await getUserByEmail(email);
 
   if (!foundUser) {
-    throw new ApiError('user not found', 401);
+    throw new ApiError('User not found, please sign up first.', 401);
   }
 
   const passwordMatch = await bcrypt.compare(password, foundUser.password);

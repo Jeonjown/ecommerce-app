@@ -1,12 +1,8 @@
-export interface SignupResponse {
-  message: string;
-  user: {
-    id: number;
-    name: string;
-    email: string;
-    password: string;
-    created_at: Date;
-  };
+export interface AuthenticatedUser {
+  id: number;
+  name: string;
+  email: string;
+  created_at: Date;
 }
 
 export interface SignupRequest {
@@ -14,4 +10,14 @@ export interface SignupRequest {
   email: string;
   password: string;
   confirmPassword: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  message: string;
+  user: AuthenticatedUser;
 }

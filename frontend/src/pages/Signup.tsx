@@ -1,11 +1,12 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { LuEyeClosed } from "react-icons/lu";
 import { FaRegEye } from "react-icons/fa6";
 import { useSignupUser } from "../hooks/useSignupUser";
+import { useNavigate } from "react-router-dom";
 
 const schema = z
   .object({
@@ -28,7 +29,15 @@ const schema = z
 type FormData = z.infer<typeof schema>;
 
 const Signup = () => {
-  const { mutate, isPending, error, data: user } = useSignupUser();
+  const { mutate, isPending, isSuccess, error, data } = useSignupUser();
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isSuccess) {
+      navigate("/");
+    }
+  }, [isSuccess, navigate]);
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -49,7 +58,7 @@ const Signup = () => {
     <div className="flex min-h-[90vh] items-center justify-center p-4">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-md space-y-6 rounded-lg bg-white p-6 md:shadow-lg"
+        className="w-full max-w-md space-y-6 rounded-lg border border-gray-300 bg-white p-6 md:shadow-lg"
       >
         <h1 className="text-center text-2xl font-bold text-gray-800">
           Create Your Account
@@ -163,7 +172,7 @@ const Signup = () => {
           {isPending ? "Creating..." : "Sign Up"}
         </button>
         {error && <p className="text-red-500">{error.message}</p>}
-        {user && <p className="text-green-500">{user.message}</p>}
+        {data && <p className="text-green-500">{data.message}</p>}
       </form>
     </div>
   );
