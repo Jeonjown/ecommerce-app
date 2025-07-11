@@ -6,7 +6,7 @@ import { ApiError } from '../utils/ApiError';
 import { jwtSign } from '../utils/jwtSign';
 import setTokenCookie from '../utils/setTokenCookie';
 import { validateEmail } from '../utils/validateEmail';
-import validatePassword from '../utils/validatePassword';
+import { validatePassword } from '../utils/validatePassword';
 
 export const signupUserController = async (
   req: Request,
@@ -15,6 +15,10 @@ export const signupUserController = async (
 ) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
+
+    if (!email || !password || !name || !confirmPassword) {
+      throw new ApiError('Please provide all required fields', 400);
+    }
 
     if (password !== confirmPassword) {
       throw new ApiError('Passwords do not match.', 400);
@@ -78,7 +82,7 @@ export const logoutUserController = async (
     res.status(200).json({ message: 'Logged out successfully' });
     return;
   } catch (error) {
-    console.error();
+    console.error(error);
     next(new ApiError('Error logging out', 500));
   }
 };

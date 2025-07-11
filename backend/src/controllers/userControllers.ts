@@ -12,7 +12,7 @@ export const getUsersController = async (
   try {
     const users = await getAllUsers();
 
-    res.json(users);
+    res.status(200).json(users);
   } catch (error) {
     console.error(error);
     next(new ApiError('Failed to fetch users', 500));
@@ -27,14 +27,17 @@ export const createUserController = async (
   const { name, email, password } = req.body;
 
   try {
+    if (!name || !email || !password) {
+      throw new ApiError('Please provide all required fields', 400);
+    }
     const user = await createUser(name, email, password);
     res.status(201).json({ user, message: 'user successfully created' });
   } catch (error) {
     console.error(error);
-    next(new ApiError('Failed to create users', 500));
+    next(error);
   }
 };
-export const getLoggedInUser = async (
+export const getLoggedInUserController = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction

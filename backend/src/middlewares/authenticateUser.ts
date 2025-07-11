@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { ApiError } from '../utils/ApiError';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -37,6 +37,6 @@ export const authenticateUser = (
     next();
   } catch (error) {
     console.error('Auth error:', error);
-    next(new ApiError('Unauthorized.', 401));
+    next(error);
   }
 };

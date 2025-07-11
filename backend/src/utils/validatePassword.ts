@@ -1,7 +1,7 @@
 import validator from 'validator';
 import { ApiError } from './ApiError';
 
-const validatePassword = (password: string): boolean => {
+export const validatePassword = (password: string): boolean => {
   const isValid = validator.isStrongPassword(password, {
     minLength: 8,
     minLowercase: 1,
@@ -19,5 +19,3 @@ const validatePassword = (password: string): boolean => {
 
   return true;
 };
-
-export default validatePassword;
