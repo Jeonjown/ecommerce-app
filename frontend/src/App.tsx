@@ -4,14 +4,33 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Cart from "./components/Cart";
+import PrivateRoutes from "./components/PrivateRoutes";
+import AdminRoutes from "./components/AdminRoutes";
+import AdminDashboard from "./components/AdminDashboard";
+import { useGetLoggedInUser } from "./hooks/useGetLoggedInUser";
+import AdminNavbar from "./components/AdminNavbar";
 
 function App() {
+  const { data } = useGetLoggedInUser();
+
   return (
     <>
-      <Navbar />
+      {data?.user.role === "admin" ? <AdminNavbar /> : <Navbar />}
 
       <main className="container mx-auto">
         <Routes>
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminRoutes />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+          </Route>
+
+          {/* Private Routes */}
+          <Route element={<PrivateRoutes />}>
+            <Route path="/cart" element={<Cart />} />
+          </Route>
+
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />

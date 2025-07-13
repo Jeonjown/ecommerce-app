@@ -36,7 +36,6 @@ export const authenticateUser = (
 
     next();
   } catch (error) {
-    console.error('Auth error:', error);
     next(error);
   }
 };

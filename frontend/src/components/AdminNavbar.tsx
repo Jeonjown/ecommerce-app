@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { useGetLoggedInUser } from "../hooks/useGetLoggedInUser";
 import { useLogoutUser } from "../hooks/useLogoutUser";
 
-const Navbar = () => {
+const AdminNavbar = () => {
   const { data } = useGetLoggedInUser();
   const { mutate } = useLogoutUser();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
@@ -17,13 +17,17 @@ const Navbar = () => {
     <>
       <nav className="relative container mx-auto flex flex-wrap items-center justify-between gap-4 px-4 py-4">
         {/* Logo */}
-        <div className="text-2xl font-bold">LOGO</div>
 
+        <div className="text-2xl font-bold">LOGO</div>
         {/* Desktop Nav Links (moved before search) */}
+        <div>Admin Navbar</div>
         <ul className="hidden space-x-6 font-semibold md:flex lg:mx-auto">
+          <li>Dashboard</li>
+          <li>Products</li>
           <li>Categories</li>
-          <li>New Deals</li>
-          <li>Delivery</li>
+          <li>Orders</li>
+          <li>Users</li>
+          <li>Logout</li>
         </ul>
 
         {/* Search */}
@@ -90,4 +94,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default AdminNavbar;

@@ -202,7 +202,7 @@ describe('loginController', () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      message: 'user successfully logged in ',
+      message: 'user successfully logged in',
       user: {
         id: 'user123',
         name: 'John Doe',

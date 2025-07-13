@@ -14,29 +14,27 @@ export const getUsersController = async (
 
     res.status(200).json(users);
   } catch (error) {
-    console.error(error);
     next(new ApiError('Failed to fetch users', 500));
   }
 };
 
-export const createUserController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { name, email, password } = req.body;
+// export const createUserController = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   const { name, email, password } = req.body;
 
-  try {
-    if (!name || !email || !password) {
-      throw new ApiError('Please provide all required fields', 400);
-    }
-    const user = await createUser(name, email, password);
-    res.status(201).json({ user, message: 'user successfully created' });
-  } catch (error) {
-    console.error(error);
-    next(error);
-  }
-};
+//   try {
+//     if (!name || !email || !password) {
+//       throw new ApiError('Please provide all required fields', 400);
+//     }
+//     const user = await createUser(name, email, password);
+//     res.status(201).json({ user, message: 'user successfully created' });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 export const getLoggedInUserController = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -55,7 +53,6 @@ export const getLoggedInUserController = async (
 
     res.status(200).json({ user, message: 'User successfully fetched.' });
   } catch (error) {
-    console.error(error);
     next(new ApiError('Failed to fetch user.', 500));
   }
 };

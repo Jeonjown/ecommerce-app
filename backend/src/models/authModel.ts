@@ -10,12 +10,21 @@ export const signupUser = async (
   validEmail: string,
   hashPassword: string
 ): Promise<User> => {
+  const foundUser = await getUserByEmail(validEmail);
+  if (foundUser) {
+    throw new ApiError('Email already in used. Please try another one', 401);
+  }
+
   const [result]: [ResultSetHeader, any] = await pool.query(
     'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
     [name, validEmail, hashPassword]
   );
 
   const newUser = await getUserById(result.insertId);
+
+  if (!newUser) {
+    throw new ApiError('Failed to fetch newly created user.', 500);
+  }
 
   return newUser;
 };

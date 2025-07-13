@@ -6,8 +6,6 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ) {
-  console.error(err.message);
-
   const status = err.status || 500;
   const message = err.message || 'Internal Server Error';
 

@@ -21,7 +21,12 @@ app.use(cookieParser());
 app.use(express.json());
 
 // routes
-app.use('/api/users', authenticateUser, checkUserRole('user'), userRoutes);
+app.use(
+  '/api/users',
+  authenticateUser,
+  checkUserRole('user', 'admin'),
+  userRoutes
+);
 app.use('/api/auth', authRoutes);
 
 app.use(errorHandler);

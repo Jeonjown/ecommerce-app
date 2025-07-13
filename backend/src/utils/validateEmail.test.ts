@@ -6,10 +6,12 @@ describe('validateEmail', () => {
   });
 
   it('returns not valid email', () => {
-    expect(() => validateEmail('testEmail')).toThrow('Email is not valid');
+    expect(() => validateEmail('testEmail')).toThrow(
+      'Please enter a valid email.'
+    );
   });
 
   it('returns not valid email when email is empty ', () => {
-    expect(() => validateEmail('')).toThrow('Email is not valid');
+    expect(() => validateEmail('')).toThrow('Please enter a valid email.');
   });
 });

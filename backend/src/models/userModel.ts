@@ -37,7 +37,9 @@ export const getUserByEmail = async (
   return rows[0];
 };
 
-export const getUserById = async (resultId: number) => {
+export const getUserById = async (
+  resultId: number
+): Promise<User | undefined> => {
   const [row] = await pool.query<User[]>(
     'SELECT id, name, email, role, created_at FROM users WHERE id = ?',
     [resultId]

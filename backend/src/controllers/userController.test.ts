@@ -43,7 +43,6 @@ import { NextFunction, Request, Response } from 'express';
 import { getAllUsers, createUser, getUserById } from '../models/userModel';
 import { ApiError } from '../utils/ApiError';
 import {
-  createUserController,
   getLoggedInUserController,
   getUsersController,
 } from './userControllers';
@@ -100,92 +99,6 @@ describe('getUsersController', () => {
     expect(error).toBeInstanceOf(ApiError);
     expect(error.message).toBe('Failed to fetch users');
     expect(error.status).toBe(500);
-  });
-});
-
-describe('createUserController', () => {
-  let req: Partial<Request>;
-  let res: Partial<Response>;
-  let next: NextFunction;
-
-  beforeEach(() => {
-    req = {
-      body: {},
-    };
-    res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
-
-    next = jest.fn();
-  });
-
-  it('it should return created user successfully', async () => {
-    req.body = {
-      name: 'Alice',
-      email: 'alice@example.com',
-      password: 'TestPass123!',
-    };
-
-    await createUserController(req as Request, res as Response, next);
-
-    expect(createUser).toHaveBeenCalledWith(
-      req.body.name,
-      req.body.email,
-      req.body.password
-    );
-
-    expect(res.status).toHaveBeenCalledWith(201);
-
-    expect(res.json).toHaveBeenCalledWith({
-      user: {
-        id: 1,
-        name: 'Alice',
-        email: 'alice@example.com',
-        role: 'user',
-        created_at: '2024-01-01',
-      },
-      message: 'user successfully created',
-    });
-  });
-
-  it('should throw an error when missing a field', async () => {
-    req.body = {
-      name: 'Alice',
-      email: 'alice@example.com',
-    };
-
-    await createUserController(req as Request, res as Response, next);
-
-    expect(next).toHaveBeenCalled();
-
-    const error = (next as jest.Mock).mock.calls[0][0];
-
-    expect(error).toBeInstanceOf(ApiError);
-    expect(error.message).toBe('Please provide all required fields');
-    expect((error as ApiError).status).toBe(400);
-  });
-
-  it('should throw an error when user creation failed', async () => {
-    req.body = {
-      name: 'Alice',
-      email: 'alice@example.com',
-      password: 'TestPass123!',
-    };
-
-    (createUser as jest.Mock).mockImplementation(() => {
-      throw new ApiError('Internal Server Error', 500);
-    });
-
-    await createUserController(req as Request, res as Response, next);
-
-    expect(next).toHaveBeenCalled();
-
-    const error = (next as jest.Mock).mock.calls[0][0];
-
-    expect(error).toBeInstanceOf(ApiError);
-    expect(error.message).toBe('Internal Server Error');
-    expect((error as ApiError).status).toBe(500);
   });
 });
 

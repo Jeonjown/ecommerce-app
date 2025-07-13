@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { LuEyeClosed } from "react-icons/lu";
 import { FaRegEye } from "react-icons/fa6";
@@ -25,6 +25,10 @@ const Login = () => {
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      email: "test@email.com",
+      password: "Testpass123!",
+    },
   });
 
   const onSubmit = (data: FormData) => {

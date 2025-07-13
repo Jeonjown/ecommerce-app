@@ -60,7 +60,7 @@ export const loginUserController = async (
 
     setTokenCookie(res, token);
 
-    res.status(200).json({ message: 'user successfully logged in ', user });
+    res.status(200).json({ message: 'user successfully logged in', user });
   } catch (error) {
     next(error);
   }
@@ -82,7 +82,6 @@ export const logoutUserController = async (
     res.status(200).json({ message: 'Logged out successfully' });
     return;
   } catch (error) {
-    console.error(error);
     next(new ApiError('Error logging out', 500));
   }
 };
