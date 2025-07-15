@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes';
 import { authenticateUser } from './middlewares/authenticateUser';
 import { checkUserRole } from './middlewares/checkUserRole';
 import { errorHandler } from './middlewares/errorHandler';
+import categoryRoutes from './routes/categoryRoutes';
 
 const app = express();
 
@@ -27,6 +28,14 @@ app.use(
   checkUserRole('user', 'admin'),
   userRoutes
 );
+
+app.use(
+  '/api/categories',
+  authenticateUser,
+  checkUserRole('admin'),
+  categoryRoutes
+);
+
 app.use('/api/auth', authRoutes);
 
 app.use(errorHandler);
