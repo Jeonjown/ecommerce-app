@@ -4,8 +4,11 @@ import {
   deleteCategoryById,
   editCategory,
   getCategories,
+  getCategoryBySlug,
 } from '../models/categoryModel';
 import { ApiError } from '../utils/ApiError';
+import { createSlug } from '../utils/createSlug';
+import { getProductsByCategory } from '../models/productModel';
 
 export const getCategoryController = async (
   req: Request,
@@ -21,17 +24,40 @@ export const getCategoryController = async (
   }
 };
 
+export const getProductsByCategorySlugController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { slug } = req.params;
+
+    const category = await getCategoryBySlug(slug);
+    if (!category) {
+      res.status(404).json({ message: 'Category not found' });
+      return;
+    }
+
+    const products = await getProductsByCategory(category.id);
+    res.status(200).json({ products });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createCategoryController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { name, slug } = req.body;
+    const { name } = req.body;
 
-    if (!name || !slug) {
+    if (!name) {
       throw new ApiError('Please fill all credentials.', 400);
     }
+
+    const slug = createSlug(name);
 
     const category = await createCategory(name, slug);
     res
@@ -49,12 +75,14 @@ export const editCategoryController = async (
   next: NextFunction
 ) => {
   try {
-    const { name, slug } = req.body;
+    const { name } = req.body;
     const { id } = req.params;
 
-    if (!name || !slug) {
+    if (!name) {
       throw new ApiError('Please fill all credentials.', 400);
     }
+
+    const slug = createSlug(name);
 
     const updatedCategory = await editCategory(Number(id), { name, slug });
 

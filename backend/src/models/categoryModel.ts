@@ -7,6 +7,28 @@ export const getCategories = async (): Promise<Categories[]> => {
   return rows as Categories[];
 };
 
+export const getCategoryById = async (
+  id: number
+): Promise<Categories | null> => {
+  const [rows] = await pool.query('SELECT * FROM categories WHERE id = ?', [
+    id,
+  ]);
+
+  const categories = rows as Categories[];
+  return categories[0] ?? null;
+};
+
+export const getCategoryBySlug = async (
+  slug: string
+): Promise<Categories | null> => {
+  const [rows] = await pool.query('SELECT * FROM categories WHERE slug = ?', [
+    slug,
+  ]);
+
+  const categories = rows as Categories[];
+  return categories[0] ?? null;
+};
+
 export const createCategory = async (
   name: string,
   slug: string
