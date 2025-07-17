@@ -10,6 +10,7 @@ import AdminRoutes from "./components/AdminRoutes";
 import AdminDashboard from "./components/AdminDashboard";
 import { useGetLoggedInUser } from "./hooks/useGetLoggedInUser";
 import AdminNavbar from "./components/AdminNavbar";
+import Products from "./pages/Products";
 
 function App() {
   const { data } = useGetLoggedInUser();
@@ -17,12 +18,12 @@ function App() {
   return (
     <>
       {data?.user.role === "admin" ? <AdminNavbar /> : <Navbar />}
-
       <main className="container mx-auto">
         <Routes>
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminRoutes />}>
             <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="products" element={<Products />} />
           </Route>
 
           {/* Private Routes */}

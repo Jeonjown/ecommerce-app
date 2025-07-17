@@ -15,7 +15,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="relative container mx-auto flex flex-wrap items-center justify-between gap-4 px-4 py-4">
+      <nav className="relative container mx-auto flex flex-wrap items-center justify-between gap-4">
         {/* Logo */}
         <div className="text-2xl font-bold">LOGO</div>
 

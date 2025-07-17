@@ -1,0 +1,24 @@
+import { DataTable } from "@/components/ui/data-table";
+import { useGetProducts } from "@/hooks/useGetProducts";
+import Loading from "@/pages/Loading";
+import { columns } from "./ProductColumns";
+
+const ProductPage = () => {
+  const { data, isPending, isError } = useGetProducts();
+
+  if (isError) {
+    return <div className="text-red-600">Failed to load products.</div>;
+  }
+
+  return (
+    <div className="container mx-auto">
+      {isPending ? (
+        <Loading />
+      ) : (
+        <DataTable columns={columns} data={data.products ?? []} />
+      )}
+    </div>
+  );
+};
+
+export default ProductPage;

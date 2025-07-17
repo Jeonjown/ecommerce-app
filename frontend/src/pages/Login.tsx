@@ -7,6 +7,10 @@ import { LuEyeClosed } from "react-icons/lu";
 import { FaRegEye } from "react-icons/fa6";
 import { useLoginUser } from "../hooks/useLoginUser";
 
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+
 const schema = z.object({
   email: z.string().email("Invalid email"),
   password: z.string(),
@@ -15,7 +19,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { mutate, data, error, isPending } = useLoginUser();
 
@@ -26,7 +30,7 @@ const Login = () => {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      email: "test@email.com",
+      email: "user@email.com",
       password: "Testpass123!",
     },
   });
@@ -41,22 +45,22 @@ const Login = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full max-w-md space-y-6 rounded-lg border border-gray-300 bg-white p-6 md:shadow-lg"
       >
-        <h1 className="text-center text-2xl font-bold text-gray-800">
-          Welcome Back
-          <p className="mt-2 text-center text-base font-normal text-gray-500">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800">Welcome Back</h1>
+          <p className="mt-2 text-base text-gray-500">
             Log in to your account to continue.
           </p>
-        </h1>
+        </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="space-y-4">
           {/* Email */}
-          <div className="flex flex-col">
-            <label className="mb-1 text-sm text-gray-600">Email</label>
-            <input
-              {...register("email")}
+          <div className="space-y-1">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
               type="email"
               autoComplete="email"
-              className="w-full rounded border border-gray-300 p-2 focus:border-gray-500 focus:outline-none"
+              {...register("email")}
             />
             {errors.email?.message && (
               <span className="text-sm text-red-500">
@@ -66,48 +70,34 @@ const Login = () => {
           </div>
 
           {/* Password */}
-          <div className="relative flex flex-col">
-            <label className="mb-1 text-sm text-gray-600">Password</label>
-            <input
-              {...register("password")}
+          <div className="relative space-y-1">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
               type={showPassword ? "text" : "password"}
-              autoComplete="new-password"
-              className="relative w-full rounded border border-gray-300 p-2 focus:border-gray-500 focus:outline-none"
+              autoComplete="current-password"
+              {...register("password")}
             />
-
-            {showPassword ? (
-              <FaRegEye
-                className="absolute top-9 right-3"
-                onClick={() => {
-                  setShowPassword((prev) => !prev);
-                }}
-              />
-            ) : (
-              <LuEyeClosed
-                className="absolute top-9 right-3"
-                onClick={() => {
-                  setShowPassword((prev) => !prev);
-                }}
-              />
-            )}
+            <div
+              className="absolute top-7 right-3 cursor-pointer"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? <FaRegEye /> : <LuEyeClosed />}
+            </div>
             {errors.password?.message && (
               <span className="text-sm text-red-500">
                 {errors.password.message}
               </span>
             )}
           </div>
-
-          {/* Confirm Password */}
         </div>
 
-        <button
-          type="submit"
-          className="w-full rounded bg-blue-600 px-4 py-3 text-base font-semibold text-white transition hover:bg-blue-700"
-        >
+        <Button type="submit" className="w-full">
           {isPending ? "Logging in..." : "Log in"}
-        </button>
-        {error && <p className="text-red-500">{error.message}</p>}
-        {data && <p className="text-green-500">{data.message}</p>}
+        </Button>
+
+        {error && <p className="text-sm text-red-500">{error.message}</p>}
+        {data && <p className="text-sm text-green-500">{data.message}</p>}
       </form>
     </div>
   );

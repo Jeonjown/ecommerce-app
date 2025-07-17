@@ -4,16 +4,13 @@ import { useNavigate } from "react-router-dom";
 
 export const useLogoutUser = () => {
   const queryClient = useQueryClient();
-
   const navigate = useNavigate();
 
   return useMutation({
     mutationFn: logoutUser,
     onSuccess: () => {
-      queryClient.removeQueries({
-        queryKey: ["loggedInUser"],
-      });
-
+      //  clear the logged-in user data
+      queryClient.setQueryData(["loggedInUser"], null);
       navigate("/login");
     },
   });

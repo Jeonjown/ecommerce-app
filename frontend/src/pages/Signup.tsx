@@ -2,11 +2,22 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-
+import { useSignupUser } from "@/hooks/useSignupUser";
+import { useNavigate } from "react-router-dom";
 import { LuEyeClosed } from "react-icons/lu";
 import { FaRegEye } from "react-icons/fa6";
-import { useSignupUser } from "../hooks/useSignupUser";
-import { useNavigate } from "react-router-dom";
+
+// Shadcn UI components
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 
 const schema = z
   .object({
@@ -16,9 +27,9 @@ const schema = z
       .string()
       .min(8, "Password must be at least 8 characters")
       .max(32, "Password must be at most 32 characters")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number"),
+      .regex(/[A-Z]/, "Must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Must contain at least one number"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -29,26 +40,19 @@ const schema = z
 type FormData = z.infer<typeof schema>;
 
 const Signup = () => {
-  const { mutate, isPending, isSuccess, error, data } = useSignupUser();
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (isSuccess) {
-      navigate("/");
-    }
-  }, [isSuccess, navigate]);
-
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({
+  const form = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  const navigate = useNavigate();
+  const { mutate, isPending, isSuccess, error, data } = useSignupUser();
+
+  useEffect(() => {
+    if (isSuccess) navigate("/");
+  }, [isSuccess, navigate]);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const onSubmit = (data: FormData) => {
     mutate(data);
@@ -56,124 +60,111 @@ const Signup = () => {
 
   return (
     <div className="flex min-h-[90vh] items-center justify-center p-4">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-md space-y-6 rounded-lg border border-gray-300 bg-white p-6 md:shadow-lg"
-      >
-        <h1 className="text-center text-2xl font-bold text-gray-800">
-          Create Your Account
-          <p className="mt-2 text-center text-base font-normal text-gray-500">
-            Sign up to continue.
-          </p>
-        </h1>
+      <div className="w-full max-w-md space-y-6 rounded-lg border bg-white p-6 shadow-sm">
+        <h1 className="text-center text-2xl font-bold">Create Your Account</h1>
+        <p className="text-muted-foreground text-center text-sm">
+          Sign up to continue.
+        </p>
 
-        <div className="flex flex-col gap-4">
-          {/* Full Name */}
-          <div className="flex flex-col">
-            <label className="mb-1 text-sm text-gray-600">Full Name</label>
-            <input
-              {...register("name")}
-              type="text"
-              className="w-full rounded border border-gray-300 p-2 focus:border-gray-500 focus:outline-none"
-              autoComplete="name"
-            />
-            {errors.name?.message && (
-              <span className="text-sm text-red-500">
-                {errors.name.message}
-              </span>
-            )}
-          </div>
-          {/* Email */}
-          <div className="flex flex-col">
-            <label className="mb-1 text-sm text-gray-600">Email</label>
-            <input
-              {...register("email")}
-              type="email"
-              autoComplete="email"
-              className="w-full rounded border border-gray-300 p-2 focus:border-gray-500 focus:outline-none"
-            />
-            {errors.email?.message && (
-              <span className="text-sm text-red-500">
-                {errors.email.message}
-              </span>
-            )}
-          </div>
-
-          {/* Password */}
-          <div className="relative flex flex-col">
-            <label className="mb-1 text-sm text-gray-600">Password</label>
-            <input
-              {...register("password")}
-              type={showPassword ? "text" : "password"}
-              autoComplete="new-password"
-              className="relative w-full rounded border border-gray-300 p-2 focus:border-gray-500 focus:outline-none"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            {/* Full Name */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} autoComplete="name" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
-            {showPassword ? (
-              <FaRegEye
-                className="absolute top-9 right-3"
-                onClick={() => {
-                  setShowPassword((prev) => !prev);
-                }}
-              />
-            ) : (
-              <LuEyeClosed
-                className="absolute top-9 right-3"
-                onClick={() => {
-                  setShowPassword((prev) => !prev);
-                }}
-              />
-            )}
-            {errors.password?.message && (
-              <span className="text-sm text-red-500">
-                {errors.password.message}
-              </span>
-            )}
-          </div>
-
-          {/* Confirm Password */}
-          <div className="relative flex flex-col">
-            <label className="mb-1 text-sm text-gray-600">
-              Confirm Password
-            </label>
-            <input
-              {...register("confirmPassword")}
-              type={showConfirmPassword ? "text" : "password"}
-              autoComplete="new-password"
-              className="w-full rounded border border-gray-300 p-2 focus:border-gray-500 focus:outline-none"
+            {/* Email */}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" {...field} autoComplete="email" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.confirmPassword?.message && (
-              <span className="text-sm text-red-500">
-                {errors.confirmPassword.message}
-              </span>
-            )}
-            {showConfirmPassword ? (
-              <FaRegEye
-                className="absolute top-9 right-3"
-                onClick={() => {
-                  setShowConfirmPassword((prev) => !prev);
-                }}
-              />
-            ) : (
-              <LuEyeClosed
-                className="absolute top-9 right-3"
-                onClick={() => {
-                  setShowConfirmPassword((prev) => !prev);
-                }}
-              />
-            )}
-          </div>
-        </div>
 
-        <button
-          type="submit"
-          className="w-full rounded bg-blue-600 px-4 py-3 text-base font-semibold text-white transition hover:bg-blue-700"
-        >
-          {isPending ? "Creating..." : "Sign Up"}
-        </button>
-        {error && <p className="text-red-500">{error.message}</p>}
-        {data && <p className="text-green-500">{data.message}</p>}
-      </form>
+            {/* Password */}
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem className="relative">
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <span
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="text-muted-foreground absolute top-[32px] right-3 cursor-pointer"
+                  >
+                    {showPassword ? <FaRegEye /> : <LuEyeClosed />}
+                  </span>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Confirm Password */}
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem className="relative">
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type={showConfirmPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <span
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="text-muted-foreground absolute top-[32px] right-3 cursor-pointer"
+                  >
+                    {showConfirmPassword ? <FaRegEye /> : <LuEyeClosed />}
+                  </span>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Creating..." : "Sign Up"}
+            </Button>
+
+            {error && (
+              <p className="text-center text-sm text-red-500">
+                {error.message}
+              </p>
+            )}
+            {data && (
+              <p className="text-center text-sm text-green-500">
+                {data.message}
+              </p>
+            )}
+          </form>
+        </Form>
+      </div>
     </div>
   );
 };
