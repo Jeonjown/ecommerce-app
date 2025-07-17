@@ -7,7 +7,6 @@ export interface Product {
   name: string;
   description: string;
   category_id: number;
-  image_url: string;
   created_at: string;
   updated_at: string;
   is_active: number;
@@ -24,6 +23,7 @@ export interface Variant {
   price: string;
   stock: number;
   is_active: number;
+  image_url: string;
   created_at: string;
   updated_at: string;
   sku: string;

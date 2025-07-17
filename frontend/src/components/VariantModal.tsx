@@ -15,6 +15,7 @@ interface VariantModalProps {
 
 export function VariantModal({ variants }: VariantModalProps) {
   if (!variants.length) return "No variants";
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -26,12 +27,27 @@ export function VariantModal({ variants }: VariantModalProps) {
         <DialogHeader>
           <DialogTitle>Product Variants</DialogTitle>
         </DialogHeader>
+
         <div className="max-h-[60vh] space-y-4 overflow-y-auto">
           {variants.map((variant) => (
             <div
               key={variant.id}
-              className="text-muted-foreground border-b pb-2 text-sm"
+              className="text-muted-foreground border-b pb-4 text-sm"
             >
+              {/* Image */}
+              {variant.image_url ? (
+                <img
+                  src={variant.image_url}
+                  alt="Variant"
+                  className="mb-2 h-32 w-full rounded object-cover"
+                />
+              ) : (
+                <div className="mb-2 flex h-32 w-full items-center justify-center rounded bg-gray-100 text-xs">
+                  No image
+                </div>
+              )}
+
+              {/* Variant details */}
               <div className="font-medium">SKU: {variant.sku}</div>
               <div>
                 Options:{" "}
@@ -45,6 +61,7 @@ export function VariantModal({ variants }: VariantModalProps) {
             </div>
           ))}
         </div>
+
         <DialogClose asChild>
           <Button variant="secondary">Close</Button>
         </DialogClose>

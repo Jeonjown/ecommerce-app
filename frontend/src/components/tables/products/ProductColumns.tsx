@@ -19,20 +19,7 @@ export const columns: ColumnDef<Product>[] = [
       return <div className="ml-3">{id}</div>;
     },
   },
-  {
-    accessorKey: "image_url",
-    header: "Image",
-    cell: ({ getValue }) => {
-      const url = getValue() as string;
-      return (
-        <img
-          src={url}
-          alt="product"
-          className="h-16 w-16 rounded object-cover"
-        />
-      );
-    },
-  },
+
   {
     accessorKey: "name",
     header: ({ column }) => (

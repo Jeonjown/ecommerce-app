@@ -92,7 +92,6 @@ export const createProduct = async (
     Omit<ProductVariant, 'id' | 'product_id' | 'created_at' | 'updated_at'>
   >
 ): Promise<Product> => {
-  // Insert the product
   const [productResult] = await pool.query<ResultSetHeader>(
     `INSERT INTO products 
      (category_id, name, description, image_url, is_active, slug, created_at, updated_at)
@@ -109,7 +108,6 @@ export const createProduct = async (
 
   const insertedId = productResult.insertId;
 
-  // Insert variants
   for (const variant of variants) {
     await pool.query(
       `INSERT INTO product_variants 
@@ -137,7 +135,9 @@ export const createProduct = async (
 // Edit product details (not variants)
 export const editProduct = async (
   id: number,
-  payload: Partial<Omit<Product, 'id' | 'created_at' | 'updated_at'>>
+  payload: Partial<
+    Omit<Product, 'id' | 'created_at' | 'updated_at' | 'variants'>
+  >
 ): Promise<Product> => {
   const fieldsToUpdate = {
     ...payload,
