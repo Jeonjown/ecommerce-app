@@ -138,7 +138,7 @@ const Signup = () => {
             </label>
             <input
               {...register("confirmPassword")}
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               autoComplete="new-password"
               className="w-full rounded border border-gray-300 p-2 focus:border-gray-500 focus:outline-none"
             />
