@@ -1,236 +1,194 @@
-import { ResultSetHeader } from 'mysql2/promise';
+import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import pool from '../db';
-import { Product, ProductVariant } from '../types/models/products';
-import { ApiError } from '../utils/ApiError';
+import {
+  Product,
+  ProductVariant,
+  VariantOption,
+  ProductOptionWithValues,
+} from '../types/models/products';
 
-// Get all products with their variants
-export const getProducts = async (): Promise<Product[]> => {
-  const [rows] = await pool.query('SELECT * FROM products');
-  const products = rows as Product[];
-
-  for (const product of products) {
-    const [variantRows] = await pool.query(
-      'SELECT * FROM product_variants WHERE product_id = ?',
-      [product.id]
-    );
-    product.variants = variantRows as ProductVariant[];
-  }
-
-  return products;
+// Create Product
+export const createProduct = async (
+  category_id: number,
+  name: string,
+  slug: string,
+  description: string,
+  is_active: boolean
+): Promise<number> => {
+  console.log('About to insert product with values:', {
+    category_id,
+    name,
+    slug,
+    description,
+    is_active,
+  });
+  console.log(
+    'SQL QUERY: INSERT INTO products (category_id, name, slug, description, is_active, created_at, updated_at)'
+  );
+  console.log('VALUES:', [category_id, name, slug, description, is_active]);
+  const [result] = await pool.query<ResultSetHeader>(
+    `INSERT INTO products (category_id, name, slug, description, is_active, created_at, updated_at)
+  VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
+    [category_id, name, slug, description, is_active]
+  );
+  return result.insertId;
 };
 
-// Get a single product by ID with its variants
-export const getProduct = async (id: number): Promise<Product | null> => {
-  const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [id]);
+// Get all products with variants and their options
+export const getProducts = async (): Promise<Product[]> => {
+  const [rows] = await pool.query<RowDataPacket[]>(`SELECT * FROM products`);
+
+  const fullProducts: Product[] = [];
+
+  for (const row of rows) {
+    const product: Product = {
+      id: row.id,
+      category_id: row.category_id,
+      name: row.name,
+      slug: row.slug,
+      description: row.description,
+      is_active: !!row.is_active,
+    };
+
+    const variants = await getProductVariants(product.id);
+    const options = await getProductOptions(product.id);
+    fullProducts.push({ ...product, variants, options });
+  }
+
+  return fullProducts;
+};
+
+export const getProductBySlug = async (
+  slug: string
+): Promise<Product | null> => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT * FROM products WHERE slug = ? LIMIT 1`,
+    [slug]
+  );
+
   const products = rows as Product[];
 
-  if (!products.length) return null;
-
-  const product = products[0];
-
-  const [variantRows] = await pool.query(
-    'SELECT * FROM product_variants WHERE product_id = ?',
+  return products.length > 0 ? products[0] : null;
+};
+// Get single product by ID with variants and options
+export const getProductById = async (id: number): Promise<Product | null> => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT * FROM products WHERE id = ?`,
     [id]
   );
-  product.variants = variantRows as ProductVariant[];
 
-  return product;
-};
+  if (!rows.length) return null;
 
-// Search products by keyword
-export const searchProducts = async (keyword: string): Promise<Product[]> => {
-  const searchPattern = `%${keyword}%`;
+  const row = rows[0];
 
-  const [rows] = await pool.query(
-    `SELECT * FROM products 
-     WHERE name LIKE ? OR description LIKE ?`,
-    [searchPattern, searchPattern]
-  );
-
-  const products = rows as Product[];
-
-  for (const product of products) {
-    const [variantRows] = await pool.query(
-      'SELECT * FROM product_variants WHERE product_id = ?',
-      [product.id]
-    );
-    product.variants = variantRows as ProductVariant[];
-  }
-
-  return products;
-};
-
-// Get products by category ID
-export const getProductsByCategory = async (
-  category_id: number
-): Promise<Product[]> => {
-  const [rows] = await pool.query(
-    'SELECT * FROM products WHERE category_id = ?',
-    [category_id]
-  );
-
-  const products = rows as Product[];
-
-  for (const product of products) {
-    const [variantRows] = await pool.query(
-      'SELECT * FROM product_variants WHERE product_id = ?',
-      [product.id]
-    );
-    product.variants = variantRows as ProductVariant[];
-  }
-
-  return products;
-};
-
-// Create a product and its variants
-export const createProduct = async (
-  productPayload: Omit<
-    Product,
-    'id' | 'created_at' | 'updated_at' | 'variants'
-  >,
-  variants: Array<
-    Omit<ProductVariant, 'id' | 'product_id' | 'created_at' | 'updated_at'>
-  >
-): Promise<Product> => {
-  const [productResult] = await pool.query<ResultSetHeader>(
-    `INSERT INTO products 
-     (category_id, name, description, image_url, is_active, slug, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-    [
-      productPayload.category_id,
-      productPayload.name,
-      productPayload.description,
-      productPayload.image_url,
-      productPayload.is_active,
-      productPayload.slug,
-    ]
-  );
-
-  const insertedId = productResult.insertId;
-
-  for (const variant of variants) {
-    await pool.query(
-      `INSERT INTO product_variants 
-       (product_id, option1, option2, option3, price, stock, sku, is_active, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-      [
-        insertedId,
-        variant.option1,
-        variant.option2,
-        variant.option3,
-        variant.price,
-        variant.stock,
-        variant.sku,
-        variant.is_active ?? 1,
-      ]
-    );
-  }
-
-  const createdProduct = await getProduct(insertedId);
-  if (!createdProduct)
-    throw new ApiError('Failed to fetch created product.', 500);
-  return createdProduct;
-};
-
-// Edit product details (not variants)
-export const editProduct = async (
-  id: number,
-  payload: Partial<
-    Omit<Product, 'id' | 'created_at' | 'updated_at' | 'variants'>
-  >
-): Promise<Product> => {
-  const fieldsToUpdate = {
-    ...payload,
-    updated_at: new Date(),
+  const product: Product = {
+    id: row.id,
+    category_id: row.category_id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description,
+    is_active: !!row.is_active,
   };
 
-  const [result] = await pool.query<ResultSetHeader>(
-    'UPDATE products SET ? WHERE id = ?',
-    [fieldsToUpdate, id]
-  );
+  const variants = await getProductVariants(id);
+  const options = await getProductOptions(id);
 
-  if (result.affectedRows === 0) {
-    throw new ApiError('Product not found or no changes were made.', 404);
-  }
-
-  const updatedProduct = await getProduct(id);
-  if (!updatedProduct) {
-    throw new ApiError('Failed to retrieve updated product.', 404);
-  }
-
-  return updatedProduct;
+  return { ...product, variants, options };
 };
 
-// Edit product and replace all its variants
-export const editProductWithVariants = async (
+// Get variants for a specific product (with options)
+export const getProductVariants = async (
+  productId: number
+): Promise<ProductVariant[]> => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT * FROM product_variants WHERE product_id = ?`,
+    [productId]
+  );
+
+  const variantsWithOptions: ProductVariant[] = [];
+
+  for (const row of rows) {
+    const variant: ProductVariant = {
+      id: row.id,
+      product_id: row.product_id,
+      sku: row.sku,
+      price: row.price,
+      stock: row.stock,
+      image_url: row.image_url,
+      is_active: !!row.is_active,
+    };
+
+    const options = await getVariantOptionValues(variant.id);
+    variantsWithOptions.push({ ...variant, options });
+  }
+
+  return variantsWithOptions;
+};
+
+// Get option values for a specific variant
+export const getVariantOptionValues = async (
+  variantId: number
+): Promise<VariantOption[]> => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+      po.id AS option_id,
+      po.name AS option_name,
+      pov.id AS option_value_id,
+      pov.value AS option_value
+    FROM product_variant_values pvv
+    JOIN product_options po ON po.id = pvv.product_option_id
+    JOIN product_option_values pov ON pov.id = pvv.product_option_value_id
+    WHERE pvv.product_variant_id = ?`,
+    [variantId]
+  );
+
+  return rows as VariantOption[];
+};
+
+// Get all available options and their values for a product
+export const getProductOptions = async (
+  productId: number
+): Promise<ProductOptionWithValues[]> => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+      po.id AS option_id,
+      po.name AS option_name,
+      pov.id AS option_value_id,
+      pov.value AS option_value
+    FROM product_options po
+    JOIN product_option_values pov ON pov.product_option_id = po.id
+    WHERE po.product_id = ?`,
+    [productId]
+  );
+
+  return rows as ProductOptionWithValues[];
+};
+
+/**
+ * Updates the core product row.
+ */
+export const updateProduct = async (
   id: number,
-  productData: Partial<Omit<Product, 'id' | 'created_at' | 'updated_at'>>,
-  variants: Array<
-    Omit<ProductVariant, 'id' | 'product_id' | 'created_at' | 'updated_at'>
+  payload: Partial<
+    Pick<Product, 'category_id' | 'name' | 'description' | 'is_active' | 'slug'>
   >
 ): Promise<void> => {
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-
-    const [productResult] = await connection.query<ResultSetHeader>(
-      'UPDATE products SET ? WHERE id = ?',
-      [{ ...productData, updated_at: new Date() }, id]
-    );
-
-    if (productResult.affectedRows === 0) {
-      throw new ApiError('Product not found.', 404);
-    }
-
-    await connection.query(
-      'DELETE FROM product_variants WHERE product_id = ?',
-      [id]
-    );
-
-    for (const variant of variants) {
-      await connection.query(
-        `INSERT INTO product_variants 
-         (product_id, option1, option2, option3, price, stock, sku, is_active, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-        [
-          id,
-          variant.option1,
-          variant.option2,
-          variant.option3,
-          variant.price,
-          variant.stock,
-          variant.sku,
-          variant.is_active ?? 1,
-        ]
-      );
-    }
-
-    await connection.commit();
-  } catch (err) {
-    await connection.rollback();
-    throw err;
-  } finally {
-    connection.release();
+  const fields: any = { ...payload };
+  const [result] = await pool.query<ResultSetHeader>(
+    `UPDATE products SET ? WHERE id = ?`,
+    [fields, id]
+  );
+  if (result.affectedRows === 0) {
+    throw new Error('Product not found or no changes applied');
   }
 };
 
-// Delete product and all its variants
-export const deleteProduct = async (id: number): Promise<Product> => {
-  const product = await getProduct(id);
-  if (!product) {
-    throw new ApiError('Product not found.', 404);
-  }
-
-  await pool.query('DELETE FROM product_variants WHERE product_id = ?', [id]);
-
+export const deleteProduct = async (id: number): Promise<void> => {
   const [result] = await pool.query<ResultSetHeader>(
-    'DELETE FROM products WHERE id = ?',
+    `DELETE FROM products WHERE id = ?`,
     [id]
   );
-
   if (result.affectedRows === 0) {
-    throw new ApiError('Product not deleted.', 500);
+    throw new Error('Product not found');
   }
-
-  return product;
 };

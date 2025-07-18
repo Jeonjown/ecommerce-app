@@ -7,7 +7,7 @@ import {
   getCategoryBySlug,
 } from '../models/categoryModel';
 import { ApiError } from '../utils/ApiError';
-import { createSlug } from '../utils/createSlug';
+import { createSlug } from '../utils/generateSlug';
 import { getProductsByCategory } from '../models/productModel';
 
 export const getCategoryController = async (

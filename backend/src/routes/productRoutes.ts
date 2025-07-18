@@ -1,21 +1,28 @@
-import express from 'express';
+// src/routes/productRoutes.ts
+import { Router } from 'express';
 import {
   createProductController,
+  getAllProductsController,
+  getProductByIdController,
+  updateProductController,
   deleteProductController,
-  editProductController,
-  getProductController,
-  getProductsController,
 } from '../controllers/productController';
 
-const router = express.Router();
+const router = Router();
 
+// GET    /api/products
+router.get('/', getAllProductsController);
+
+// GET    /api/products/:id
+router.get('/:id', getProductByIdController);
+
+// POST   /api/products
 router.post('/', createProductController);
 
-router.get('/', getProductsController);
-router.get('/:id', getProductController);
+// PUT    /api/products/:id
+router.put('/:id', updateProductController);
 
-router.patch('/:id', editProductController);
-
+// DELETE /api/products/:id
 router.delete('/:id', deleteProductController);
 
 export default router;

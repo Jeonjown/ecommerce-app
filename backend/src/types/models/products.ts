@@ -1,26 +1,35 @@
 export interface Product {
   id: number;
-  name: string;
-  description: string;
   category_id: number;
-  image_url: string;
+  name: string;
   slug: string;
-  is_active: number;
-  created_at: string;
-  updated_at: string;
-  variants: ProductVariant[];
+  description: string;
+  is_active: boolean;
+  variants?: ProductVariant[];
+  options?: ProductOptionWithValues[];
 }
 
 export interface ProductVariant {
   id: number;
   product_id: number;
-  option1: string;
-  option2: string;
-  option3: string;
-  price: string;
-  stock: number;
   sku: string;
-  is_active: number;
-  created_at: string;
-  updated_at: string;
+  price: number;
+  stock: number;
+  image_url: string;
+  is_active: boolean;
+  options?: VariantOption[];
+}
+
+export interface VariantOption {
+  option_id: number;
+  option_name: string;
+  option_value_id: number;
+  option_value: string;
+}
+
+export interface ProductOptionWithValues {
+  option_id: number;
+  option_name: string;
+  option_value_id: number;
+  option_value: string;
 }

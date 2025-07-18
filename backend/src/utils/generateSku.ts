@@ -1,16 +1,32 @@
-export function generateSku(
+import { RowDataPacket } from 'mysql2';
+import pool from '../db';
+
+export const generateSku = async (
   productName: string,
-  option1?: string | null,
-  option2?: string | null,
-  option3?: string | null
-): string {
+  options: { name: string; value: string }[] = []
+): Promise<string> => {
   const base = productName.trim().toUpperCase().replace(/\s+/g, '-');
 
-  const options = [option1, option2, option3]
-    .filter((o) => o && o.trim())
-    .map((o) => o!.trim().toUpperCase().replace(/\s+/g, '-'));
+  const optionParts = options.map((opt) =>
+    opt.value.trim().toUpperCase().replace(/\s+/g, '-')
+  );
 
-  const randomSuffix = Math.floor(1000 + Math.random() * 9000); // e.g., 4567
+  let baseSku = [base, ...optionParts].join('-');
+  let sku = baseSku;
+  let counter = 1;
 
-  return [base, ...options, randomSuffix].join('-');
-}
+  while (await skuExists(sku)) {
+    sku = `${baseSku}[${counter}]`;
+    counter++;
+  }
+
+  return sku;
+};
+
+const skuExists = async (sku: string): Promise<boolean> => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    'SELECT COUNT(*) AS count FROM product_variants WHERE sku = ?',
+    [sku]
+  );
+  return rows[0].count > 0;
+};
