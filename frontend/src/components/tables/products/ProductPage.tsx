@@ -1,7 +1,7 @@
-import { DataTable } from "@/components/ui/data-table";
 import { useGetProducts } from "@/hooks/useGetProducts";
 import Loading from "@/pages/Loading";
 import { columns } from "./ProductColumns";
+import { ProductTable } from "./ProductTable";
 
 const ProductPage = () => {
   const { data, isPending, isError } = useGetProducts();
@@ -15,7 +15,7 @@ const ProductPage = () => {
       {isPending ? (
         <Loading />
       ) : (
-        <DataTable columns={columns} data={data.products ?? []} />
+        <ProductTable columns={columns} data={data.products ?? []} />
       )}
     </div>
   );

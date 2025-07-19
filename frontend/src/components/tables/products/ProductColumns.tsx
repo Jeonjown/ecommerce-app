@@ -1,25 +1,21 @@
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
-
 import { VariantModal } from "@/components/VariantModal";
-import type { Product, Variant } from "@/types/api/products";
+import type { ProductWithCategory, Variant } from "@/types/api/products";
 import type { ColumnDef } from "@tanstack/react-table";
 
-export const columns: ColumnDef<Product>[] = [
+export const columns: ColumnDef<ProductWithCategory>[] = [
   {
     accessorKey: "id",
-    header: ({ column }) => {
-      return (
-        <div className="flex justify-center">
-          <DataTableColumnHeader column={column} title="ID" />
-        </div>
-      );
-    },
+    header: ({ column }) => (
+      <div className="flex justify-center">
+        <DataTableColumnHeader column={column} title="ID" />
+      </div>
+    ),
     cell: ({ getValue }) => {
       const id = getValue() as number;
       return <div className="ml-3">{id}</div>;
     },
   },
-
   {
     accessorKey: "name",
     header: ({ column }) => (
@@ -29,25 +25,59 @@ export const columns: ColumnDef<Product>[] = [
     ),
   },
   {
+    id: "category",
+    accessorFn: (row) => row.category?.name ?? "N/A",
+    header: ({ column }) => (
+      <div className="flex items-center gap-2">
+        <DataTableColumnHeader column={column} title="Category" />
+      </div>
+    ),
+    cell: ({ row }) => <span>{row.original.category?.name ?? "N/A"}</span>,
+    enableColumnFilter: true,
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
+  },
+  {
     accessorKey: "description",
     header: "Description",
+    cell: ({ getValue }) => {
+      const description = getValue() as string;
+      return (
+        <div className="text-muted-foreground line-clamp-2 max-w-[300px] truncate">
+          {description}
+        </div>
+      );
+    },
   },
-
   {
     accessorKey: "is_active",
     header: "Active",
-    cell: ({ getValue }) => ((getValue() as number) ? "Yes" : "No"),
+    cell: ({ getValue }) => ((getValue() as boolean) ? "Yes" : "No"),
   },
   {
     accessorKey: "slug",
     header: "Slug",
+    cell: ({ getValue }) => {
+      const slug = getValue() as string;
+      return <code className="text-muted-foreground text-sm">{slug}</code>;
+    },
   },
   {
     accessorKey: "variants",
     header: "Variants",
-    cell: ({ getValue }) => {
+    cell: ({ getValue, row }) => {
       const variants = getValue() as Variant[];
-      return <VariantModal variants={variants} />;
+
+      return (
+        <div className="flex justify-start">
+          <VariantModal
+            variants={variants}
+            productName={row.original.name}
+            productOptions={row.original.options}
+          />
+        </div>
+      );
     },
   },
 ];

@@ -4,11 +4,12 @@ import {
   deleteCategoryById,
   editCategory,
   getCategories,
+  getCategoryById,
   getCategoryBySlug,
 } from '../models/categoryModel';
 import { ApiError } from '../utils/ApiError';
-import { createSlug } from '../utils/generateSlug';
-import { getProductsByCategory } from '../models/productModel';
+import { generateSlug } from '../utils/generateSlug';
+import { getProductById } from '../models/productModel';
 
 export const getCategoryController = async (
   req: Request,
@@ -17,6 +18,21 @@ export const getCategoryController = async (
 ) => {
   try {
     const categories = await getCategories();
+    res.status(200).json({ categories });
+    return;
+  } catch (error) {
+    next(new ApiError('Failed to fetch categories', 500));
+  }
+};
+
+export const getCategoryByIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const categories = await getCategoryById(Number(id));
     res.status(200).json({ categories });
     return;
   } catch (error) {
@@ -38,7 +54,7 @@ export const getProductsByCategorySlugController = async (
       return;
     }
 
-    const products = await getProductsByCategory(category.id);
+    const products = await getProductById(category.id);
     res.status(200).json({ products });
   } catch (error) {
     next(error);
@@ -57,7 +73,7 @@ export const createCategoryController = async (
       throw new ApiError('Please fill all credentials.', 400);
     }
 
-    const slug = createSlug(name);
+    const slug = await generateSlug(name, 'categories');
 
     const category = await createCategory(name, slug);
     res
@@ -82,7 +98,7 @@ export const editCategoryController = async (
       throw new ApiError('Please fill all credentials.', 400);
     }
 
-    const slug = createSlug(name);
+    const slug = await generateSlug(name, 'categories');
 
     const updatedCategory = await editCategory(Number(id), { name, slug });
 

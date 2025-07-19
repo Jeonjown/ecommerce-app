@@ -3,12 +3,14 @@ import {
   createCategoryController,
   deleteCategoryController,
   editCategoryController,
+  getCategoryByIdController,
   getCategoryController,
   getProductsByCategorySlugController,
 } from '../controllers/categoryController';
 const router = express.Router();
 
 router.get('/', getCategoryController);
+router.get('/:id', getCategoryByIdController);
 router.get('/:slug/products', getProductsByCategorySlugController);
 
 router.post('/', createCategoryController);

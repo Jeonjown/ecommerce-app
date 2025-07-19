@@ -1,38 +1,36 @@
 import { ResultSetHeader, FieldPacket } from 'mysql2/promise';
 import pool from '../db';
-import type { Categories } from '../types/models/categories';
+import { Category } from '../types/models/categories';
 
-export const getCategories = async (): Promise<Categories[]> => {
+export const getCategories = async (): Promise<Category[]> => {
   const [rows] = await pool.query('SELECT * FROM categories');
-  return rows as Categories[];
+  return rows as Category[];
 };
 
-export const getCategoryById = async (
-  id: number
-): Promise<Categories | null> => {
+export const getCategoryById = async (id: number): Promise<Category | null> => {
   const [rows] = await pool.query('SELECT * FROM categories WHERE id = ?', [
     id,
   ]);
 
-  const categories = rows as Categories[];
+  const categories = rows as Category[];
   return categories[0] ?? null;
 };
 
 export const getCategoryBySlug = async (
   slug: string
-): Promise<Categories | null> => {
+): Promise<Category | null> => {
   const [rows] = await pool.query('SELECT * FROM categories WHERE slug = ?', [
     slug,
   ]);
 
-  const categories = rows as Categories[];
+  const categories = rows as Category[];
   return categories[0] ?? null;
 };
 
 export const createCategory = async (
   name: string,
   slug: string
-): Promise<Categories> => {
+): Promise<Category> => {
   const [result] = await pool.query<ResultSetHeader>(
     'INSERT INTO categories (name, slug) VALUES (?, ?)',
     [name, slug]
@@ -43,13 +41,13 @@ export const createCategory = async (
     insertId,
   ]);
 
-  return (rows as Categories[])[0];
+  return (rows as Category[])[0];
 };
 
 export const editCategory = async (
   id: number,
   fields: { name: string; slug: string }
-): Promise<Categories | null> => {
+): Promise<Category | null> => {
   // Perform the update
   const [result] = await pool.query('UPDATE categories SET ? WHERE id = ?', [
     fields,
@@ -67,7 +65,7 @@ export const editCategory = async (
     id,
   ]);
 
-  const rows = rawRows as Categories[];
+  const rows = rawRows as Category[];
 
   return rows[0] ?? null;
 };

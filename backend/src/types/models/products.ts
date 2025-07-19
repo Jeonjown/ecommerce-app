@@ -1,6 +1,19 @@
+import { Category } from './categories';
+
 export interface Product {
   id: number;
   category_id: number;
+  name: string;
+  slug: string;
+  description: string;
+  is_active: boolean;
+  variants?: ProductVariant[];
+  options?: ProductOptionWithValues[];
+}
+
+export interface ProductWithCategory {
+  id: number;
+  category: Category;
   name: string;
   slug: string;
   description: string;

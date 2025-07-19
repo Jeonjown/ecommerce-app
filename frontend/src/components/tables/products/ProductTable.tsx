@@ -20,11 +20,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DataTablePagination } from "./data-table-pagination";
-import { DataTableViewOptions } from "./data-table-column-toggle";
+
 import { IoSearch } from "react-icons/io5";
 
 import { useState } from "react";
+import { DataTableViewOptions } from "@/components/ui/data-table-column-toggle";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import { CategoryFilter } from "@/components/ui/category-filter";
 
 interface DataTableProps<TData extends object> {
   columns: ColumnDef<TData>[];
@@ -43,7 +45,7 @@ function globalFilterFn<TData extends object>(
   );
 }
 
-export function DataTable<TData extends object>({
+export function ProductTable<TData extends object>({
   columns,
   data,
 }: DataTableProps<TData>) {
@@ -69,11 +71,20 @@ export function DataTable<TData extends object>({
     globalFilterFn,
   });
 
+  const categoryOptions = [
+    ...new Set(
+      data.map(
+        (row) =>
+          (row as { category?: { name?: string } }).category?.name ?? "N/A",
+      ),
+    ),
+  ];
+
   return (
     <div className="">
       {/* Global Search & View Options */}
       <div className="flex items-center justify-between py-5">
-        <div className="relative w-full max-w-xs">
+        <div className="relative mr-3 w-full max-w-xs">
           <IoSearch
             size={16}
             className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400"
@@ -85,6 +96,10 @@ export function DataTable<TData extends object>({
             className="py-2 text-sm"
           />
         </div>
+        <CategoryFilter
+          column={table.getColumn("category")}
+          options={categoryOptions}
+        />
 
         <DataTableViewOptions table={table} />
       </div>

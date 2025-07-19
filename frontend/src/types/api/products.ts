@@ -1,5 +1,7 @@
+import type { Category } from "./categories";
+
 export interface ProductResponse {
-  products: Product[];
+  products: ProductWithCategory[];
 }
 
 export interface Product {
@@ -7,24 +9,44 @@ export interface Product {
   name: string;
   description: string;
   category_id: number;
-  created_at: string;
-  updated_at: string;
-  is_active: number;
   slug: string;
+  is_active: boolean;
   variants: Variant[];
+  options: ProductOption[];
+}
+
+export interface ProductWithCategory {
+  id: number;
+  name: string;
+  description: string;
+  category: Category;
+  slug: string;
+  is_active: boolean;
+  variants: Variant[];
+  options: ProductOption[];
 }
 
 export interface Variant {
   id: number;
   product_id: number;
-  option1: string;
-  option2: string;
-  option3: string;
+  sku: string;
   price: string;
   stock: number;
-  is_active: number;
-  image_url: string;
-  created_at: string;
-  updated_at: string;
-  sku: string;
+  image_url: string | null;
+  is_active: boolean;
+  options: VariantOption[];
+}
+
+export interface VariantOption {
+  option_id: number;
+  option_name: string;
+  option_value_id: number;
+  option_value: string;
+}
+
+export interface ProductOption {
+  option_id: number;
+  option_name: string;
+  option_value_id: number;
+  option_value: string;
 }
