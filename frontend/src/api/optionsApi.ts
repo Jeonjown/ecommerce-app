@@ -36,6 +36,20 @@ export const deleteOptionByOptionId = async (id: string) => {
   }
 };
 
-// add option
-// edit option
-// delete option
+export const createOptionByProductId = async (id: string, name: string) => {
+  try {
+    const response = await api.post(
+      `/products/options/${id}`,
+      { name },
+      { withCredentials: true },
+    );
+    return response.data;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to delete options.",
+      );
+    }
+    throw new Error("Unexpected error deleting options.");
+  }
+};

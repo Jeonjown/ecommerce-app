@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 import {
+  createOption,
   deleteOptionsByOptionsId,
   getAllOptions,
   getOptionsandValuesByProductId,
@@ -34,6 +35,28 @@ export const getAllOptionsController = async (
     res.status(200).json({ options });
   } catch (error) {
     next(error);
+  }
+};
+
+export const createOptionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    if (!name || !id)
+      throw new ApiError('Please provide name and product id', 400);
+
+    const option_id = await createOption(Number(id), name);
+    res.status(200).json({
+      message: 'option created successfully.',
+      option: { option_id, name },
+    });
+  } catch (error) {
+    next();
   }
 };
 

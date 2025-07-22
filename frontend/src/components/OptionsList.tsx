@@ -1,15 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import { Badge } from "@/components/ui/badge";
 import { useGetOptionsByProductId } from "@/hooks/useGetOptionsByProductId";
 import type { OptionGroup } from "@/types/api/options";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 import { FaRegEdit } from "react-icons/fa";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { IoMdClose } from "react-icons/io";
-
 import DeleteOptionModal from "./DeleteOptionModal";
 import { FaCirclePlus } from "react-icons/fa6";
+import { useCreateOptions } from "@/hooks/useCreateOptions";
+import { useState } from "react";
 
 interface OptionListProps {
   id: number;
@@ -17,20 +18,63 @@ interface OptionListProps {
 
 const OptionsList = ({ id }: OptionListProps) => {
   const { data } = useGetOptionsByProductId(String(id));
+  const { mutate } = useCreateOptions(String(id));
+
+  const [isAdding, setIsAdding] = useState(false);
+  const [optionName, setOptionName] = useState("");
+
+  const handleAddOption = () => {
+    if (!optionName.trim()) return;
+    mutate(optionName); // Pass name, not id
+    setOptionName("");
+    setIsAdding(false);
+  };
 
   return (
     <Card>
-      <CardHeader className="">
+      <CardHeader>
         <CardTitle className="flex items-center justify-between text-lg">
-          Available Options <Button>Add Options</Button>
+          Available Options
+          {!isAdding ? (
+            <Button size="sm" onClick={() => setIsAdding(true)}>
+              Add Option
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={handleAddOption}>
+                Save
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setIsAdding(false);
+                  setOptionName("");
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
         </CardTitle>
+        {isAdding && (
+          <Input
+            value={optionName}
+            onChange={(e) => setOptionName(e.target.value)}
+            placeholder="Enter option name"
+            className="mt-1 h-8 w-full"
+          />
+        )}
       </CardHeader>
+
       <CardContent className="space-y-4">
         {data && data?.options?.length > 0 ? (
-          data?.options.map((option: OptionGroup) => (
+          data.options.map((option: OptionGroup) => (
             <div key={option.option_id}>
               <div className="flex items-center space-x-1">
-                <p className="text-sm font-semibold">{`${option.option_name}:`}</p>
+                <p className="text-sm font-semibold">
+                  {`${option.option_name}:`}
+                </p>
 
                 <Tooltip>
                   <TooltipTrigger asChild>
