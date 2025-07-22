@@ -38,6 +38,42 @@ export const createProductController = async (
   next: NextFunction
 ) => {
   try {
+    const { category_id, name, description, is_active } = req.body;
+
+    const isActiveBool = !!is_active;
+
+    if (!category_id || !name || !description) {
+      throw new ApiError('Missing required product fields', 400);
+    }
+
+    const cleanedName = name.trim();
+    if (!cleanedName) {
+      throw new ApiError('Invalid product name', 400);
+    }
+
+    const slugToUse = await generateSlug(cleanedName, 'products');
+
+    const product = await createProduct(
+      category_id,
+      cleanedName,
+      slugToUse,
+      description,
+      isActiveBool
+    );
+
+    res.status(200).json({ message: 'Product Created Successfully', product });
+    return;
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createProductControllerTest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
     const {
       category_id,
       name,

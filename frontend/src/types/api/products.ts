@@ -11,8 +11,8 @@ export interface Product {
   category_id: number;
   slug: string;
   is_active: boolean;
-  variants: Variant[];
-  options: ProductOption[];
+  // variants: Variant[];
+  // options: ProductOption[];
 }
 
 export interface ProductWithCategory {
@@ -22,8 +22,9 @@ export interface ProductWithCategory {
   category: Category;
   slug: string;
   is_active: boolean;
-  variants: Variant[];
   options: ProductOption[];
+  // variants: Variant[];
+  // options: ProductOption[];
 }
 
 export interface Variant {
@@ -49,4 +50,16 @@ export interface ProductOption {
   option_name: string;
   option_value_id: number;
   option_value: string;
+}
+
+export interface CreateProductRequest {
+  category_id: number;
+  name: string;
+  description: string;
+  is_active: boolean;
+}
+
+export interface CreateProductResponse {
+  message: string;
+  product: Product;
 }

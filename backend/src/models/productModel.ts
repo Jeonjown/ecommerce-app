@@ -9,7 +9,23 @@ import {
 } from '../types/models/products';
 
 // Create Product
+
 export const createProduct = async (
+  category_id: number,
+  name: string,
+  slug: string,
+  description: string,
+  is_active: boolean
+): Promise<number> => {
+  const [result] = await pool.query<ResultSetHeader>(
+    `INSERT INTO products (category_id, name, slug, description, is_active)
+  VALUES (?, ?, ?, ?, ?)`,
+    [category_id, name, slug, description, is_active]
+  );
+  return result.insertId;
+};
+
+export const createProductTest = async (
   category_id: number,
   name: string,
   slug: string,

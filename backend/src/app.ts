@@ -9,6 +9,8 @@ import { checkUserRole } from './middlewares/checkUserRole';
 import { errorHandler } from './middlewares/errorHandler';
 import categoryRoutes from './routes/categoryRoutes';
 import productRoutes from './routes/productRoutes';
+import optionRoutes from './routes/optionRoutes';
+import imageRoutes from './routes/imageRoutes';
 
 const app = express();
 
@@ -37,9 +39,18 @@ app.use(
   categoryRoutes
 );
 
+app.use(
+  '/api/products/options',
+  authenticateUser,
+  checkUserRole('admin'),
+  optionRoutes
+);
+
 app.use('/api/products', productRoutes);
 
 app.use('/api/auth', authRoutes);
+
+app.use('/api/images', imageRoutes);
 
 app.use(errorHandler);
 

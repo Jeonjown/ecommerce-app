@@ -11,7 +11,6 @@ import AdminDashboard from "./components/AdminDashboard";
 import { useGetLoggedInUser } from "./hooks/useGetLoggedInUser";
 import AdminNavbar from "./components/AdminNavbar";
 import Products from "./pages/Products";
-
 function App() {
   const { data } = useGetLoggedInUser();
 

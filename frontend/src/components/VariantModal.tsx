@@ -1,4 +1,8 @@
-import type { ProductOption, Variant } from "@/types/api/products";
+import type {
+  ProductOption,
+  ProductWithCategory,
+  Variant,
+} from "@/types/api/products";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -16,60 +20,26 @@ interface VariantModalProps {
   variants: Variant[];
   productName: string;
   productOptions: ProductOption[];
+  product: ProductWithCategory;
 }
 
-export function VariantModal({
-  variants,
-  productName,
-  productOptions,
-}: VariantModalProps) {
-  if (!variants.length)
-    return (
-      <p className="text-muted-foreground text-sm">No variants available</p>
-    );
-
+export function VariantModal({ variants, product }: VariantModalProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          View ({variants.length})
+          View
         </Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{productName} Variants</DialogTitle>
+          <DialogTitle>{product.name} Variants</DialogTitle>
           <DialogDescription>
             A list of all available variants and their details.
           </DialogDescription>
         </DialogHeader>
         <div className="max-h-[75vh] space-y-6 overflow-y-auto pr-2">
-          {/* Product Options Overview */}
-          {productOptions.length > 0 && (
-            <div className="bg-muted/50 rounded-md p-4 text-sm">
-              <div className="mb-2 font-semibold text-gray-700">
-                Available Options
-              </div>
-              <ul className="list-disc space-y-1 pl-5">
-                {Object.entries(
-                  productOptions.reduce(
-                    (acc, curr) => {
-                      if (!acc[curr.option_name])
-                        acc[curr.option_name] = new Set();
-                      acc[curr.option_name].add(curr.option_value);
-                      return acc;
-                    },
-                    {} as Record<string, Set<string>>,
-                  ),
-                ).map(([optionName, valuesSet]) => (
-                  <li key={optionName}>
-                    <strong>{optionName}:</strong> {[...valuesSet].join(", ")}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
           {/* Variants Grid */}
           <div className="grid gap-4 sm:grid-cols-2">
             {variants.map((variant) => (

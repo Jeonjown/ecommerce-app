@@ -1,3 +1,4 @@
+import { OptionModal } from "@/components/OptionModal";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { VariantModal } from "@/components/VariantModal";
 import type { ProductWithCategory, Variant } from "@/types/api/products";
@@ -55,14 +56,14 @@ export const columns: ColumnDef<ProductWithCategory>[] = [
     header: "Active",
     cell: ({ getValue }) => ((getValue() as boolean) ? "Yes" : "No"),
   },
-  {
-    accessorKey: "slug",
-    header: "Slug",
-    cell: ({ getValue }) => {
-      const slug = getValue() as string;
-      return <code className="text-muted-foreground text-sm">{slug}</code>;
-    },
-  },
+  // {
+  //   accessorKey: "slug",
+  //   header: "Slug",
+  //   cell: ({ getValue }) => {
+  //     const slug = getValue() as string;
+  //     return <code className="text-muted-foreground text-sm">{slug}</code>;
+  //   },
+  // },
   {
     accessorKey: "variants",
     header: "Variants",
@@ -75,9 +76,24 @@ export const columns: ColumnDef<ProductWithCategory>[] = [
             variants={variants}
             productName={row.original.name}
             productOptions={row.original.options}
+            product={row.original}
           />
         </div>
       );
     },
+  },
+
+  {
+    id: "options",
+    header: "Options",
+    cell: ({ row }) => {
+      return (
+        <div className="flex justify-start">
+          <OptionModal product={row.original} />
+        </div>
+      );
+    },
+    enableSorting: false,
+    enableColumnFilter: false,
   },
 ];

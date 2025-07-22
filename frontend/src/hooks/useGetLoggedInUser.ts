@@ -7,6 +7,6 @@ export const useGetLoggedInUser = () => {
     queryKey: ["loggedInUser"],
     queryFn: getLoggedInUser,
     retry: false,
-    refetchOnWindowFocus: false, // no refetch when tab focused
+    refetchOnWindowFocus: false,
   });
 };

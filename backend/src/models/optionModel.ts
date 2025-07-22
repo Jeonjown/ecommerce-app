@@ -1,5 +1,6 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import pool from '../db';
+import { OptionGroup } from '../types/models/options';
 
 // Get all options for a product
 export const getOptionsByProductId = async (
@@ -11,6 +12,89 @@ export const getOptionsByProductId = async (
   );
   return rows;
 };
+
+export const getAllOptions = async (): Promise<OptionGroup[]> => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+      po.id AS option_id,
+      po.name AS option_name,
+      pov.id AS value_id,
+      pov.value AS value_name
+    FROM product_options AS po
+    JOIN product_option_values AS pov
+      ON po.id = pov.product_option_id`
+  );
+
+  const groups = rows.reduce<OptionGroup[]>((acc, row) => {
+    const option = acc.find((o) => o.option_id === row.option_id);
+
+    if (!option) {
+      acc.push({
+        option_id: row.option_id,
+        option_name: row.option_name,
+        values: [
+          {
+            value_id: row.value_id,
+            value_name: row.value_name,
+          },
+        ],
+      });
+    } else {
+      option.values.push({
+        value_id: row.value_id,
+        value_name: row.value_name,
+      });
+    }
+
+    return acc;
+  }, []);
+
+  return groups;
+};
+
+export const getOptionsandValuesByProductId = async (
+  id: number
+): Promise<OptionGroup[]> => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+      po.id AS option_id,
+      po.name AS option_name,
+      pov.id AS value_id,
+      pov.value AS value_name
+    FROM product_options AS po
+    JOIN product_option_values AS pov
+      ON po.id = pov.product_option_id
+    WHERE po.product_id = ?`,
+    [id]
+  );
+
+  const groups = rows.reduce<OptionGroup[]>((acc, row) => {
+    const option = acc.find((o) => o.option_id === row.option_id);
+
+    if (!option) {
+      acc.push({
+        option_id: row.option_id,
+        option_name: row.option_name,
+        values: [
+          {
+            value_id: row.value_id,
+            value_name: row.value_name,
+          },
+        ],
+      });
+    } else {
+      option.values.push({
+        value_id: row.value_id,
+        value_name: row.value_name,
+      });
+    }
+
+    return acc;
+  }, []);
+
+  return groups;
+};
+
 // Create an option for a product (e.g., Color, Size)
 export const createOption = async (
   productId: number,
@@ -20,7 +104,7 @@ export const createOption = async (
     `INSERT INTO product_options (product_id, name) VALUES (?, ?)`,
     [productId, name]
   );
-  return result.insertId; // ✅ Must return number
+  return result.insertId;
 };
 // Delete options for a product
 export const deleteOptionsByProductId = async (productId: number) => {
