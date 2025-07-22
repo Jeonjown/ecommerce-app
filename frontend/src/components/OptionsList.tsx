@@ -4,9 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { useGetOptionsByProductId } from "@/hooks/useGetOptionsByProductId";
 import type { OptionGroup } from "@/types/api/options";
 import { Button } from "./ui/button";
-import { TiDeleteOutline } from "react-icons/ti";
 import { FaRegEdit } from "react-icons/fa";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { IoMdClose } from "react-icons/io";
+import DeleteOptionModal from "./DeleteOptionModal";
 
 interface OptionListProps {
   id: number;
@@ -32,6 +33,7 @@ const OptionsList = ({ id }: OptionListProps) => {
                 {option.values.map((value) => (
                   <Badge key={value.value_id} variant="outline">
                     {value.value_name}
+                    <IoMdClose />
                   </Badge>
                 ))}
                 <div className="ml-auto flex items-center space-x-1">
@@ -41,12 +43,11 @@ const OptionsList = ({ id }: OptionListProps) => {
                     </TooltipTrigger>
                     <TooltipContent side="right">Edit</TooltipContent>
                   </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <TiDeleteOutline className="text-destructive !size-6 hover:scale-105" />
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Delete</TooltipContent>
-                  </Tooltip>
+                  <DeleteOptionModal
+                    optionId={option.option_id}
+                    optionName={option.option_name}
+                    productId={id}
+                  />
                 </div>
               </div>
             </div>

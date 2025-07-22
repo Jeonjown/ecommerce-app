@@ -106,11 +106,12 @@ export const createOption = async (
   );
   return result.insertId;
 };
+
 // Delete options for a product
-export const deleteOptionsByProductId = async (productId: number) => {
-  const [result] = await pool.query(
-    `DELETE FROM product_options WHERE product_id = ?`,
-    [productId]
+export const deleteOptionsByOptionsId = async (id: number) => {
+  const [result] = await pool.query<ResultSetHeader>(
+    `DELETE FROM product_options WHERE id = ?`,
+    [id]
   );
-  return result;
+  return result.affectedRows;
 };

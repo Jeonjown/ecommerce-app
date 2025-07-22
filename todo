@@ -1,0 +1,8 @@
+- make options api backend
+
+- make options api frontend
+- make variant api backend
+
+- rework frontend get products to remove variant and options
+
+- make variant api frontend
