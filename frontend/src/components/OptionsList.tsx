@@ -30,12 +30,19 @@ const OptionsList = ({ id }: OptionListProps) => {
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <p className="text-sm font-semibold">{`${option.option_name}:`}</p>
 
-                {option.values.map((value) => (
-                  <Badge key={value.value_id} variant="outline">
-                    {value.value_name}
-                    <IoMdClose />
-                  </Badge>
-                ))}
+                {option.values.length > 0 ? (
+                  option.values.map((value) => (
+                    <Badge key={value.value_id} variant="outline">
+                      {value.value_name}
+                      <IoMdClose />
+                    </Badge>
+                  ))
+                ) : (
+                  <span className="text-muted-foreground text-sm italic">
+                    No values
+                  </span>
+                )}
+
                 <div className="ml-auto flex items-center space-x-1">
                   <Tooltip>
                     <TooltipTrigger asChild>
