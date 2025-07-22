@@ -29,7 +29,6 @@ export const getAllOptionsController = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params;
     const options = await getAllOptions();
 
     res.status(200).json({ options });
@@ -51,6 +50,9 @@ export const createOptionController = async (
       throw new ApiError('Please provide name and product id', 400);
 
     const option_id = await createOption(Number(id), name);
+
+    if (option_id === 0) throw new ApiError('No option value found', 404);
+
     res.status(200).json({
       message: 'option created successfully.',
       option: { option_id, name },

@@ -4,13 +4,13 @@ import { useGetOptionsByProductId } from "@/hooks/useGetOptionsByProductId";
 import type { OptionGroup } from "@/types/api/options";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { FaRegEdit } from "react-icons/fa";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { IoMdClose } from "react-icons/io";
 import DeleteOptionModal from "./DeleteOptionModal";
 import { FaCirclePlus } from "react-icons/fa6";
 import { useCreateOptions } from "@/hooks/useCreateOptions";
 import { useState } from "react";
+import { useCreateOptionValue } from "@/hooks/useCreateOptionValue";
 
 interface OptionListProps {
   id: number;
@@ -19,15 +19,26 @@ interface OptionListProps {
 const OptionsList = ({ id }: OptionListProps) => {
   const { data } = useGetOptionsByProductId(String(id));
   const { mutate } = useCreateOptions(String(id));
+  const { mutate: createOptionValues } = useCreateOptionValue(String(id));
 
   const [isAdding, setIsAdding] = useState(false);
   const [optionName, setOptionName] = useState("");
 
+  const [activeAddValueId, setActiveAddValueId] = useState<number | null>(null);
+  const [newValueName, setNewValueName] = useState("");
+
   const handleAddOption = () => {
     if (!optionName.trim()) return;
-    mutate(optionName); // Pass name, not id
+    mutate(optionName);
     setOptionName("");
     setIsAdding(false);
+  };
+
+  const handleAddValue = (optionId: number) => {
+    if (!newValueName.trim()) return;
+    createOptionValues({ id: optionId, value: newValueName }); // expects shape { optionId, value }
+    setNewValueName("");
+    setActiveAddValueId(null);
   };
 
   return (
@@ -57,6 +68,7 @@ const OptionsList = ({ id }: OptionListProps) => {
             </div>
           )}
         </CardTitle>
+
         {isAdding && (
           <Input
             value={optionName}
@@ -76,37 +88,63 @@ const OptionsList = ({ id }: OptionListProps) => {
                   {`${option.option_name}:`}
                 </p>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <FaCirclePlus />
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    Add Option Values
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                {option.values.length > 0 ? (
-                  option.values.map((value) => (
-                    <Badge key={value.value_id} variant="outline">
-                      {value.value_name}
-                      <IoMdClose />
-                    </Badge>
-                  ))
-                ) : (
-                  <span className="text-muted-foreground text-sm italic">
-                    No values
-                  </span>
-                )}
-
-                <div className="ml-auto flex items-center space-x-1">
+                {activeAddValueId !== option.option_id ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <FaRegEdit className="text-accent-foreground !size-5 hover:scale-105" />
+                      <FaCirclePlus
+                        className="cursor-pointer"
+                        onClick={() => setActiveAddValueId(option.option_id)}
+                      />
                     </TooltipTrigger>
-                    <TooltipContent side="right">Edit</TooltipContent>
+                    <TooltipContent side="right">
+                      Add Option Value
+                    </TooltipContent>
                   </Tooltip>
+                ) : (
+                  <div className="ml-2 flex items-center gap-2">
+                    <Input
+                      value={newValueName}
+                      onChange={(e) => setNewValueName(e.target.value)}
+                      placeholder="New value"
+                      className="h-8 w-40"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddValue(option.option_id)}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setActiveAddValueId(null);
+                        setNewValueName("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center">
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {option.values.length > 0 ? (
+                    option.values.map((value) => (
+                      <Badge key={value.value_id} variant="outline">
+                        {value.value_name}
+                        <IoMdClose className="ml-1 cursor-pointer" />
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground text-sm italic">
+                      No values
+                    </span>
+                  )}
+                </div>
+
+                <div className="ml-auto">
                   <DeleteOptionModal
                     optionId={option.option_id}
                     optionName={option.option_name}

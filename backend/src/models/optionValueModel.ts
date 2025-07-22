@@ -1,6 +1,5 @@
-import { ResultSetHeader } from 'mysql2/promise';
+import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import pool from '../db';
-import { generateSlug } from '../utils/generateSlug';
 
 // Get all values for a given option (e.g., for "Color", get "Black", "White")
 export const getOptionValuesByOptionId = async (optionId: number) => {
@@ -11,19 +10,32 @@ export const getOptionValuesByOptionId = async (optionId: number) => {
   return rows;
 };
 
+export const getOptionValuesById = async (optionValueId: number) => {
+  const [rows] = await pool.query(
+    `SELECT * FROM product_option_values WHERE id = ?`,
+    [optionValueId]
+  );
+  return rows;
+};
+
 // Create a value for a specific option
 export const createOptionValue = async (
   optionId: number,
-  value: string
-): Promise<number> => {
-  const slug = await generateSlug(value, 'product_option_values');
+  value: string,
+  slug: string
+): Promise<RowDataPacket> => {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO product_option_values (product_option_id, value, slug) VALUES (?, ?, ?)`,
     [optionId, value, slug]
   );
-  return result.insertId;
-};
 
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT * FROM product_option_values WHERE id = ?`,
+    [result.insertId]
+  );
+
+  return rows[0];
+};
 // Delete all values for an option
 export const deleteOptionValuesByOptionId = async (optionId: number) => {
   const [result] = await pool.query(

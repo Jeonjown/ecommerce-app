@@ -11,6 +11,7 @@ import categoryRoutes from './routes/categoryRoutes';
 import productRoutes from './routes/productRoutes';
 import optionRoutes from './routes/optionRoutes';
 import imageRoutes from './routes/imageRoutes';
+import optionValueRoutes from './routes/optionValueRoutes';
 
 const app = express();
 
@@ -46,11 +47,18 @@ app.use(
   optionRoutes
 );
 
+app.use(
+  '/api/products/options-value',
+  authenticateUser,
+  checkUserRole('admin'),
+  optionValueRoutes
+);
+
 app.use('/api/products', productRoutes);
 
-app.use('/api/auth', authRoutes);
-
 app.use('/api/images', imageRoutes);
+
+app.use('/api/auth', authRoutes);
 
 app.use(errorHandler);
 

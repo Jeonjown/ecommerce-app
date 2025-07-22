@@ -28,15 +28,17 @@ const DeleteOptionModal = ({
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
-            <TiDeleteOutline className="text-destructive !size-6 cursor-pointer hover:scale-105" />
+            <TiDeleteOutline className="text-destructive !size-7 cursor-pointer hover:scale-105" />
           </DialogTrigger>
         </TooltipTrigger>
-        <TooltipContent side="right">Delete</TooltipContent>
+        <TooltipContent side="right">Delete Option</TooltipContent>
       </Tooltip>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Are you absolutely sure? {optionName}</DialogTitle>
+          <DialogTitle>
+            Are you absolutely sure to delete option: {optionName}?{" "}
+          </DialogTitle>
           <DialogDescription>
             This action cannot be undone. This will permanently delete this
             option.
