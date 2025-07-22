@@ -7,7 +7,9 @@ import { Button } from "./ui/button";
 import { FaRegEdit } from "react-icons/fa";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { IoMdClose } from "react-icons/io";
+
 import DeleteOptionModal from "./DeleteOptionModal";
+import { FaCirclePlus } from "react-icons/fa6";
 
 interface OptionListProps {
   id: number;
@@ -27,9 +29,20 @@ const OptionsList = ({ id }: OptionListProps) => {
         {data && data?.options?.length > 0 ? (
           data?.options.map((option: OptionGroup) => (
             <div key={option.option_id}>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="flex items-center space-x-1">
                 <p className="text-sm font-semibold">{`${option.option_name}:`}</p>
 
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <FaCirclePlus />
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    Add Option Values
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-2">
                 {option.values.length > 0 ? (
                   option.values.map((value) => (
                     <Badge key={value.value_id} variant="outline">
