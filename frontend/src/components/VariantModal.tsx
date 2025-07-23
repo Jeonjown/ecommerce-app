@@ -1,8 +1,4 @@
-import type {
-  ProductOption,
-  ProductWithCategory,
-  Variant,
-} from "@/types/api/products";
+import type { ProductOption, ProductWithCategory } from "@/types/api/products";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -14,16 +10,20 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Badge } from "./ui/badge";
-import { ImageIcon } from "lucide-react";
+import OptionsList from "./OptionsList";
+import { useGetVariantsbyProductId } from "@/hooks/useGetVariantsbyProductId";
+import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
+import { FaEdit, FaTrashAlt } from "react-icons/fa";
 
 interface VariantModalProps {
-  variants: Variant[];
   productName: string;
   productOptions: ProductOption[];
   product: ProductWithCategory;
 }
 
-export function VariantModal({ variants, product }: VariantModalProps) {
+export function VariantModal({ product }: VariantModalProps) {
+  const { data = [] } = useGetVariantsbyProductId(product.id);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -32,65 +32,64 @@ export function VariantModal({ variants, product }: VariantModalProps) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="w-full md:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{product.name} Variants</DialogTitle>
           <DialogDescription>
             A list of all available variants and their details.
           </DialogDescription>
         </DialogHeader>
-        <div className="max-h-[75vh] space-y-6 overflow-y-auto pr-2">
-          {/* Variants Grid */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            {variants.map((variant) => (
-              <div
-                key={variant.id}
-                className="rounded-lg border p-4 shadow-sm transition hover:shadow"
-              >
-                {variant.image_url ? (
-                  <img
-                    src={variant.image_url}
-                    alt="Variant"
-                    className="mb-3 h-40 w-full rounded-md object-cover"
-                  />
-                ) : (
-                  <div className="mb-3 flex h-40 w-full items-center justify-center rounded-md bg-gray-100 text-gray-400">
-                    <ImageIcon className="h-6 w-6" />
-                    <span className="ml-2 text-xs">No Image</span>
-                  </div>
-                )}
 
-                <div className="space-y-1 text-sm">
-                  <div>
-                    <span className="font-medium">SKU:</span> {variant.sku}
+        <div className="flex max-h-[75vh] flex-col space-y-6 overflow-y-auto pr-2">
+          <OptionsList id={product.id} />
+
+          {/* Variants Grid */}
+          <Button className="ml-auto">Add Variant</Button>
+          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+            {data.map((variant) => (
+              <Card
+                key={variant.id}
+                className="rounded-2xl border border-gray-200 shadow-sm transition hover:shadow-md"
+              >
+                <CardHeader className="pb-0">
+                  <div className="h-40 w-full overflow-hidden rounded-lg bg-gray-100">
+                    <img
+                      src={variant.image_url}
+                      alt="variant image"
+                      className="h-full w-full object-cover"
+                    />
                   </div>
-                  <div>
-                    <span className="font-medium">Options:</span>{" "}
-                    {variant.options
-                      .map((opt) => `${opt.option_name}: ${opt.option_value}`)
-                      .join(" / ")}
+                </CardHeader>
+
+                <CardContent className="pt-2">
+                  <h3 className="text-sm font-semibold">{variant.sku}</h3>
+
+                  <p className="text-muted-foreground mt-2 mb-4 text-sm">
+                    ₱{Number(variant.price).toFixed(2)}
+                  </p>
+
+                  <p className="mb-2 text-sm text-gray-600">
+                    Stock: {variant.stock}
+                  </p>
+                </CardContent>
+
+                <CardFooter className="flex items-center justify-between pt-0">
+                  <Badge
+                    variant={variant.is_active ? "default" : "destructive"}
+                    className="px-2 py-1 text-xs"
+                  >
+                    {variant.is_active ? "Active" : "Inactive"}
+                  </Badge>
+                  <div className="space-x-1">
+                    <Button size="icon" variant="outline">
+                      <FaEdit />
+                    </Button>
+                    <Button size="icon" variant="destructive">
+                      <FaTrashAlt />
+                    </Button>
                   </div>
-                  <div>
-                    <span className="font-medium">Price:</span> ₱
-                    {parseFloat(variant.price).toLocaleString()}
-                  </div>
-                  <div>
-                    <span className="font-medium">Stock:</span> {variant.stock}
-                  </div>
-                  <div>
-                    <span className="font-medium">Status:</span>{" "}
-                    {variant.is_active ? (
-                      <Badge variant={"default"} className="ml-1">
-                        Active
-                      </Badge>
-                    ) : (
-                      <Badge variant="destructive" className="ml-1">
-                        Inactive
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
+                </CardFooter>
+              </Card>
             ))}
           </div>
         </div>

@@ -17,7 +17,7 @@ const Navbar = () => {
     <>
       <nav className="relative container mx-auto flex flex-wrap items-center justify-between gap-4">
         {/* Logo */}
-        <div className="text-2xl font-bold">LOGO</div>
+        <div className="text-2xl font-bold">LinTech</div>
 
         {/* Desktop Nav Links (moved before search) */}
         <ul className="hidden space-x-6 font-semibold md:flex lg:mx-auto">

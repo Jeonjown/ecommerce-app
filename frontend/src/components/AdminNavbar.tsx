@@ -30,7 +30,7 @@ const AdminNavbar = () => {
   return (
     <nav className="relative container mx-auto flex flex-wrap items-center justify-between gap-4 p-4">
       {/* Logo */}
-      <div className="mr-5 text-2xl font-bold">LOGO</div>
+      <div className="mr-5 text-2xl font-bold">LinTech</div>
 
       {/* Desktop Nav Links */}
       <ul className="hidden space-x-6 font-semibold md:flex lg:mx-auto">

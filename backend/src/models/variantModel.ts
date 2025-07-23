@@ -9,6 +9,7 @@ export const getVariantsByProductId = async (
     `SELECT * FROM product_variants WHERE product_id = ?`,
     [productId]
   );
+
   return rows as ProductVariant[];
 };
 

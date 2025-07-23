@@ -25,3 +25,21 @@ export const createOptionValue = async ({
     throw new Error("Unexpected error deleting options.");
   }
 };
+
+export const deleteOptionValue = async (
+  id: number,
+): Promise<OptionValueResponse> => {
+  try {
+    const response = await api.delete(`/products/options-value/${id}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to delete options.",
+      );
+    }
+    throw new Error("Unexpected error deleting options.");
+  }
+};

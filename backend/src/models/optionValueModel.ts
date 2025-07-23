@@ -44,3 +44,13 @@ export const deleteOptionValuesByOptionId = async (optionId: number) => {
   );
   return result;
 };
+
+export const deleteOptionValuesById = async (
+  optionValueId: number
+): Promise<number> => {
+  const [result] = await pool.query<ResultSetHeader>(
+    `DELETE FROM product_option_values WHERE id = ?`,
+    [optionValueId]
+  );
+  return result.affectedRows;
+};

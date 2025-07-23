@@ -115,8 +115,7 @@ async function seed() {
         );
         const price = faker.commerce.price({ min: 100, max: 2000 });
         const stock = faker.number.int({ min: 10, max: 50 });
-        const img = faker.image.urlLoremFlickr({
-          category: 'technology',
+        const img = faker.image.urlPicsumPhotos({
           width: 800,
           height: 600,
         });

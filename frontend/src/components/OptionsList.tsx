@@ -11,6 +11,16 @@ import { FaCirclePlus } from "react-icons/fa6";
 import { useCreateOptions } from "@/hooks/useCreateOptions";
 import { useState } from "react";
 import { useCreateOptionValue } from "@/hooks/useCreateOptionValue";
+import { useDeleteOptionValue } from "@/hooks/useDeleteOptionValue";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 
 interface OptionListProps {
   id: number;
@@ -20,6 +30,8 @@ const OptionsList = ({ id }: OptionListProps) => {
   const { data } = useGetOptionsByProductId(String(id));
   const { mutate } = useCreateOptions(String(id));
   const { mutate: createOptionValues } = useCreateOptionValue(String(id));
+
+  const { mutate: deleteOptionValue } = useDeleteOptionValue(String(id));
 
   const [isAdding, setIsAdding] = useState(false);
   const [optionName, setOptionName] = useState("");
@@ -130,18 +142,43 @@ const OptionsList = ({ id }: OptionListProps) => {
 
               <div className="flex items-center">
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  {option.values.length > 0 ? (
-                    option.values.map((value) => (
-                      <Badge key={value.value_id} variant="outline">
-                        {value.value_name}
-                        <IoMdClose className="ml-1 cursor-pointer" />
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground text-sm italic">
-                      No values
-                    </span>
-                  )}
+                  {option.values.map((value) => (
+                    <Dialog key={value.value_id}>
+                      <DialogTrigger asChild>
+                        <Badge
+                          variant="outline"
+                          className="cursor-pointer font-normal hover:scale-105 hover:font-semibold"
+                        >
+                          {value.value_name}
+                          <IoMdClose className="ml-1" />
+                        </Badge>
+                      </DialogTrigger>
+
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Are you absolutely sure?</DialogTitle>
+                          <DialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete this option value and all associated items
+                            into it.
+                          </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="mt-4 flex justify-end gap-2">
+                          <DialogClose asChild>
+                            <Button variant="outline">Cancel</Button>
+                          </DialogClose>
+
+                          <Button
+                            variant="destructive"
+                            onClick={() => deleteOptionValue(value.value_id)}
+                          >
+                            Confirm
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  ))}
                 </div>
 
                 <div className="ml-auto">
