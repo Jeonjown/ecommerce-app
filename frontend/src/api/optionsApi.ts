@@ -3,7 +3,7 @@ import api from "./axios";
 import type { OptionResponse } from "@/types/api/options";
 
 export const getOptionsByProductId = async (
-  id: string,
+  id: number,
 ): Promise<OptionResponse> => {
   try {
     const response = await api.get(`/products/options/${id}`, {
@@ -20,7 +20,7 @@ export const getOptionsByProductId = async (
   }
 };
 
-export const deleteOptionByOptionId = async (id: string) => {
+export const deleteOptionByOptionId = async (id: number) => {
   try {
     const response = await api.delete(`/products/options/${id}`, {
       withCredentials: true,

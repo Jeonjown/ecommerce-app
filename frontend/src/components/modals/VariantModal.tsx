@@ -46,7 +46,7 @@ export function VariantModal({ product }: VariantModalProps) {
         </DialogHeader>
 
         <div className="flex max-h-[75vh] flex-col space-y-6 overflow-y-auto pr-2">
-          <OptionsList id={product.id} />
+          {!isAddingVariant && <OptionsList id={product.id} />}
 
           {/* Toggle Add Variant */}
           <Button
@@ -57,7 +57,10 @@ export function VariantModal({ product }: VariantModalProps) {
           </Button>
 
           {isAddingVariant ? (
-            <VariantForm />
+            <VariantForm
+              product_id={product.id}
+              onSuccess={() => setIsAddingVariant(false)}
+            />
           ) : data.length === 0 ? (
             <p className="text-muted-foreground text-center">
               No variants found.

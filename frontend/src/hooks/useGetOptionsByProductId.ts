@@ -3,7 +3,7 @@ import type { OptionResponse } from "@/types/api/options";
 
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetOptionsByProductId = (id: string) => {
+export const useGetOptionsByProductId = (id: number) => {
   return useQuery<OptionResponse>({
     queryKey: ["optionsByProductId", id],
     queryFn: () => getOptionsByProductId(id),

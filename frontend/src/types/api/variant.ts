@@ -13,3 +13,11 @@ export interface Variant {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface CreateVariantPayload {
+  price: number;
+  stock: number;
+  image_url: string;
+  is_active?: boolean;
+  options?: { name: string; value: string }[];
+}

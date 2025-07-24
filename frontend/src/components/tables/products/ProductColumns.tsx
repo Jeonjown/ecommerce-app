@@ -1,8 +1,8 @@
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
-import { VariantModal } from "@/components/modals/VariantModal";
 import type { ProductWithCategory } from "@/types/api/products";
 import type { ColumnDef } from "@tanstack/react-table";
 import { OptionModal } from "@/components/modals/OptionModal";
+import { VariantModal } from "@/components/modals/VariantModal";
 
 export const columns: ColumnDef<ProductWithCategory>[] = [
   {

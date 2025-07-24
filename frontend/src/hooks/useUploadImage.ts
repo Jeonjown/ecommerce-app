@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 export const useUploadImage = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<File, Error, File>({
+  return useMutation<string, Error, File>({
     mutationFn: uploadImage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["product"] });

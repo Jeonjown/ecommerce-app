@@ -11,7 +11,7 @@ export const uploadImage = async (file: File) => {
       transformRequest: [(data) => data],
     });
     console.log(response);
-    return response.data;
+    return response.data.url;
   } catch (error: unknown) {
     if (isAxiosError(error)) {
       throw new Error(

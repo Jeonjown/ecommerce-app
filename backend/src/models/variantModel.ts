@@ -21,13 +21,14 @@ export const getVariantById = async (id: number) => {
 
   return (rows as ProductVariant[])[0];
 };
+
 export const createVariant = async (
   product_id: number,
   sku: string,
   price: number,
   stock: number,
   image_url: string,
-  is_active: number
+  is_active: boolean
 ) => {
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO product_variants (product_id, sku, price, stock, image_url, is_active) VALUES (?, ?, ?, ?, ?, ?)`,
@@ -42,7 +43,7 @@ export const updateVariant = async (
   price: number,
   stock: number,
   image_url: string,
-  is_active: number
+  is_active: boolean
 ) => {
   await pool.query(
     `UPDATE product_variants SET sku = ?, price = ?, stock = ?, image_url = ?, is_active = ? WHERE id = ?`,
