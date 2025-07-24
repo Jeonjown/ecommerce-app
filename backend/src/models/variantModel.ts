@@ -1,6 +1,6 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import pool from '../db';
-import { ProductVariant } from '../types/models/products';
+import { ProductVariant, VariantOption } from '../types/models/products';
 
 export const getVariantsByProductId = async (
   productId: number
@@ -50,6 +50,23 @@ export const updateVariant = async (
   );
 };
 
-export const deleteVariant = async (id: number) => {
+export const deleteVariantById = async (id: number) => {
   await pool.query(`DELETE FROM product_variants WHERE id = ?`, [id]);
+};
+
+export const getVariantOptionsByVariantId = async (variantId: number) => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `
+    SELECT 
+      po.name AS option_name,
+      pov.value AS option_value
+    FROM product_variant_values pvv
+    JOIN product_option_values pov ON pvv.product_option_value_id = pov.id
+    JOIN product_options po ON pvv.product_option_id = po.id
+    WHERE pvv.product_variant_id = ?
+    `,
+    [variantId]
+  );
+
+  return rows;
 };

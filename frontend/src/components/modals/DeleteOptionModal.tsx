@@ -7,8 +7,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { TiDeleteOutline } from "react-icons/ti";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+
 import { useDeleteOptionByOptionId } from "@/hooks/useDeleteOptionByOptionId";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface DeleteOptionModalProps {
   optionId: number;

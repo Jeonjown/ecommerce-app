@@ -6,7 +6,6 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { IoMdClose } from "react-icons/io";
-import DeleteOptionModal from "./DeleteOptionModal";
 import { FaCirclePlus } from "react-icons/fa6";
 import { useCreateOptions } from "@/hooks/useCreateOptions";
 import { useState } from "react";
@@ -21,6 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import DeleteOptionModal from "./modals/DeleteOptionModal";
 
 interface OptionListProps {
   id: number;

@@ -1,8 +1,8 @@
-import { OptionModal } from "@/components/OptionModal";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
-import { VariantModal } from "@/components/VariantModal";
-import type { ProductWithCategory, Variant } from "@/types/api/products";
+import { VariantModal } from "@/components/modals/VariantModal";
+import type { ProductWithCategory } from "@/types/api/products";
 import type { ColumnDef } from "@tanstack/react-table";
+import { OptionModal } from "@/components/modals/OptionModal";
 
 export const columns: ColumnDef<ProductWithCategory>[] = [
   {
@@ -67,13 +67,10 @@ export const columns: ColumnDef<ProductWithCategory>[] = [
   {
     accessorKey: "variants",
     header: "Variants",
-    cell: ({ getValue, row }) => {
-      const variants = getValue() as Variant[];
-
+    cell: ({ row }) => {
       return (
         <div className="flex justify-start">
           <VariantModal
-            variants={variants}
             productName={row.original.name}
             productOptions={row.original.options}
             product={row.original}

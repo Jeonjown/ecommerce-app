@@ -1,5 +1,4 @@
 import type { ProductWithCategory } from "@/types/api/products";
-import { Button } from "./ui/button";
 import {
   Dialog,
   DialogClose,
@@ -8,8 +7,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
-import OptionsList from "./OptionsList";
+} from "../ui/dialog";
+import OptionsList from "../OptionsList";
+import { Button } from "../ui/button";
 
 interface VariantModalProps {
   product: ProductWithCategory;

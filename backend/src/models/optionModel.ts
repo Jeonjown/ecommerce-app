@@ -1,6 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import pool from '../db';
 import { OptionGroup } from '../types/models/options';
+import { VariantOption } from '../types/models/products';
 
 // Get all options for a product
 export const getOptionsByProductId = async (
