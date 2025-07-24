@@ -20,4 +20,8 @@ export interface CreateVariantPayload {
   stock: number;
   is_active: boolean;
   image_url: string;
+  variant_options: {
+    product_option_id: number;
+    product_option_value_id: number;
+  }[];
 }

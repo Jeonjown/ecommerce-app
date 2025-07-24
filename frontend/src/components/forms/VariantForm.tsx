@@ -1,4 +1,3 @@
-// src/components/forms/VariantForm.tsx
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,17 +17,15 @@ import { Switch } from "@/components/ui/switch";
 import { useCreateVariantByProductId } from "@/hooks/useCreateVariantByProductId";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { UploadImageField } from "../ui/upload-image";
-
-const formSchema = z.object({
-  product_id: z.coerce.number().min(1),
-  price: z.coerce.number().min(0, "Price must be ≥ 0"),
-  stock: z.coerce.number().min(0, "Stock must be ≥ 0"),
-  is_active: z.boolean(),
-  image_file: z
-    .instanceof(File)
-    .refine((f) => f.size > 0, "Please select an image file"),
-});
-type FormValues = z.infer<typeof formSchema>;
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useGetOptionsByProductId } from "@/hooks/useGetOptionsByProductId";
+import Loading from "@/pages/Loading";
 
 interface VariantFormProps {
   product_id: number;
@@ -39,9 +36,32 @@ export default function VariantForm({
   product_id,
   onSuccess,
 }: VariantFormProps) {
+  const { data } = useGetOptionsByProductId(product_id);
   const { mutate: createVariant, isPending: creating } =
     useCreateVariantByProductId(product_id);
   const { mutateAsync: uploadImage } = useUploadImage();
+
+  const dynamicOptionFields =
+    data?.options.reduce(
+      (acc, option) => {
+        acc[`option_${option.option_id}`] = z.string().min(1, "Required");
+        return acc;
+      },
+      {} as Record<string, z.ZodString>,
+    ) ?? {};
+
+  const formSchema = z.object({
+    product_id: z.coerce.number().min(1),
+    price: z.coerce.number().min(0, "Price must be ≥ 0"),
+    stock: z.coerce.number().min(0, "Stock must be ≥ 0"),
+    is_active: z.boolean(),
+    image_file: z
+      .instanceof(File)
+      .refine((f) => f.size > 0, "Please select an image file"),
+    ...dynamicOptionFields,
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -50,27 +70,37 @@ export default function VariantForm({
       price: 0,
       stock: 0,
       is_active: true,
-      image_file: undefined,
     },
   });
 
   const onSubmit = async (values: FormValues) => {
     try {
-      //  upload image and get back the url
-      const url = await uploadImage(values.image_file);
+      const imageUrl = await uploadImage(values.image_file);
 
-      // create variant with that url
+      const selectedOptions =
+        data?.options.map((option) => {
+          const key = `option_${option.option_id}`;
+          const castedValues = values as Record<string, unknown>;
+          const value = castedValues[key];
+
+          return {
+            product_option_id: option.option_id,
+            product_option_value_id: parseInt(value as string, 10),
+          };
+        }) ?? [];
+
       createVariant(
         {
           product_id,
           price: values.price,
           stock: values.stock,
           is_active: values.is_active,
-          image_url: url,
+          image_url: imageUrl,
+          variant_options: selectedOptions,
         },
         {
           onSuccess: () => {
-            onSuccess?.();
+            onSuccess();
             methods.reset();
           },
         },
@@ -80,24 +110,62 @@ export default function VariantForm({
     }
   };
 
+  if (creating) return <Loading />;
+
   return (
     <FormProvider {...methods}>
       <Form {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Image chooser (deferred upload) */}
           <UploadImageField name="image_file" label="Variant Image" />
+
+          {/* Dynamic Selects for Options */}
+          {data?.options.map((option) => (
+            <FormField
+              key={option.option_id}
+              name={`option_${option.option_id}`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{option.option_name}</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? ""}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={`Select ${option.option_name}`}
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {option.values.map((value) => (
+                        <SelectItem
+                          key={value.value_id}
+                          value={String(value.value_id)}
+                        >
+                          {value.value_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
 
           {/* Price */}
           <FormField
             control={methods.control}
             name="price"
-            render={({ field, fieldState }) => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>Price</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} />
                 </FormControl>
-                <FormMessage>{fieldState.error?.message}</FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -106,13 +174,13 @@ export default function VariantForm({
           <FormField
             control={methods.control}
             name="stock"
-            render={({ field, fieldState }) => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>Stock</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} />
                 </FormControl>
-                <FormMessage>{fieldState.error?.message}</FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />

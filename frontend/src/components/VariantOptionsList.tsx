@@ -1,6 +1,6 @@
-import { useVariantOptions } from "@/hooks/useGetVaritantOptions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { useVariantOptions } from "@/hooks/useGetVariantOptions";
 
 interface Props {
   variantId: number;

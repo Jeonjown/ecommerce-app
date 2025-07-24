@@ -2,7 +2,6 @@ import type { ProductOption, ProductWithCategory } from "@/types/api/products";
 import { Button } from "../ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -18,6 +17,7 @@ import DeleteVariantModal from "../DeleteVariantModal";
 import VariantOptionsList from "../VariantOptionsList";
 import { useState } from "react";
 import VariantForm from "../forms/VariantForm";
+import { useGetOptionsByProductId } from "@/hooks/useGetOptionsByProductId";
 
 interface VariantModalProps {
   productName: string;
@@ -28,6 +28,9 @@ interface VariantModalProps {
 export function VariantModal({ product }: VariantModalProps) {
   const [isAddingVariant, setIsAddingVariant] = useState(false);
   const { data = [] } = useGetVariantsbyProductId(product.id);
+  const { data: options } = useGetOptionsByProductId(product.id);
+
+  console.log(options);
 
   return (
     <Dialog>
@@ -84,12 +87,15 @@ export function VariantModal({ product }: VariantModalProps) {
 
                   <CardContent className="pt-2">
                     <h3 className="text-sm font-semibold">{variant.sku}</h3>
-                    <p className="text-muted-foreground mt-2 mb-4 text-sm">
-                      ₱{Number(variant.price).toFixed(2)}
-                    </p>
-                    <p className="mb-2 text-sm text-gray-600">
-                      Stock: {variant.stock}
-                    </p>
+                    <div className="mt-5 flex items-center justify-between">
+                      <p className="text-muted-foreground text-sm">
+                        ₱{Number(variant.price).toFixed(2)}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Stock: {variant.stock}
+                      </p>
+                    </div>
+
                     <VariantOptionsList variantId={variant.id} />
                   </CardContent>
 
@@ -115,12 +121,6 @@ export function VariantModal({ product }: VariantModalProps) {
             </div>
           )}
         </div>
-
-        <DialogClose asChild>
-          <Button variant="secondary" className="mt-4">
-            Close
-          </Button>
-        </DialogClose>
       </DialogContent>
     </Dialog>
   );
