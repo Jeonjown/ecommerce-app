@@ -1,13 +1,14 @@
-import { useForm } from "react-hook-form";
+// src/components/forms/VariantForm.tsx
+import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
+  FormControl,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -15,26 +16,17 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
 import { useCreateVariantByProductId } from "@/hooks/useCreateVariantByProductId";
-// import {
-//   Select,
-//   SelectTrigger,
-//   SelectValue,
-//   SelectContent,
-//   SelectItem,
-// } from "@/components/ui/select";
+import { useUploadImage } from "@/hooks/useUploadImage";
+import { UploadImageField } from "../ui/upload-image";
 
 const formSchema = z.object({
   product_id: z.coerce.number().min(1),
   price: z.coerce.number().min(0, "Price must be ≥ 0"),
   stock: z.coerce.number().min(0, "Stock must be ≥ 0"),
-  image_url: z.string().url("Must be a valid URL"),
   is_active: z.boolean(),
-  // options: z.array(
-  //   z.object({
-  //     name: z.string(),
-  //     value: z.string().min(1, "Please select a value"),
-  //   }),
-  // ),
+  image_file: z
+    .instanceof(File)
+    .refine((f) => f.size > 0, "Please select an image file"),
 });
 type FormValues = z.infer<typeof formSchema>;
 
@@ -47,146 +39,107 @@ export default function VariantForm({
   product_id,
   onSuccess,
 }: VariantFormProps) {
-  // const { data: optionGroups } = useGetOptionsByProductId(product_id);
-  const { mutate } = useCreateVariantByProductId(product_id);
+  const { mutate: createVariant, isPending: creating } =
+    useCreateVariantByProductId(product_id);
+  const { mutateAsync: uploadImage } = useUploadImage();
 
-  const form = useForm<FormValues>({
+  const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       product_id,
       price: 0,
       stock: 0,
-      image_url: "https://picsum.photos/seed/TqYKi/800/600?blur=5",
       is_active: true,
+      image_file: undefined,
     },
   });
 
-  // once we have optionGroups, seed the options field array
-  // useEffect(() => {
-  //   if (optionGroups?.options) {
-  //     form.setValue(
-  //       "options",
-  //       optionGroups.options.map(({ option_name }) => ({
-  //         name: option_name,
-  //         value: "",
-  //       })),
-  //     );
-  //   }
-  // }, [optionGroups, form]);
+  const onSubmit = async (values: FormValues) => {
+    try {
+      //  upload image and get back the url
+      const url = await uploadImage(values.image_file);
 
-  const onSubmit = (values: FormValues) => {
-    console.log("Submit payload:", values);
-    mutate(values, {
-      onSuccess: () => {
-        onSuccess?.(); // 👈 call the parent handler
-        form.reset(); // optional: reset the form
-      },
-    });
+      // create variant with that url
+      createVariant(
+        {
+          product_id,
+          price: values.price,
+          stock: values.stock,
+          is_active: values.is_active,
+          image_url: url,
+        },
+        {
+          onSuccess: () => {
+            onSuccess?.();
+            methods.reset();
+          },
+        },
+      );
+    } catch (err) {
+      console.error("Upload failed:", err);
+    }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Price */}
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Price</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <FormProvider {...methods}>
+      <Form {...methods}>
+        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Image chooser (deferred upload) */}
+          <UploadImageField name="image_file" label="Variant Image" />
 
-        {/* Stock */}
-        <FormField
-          control={form.control}
-          name="stock"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Stock</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* Price */}
+          <FormField
+            control={methods.control}
+            name="price"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>Price</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+                <FormMessage>{fieldState.error?.message}</FormMessage>
+              </FormItem>
+            )}
+          />
 
-        {/* Active */}
-        <FormField
-          control={form.control}
-          name="is_active"
-          render={({ field }) => (
-            <FormItem className="flex items-center space-x-2">
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <FormLabel>Active</FormLabel>
-            </FormItem>
-          )}
-        />
+          {/* Stock */}
+          <FormField
+            control={methods.control}
+            name="stock"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>Stock</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+                <FormMessage>{fieldState.error?.message}</FormMessage>
+              </FormItem>
+            )}
+          />
 
-        {/* Image URL */}
-        <FormField
-          control={form.control}
-          name="image_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Image URL</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="https://..." />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* Active */}
+          <FormField
+            control={methods.control}
+            name="is_active"
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel>Active</FormLabel>
+              </FormItem>
+            )}
+          />
 
-        {/* Option selects
-        {fields.map((f, idx) => {
-          const group = optionGroups?.options[idx];
-          return (
-            <FormField
-              key={f.id}
-              control={form.control}
-              name={`options.${idx}.value`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{group?.option_name}</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue
-                          placeholder={`Select ${group?.option_name}`}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {group?.values.map((v) => (
-                          <SelectItem key={v.value_id} value={v.value_name}>
-                            {v.value_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          );
-        })} */}
-
-        <Button type="submit" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Submitting…" : "Create Variant"}
-        </Button>
-      </form>
-    </Form>
+          {/* Submit */}
+          <Button type="submit" disabled={creating}>
+            {creating ? "Submitting…" : "Create Variant"}
+          </Button>
+        </form>
+      </Form>
+    </FormProvider>
   );
 }

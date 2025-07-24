@@ -15,9 +15,9 @@ export interface Variant {
 }
 
 export interface CreateVariantPayload {
+  product_id: number;
   price: number;
   stock: number;
+  is_active: boolean;
   image_url: string;
-  is_active?: boolean;
-  options?: { name: string; value: string }[];
 }
