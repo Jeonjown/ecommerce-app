@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import {
   createVariant,
   deleteVariantById,
+  getVariantById,
   getVariantOptionsByVariantId,
   getVariantsByProductId,
 } from '../models/variantModel';
@@ -10,6 +11,8 @@ import { generateSku } from '../utils/generateSku';
 import { getProductById } from '../models/productModel';
 import { createVariantValues } from '../models/variantValueModel';
 import { getOptionNameAndValue } from '../models/optionModel';
+import { deleteImage } from './imageController';
+import { deleteImageByUrl } from '../utils/deleteImageByUrl';
 
 export const getVariantbyIdController = async (
   req: Request,
@@ -57,6 +60,10 @@ export const deleteVariantByIdController = async (
   try {
     const { id } = req.params;
     if (!id) throw new ApiError('Variant ID is required', 400);
+
+    const variant = await getVariantById(Number(id));
+    console.log(variant);
+    const deleted = await deleteImageByUrl(variant.image_url);
 
     await deleteVariantById(Number(id));
 
