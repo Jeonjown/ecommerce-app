@@ -17,7 +17,6 @@ import DeleteVariantModal from "../DeleteVariantModal";
 import VariantOptionsList from "../VariantOptionsList";
 import { useState } from "react";
 import VariantForm from "../forms/VariantForm";
-import { useGetOptionsByProductId } from "@/hooks/useGetOptionsByProductId";
 
 interface VariantModalProps {
   productName: string;
@@ -28,12 +27,18 @@ interface VariantModalProps {
 export function VariantModal({ product }: VariantModalProps) {
   const [isAddingVariant, setIsAddingVariant] = useState(false);
   const { data = [] } = useGetVariantsbyProductId(product.id);
-  const { data: options } = useGetOptionsByProductId(product.id);
-
-  console.log(options);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
-    <Dialog>
+    <Dialog
+      open={isDialogOpen}
+      onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) {
+          setIsAddingVariant(false);
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           View
