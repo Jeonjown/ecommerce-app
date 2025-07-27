@@ -3,15 +3,18 @@ import { Router } from 'express';
 import {
   createVariantByIdController,
   deleteVariantByIdController,
-  getVariantbyIdController,
+  getVariantByIdController,
   getVariantOptionsByVariantIdController,
+  updateVariantController,
 } from '../controllers/variantController';
 
 const router = Router();
 
-router.get('/:id/options', getVariantOptionsByVariantIdController);
-router.get('/:id', getVariantbyIdController);
+router.get('/:id', getVariantByIdController);
 router.post('/:id', createVariantByIdController);
+router.patch('/:id', updateVariantController);
 router.delete('/:id', deleteVariantByIdController);
+
+router.get('/:id/options', getVariantOptionsByVariantIdController);
 
 export default router;

@@ -7,16 +7,17 @@ import {
   updateProductController,
   deleteProductController,
 } from '../controllers/productController';
+import { getVariantsbyProductIdController } from '../controllers/variantController';
 
 const router = Router();
 
-router.get('/', getAllProductsController);
-router.get('/:id', getProductByIdController);
-
 router.post('/', createProductController);
 
-router.put('/:id', updateProductController);
+router.get('/', getAllProductsController);
+router.get('/:id', getProductByIdController);
+router.get('/:id/variants', getVariantsbyProductIdController);
 
+router.put('/:id', updateProductController);
 router.delete('/:id', deleteProductController);
 
 export default router;

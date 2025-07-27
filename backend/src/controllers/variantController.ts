@@ -5,73 +5,14 @@ import {
   getVariantById,
   getVariantOptionsByVariantId,
   getVariantsByProductId,
+  updateVariant,
 } from '../models/variantModel';
 import { ApiError } from '../utils/ApiError';
 import { generateSku } from '../utils/generateSku';
 import { getProductById } from '../models/productModel';
 import { createVariantValues } from '../models/variantValueModel';
 import { getOptionNameAndValue } from '../models/optionModel';
-import { deleteImage } from './imageController';
 import { deleteImageByUrl } from '../utils/deleteImageByUrl';
-
-export const getVariantbyIdController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-    const variant = await getVariantsByProductId(Number(id));
-
-    if (!variant) throw new ApiError('No variant found', 400);
-
-    res.status(200).json(variant);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getVariantOptionsByVariantIdController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { id } = req.params;
-
-  try {
-    const variantId = parseInt(id);
-
-    if (isNaN(variantId)) {
-      throw new ApiError('Variant ID is required', 400);
-    }
-
-    const options = await getVariantOptionsByVariantId(variantId);
-    res.json(options);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const deleteVariantByIdController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-    if (!id) throw new ApiError('Variant ID is required', 400);
-
-    const variant = await getVariantById(Number(id));
-    console.log(variant);
-    const deleted = await deleteImageByUrl(variant.image_url);
-
-    await deleteVariantById(Number(id));
-
-    res.status(200).json({ message: 'Variant deleted successfully.' });
-  } catch (error) {
-    next(error);
-  }
-};
 
 export const createVariantByIdController = async (
   req: Request,
@@ -156,6 +97,122 @@ export const createVariantValuesController = async (
     await createVariantValues(variantId, options);
 
     res.status(201).json({ message: 'Variant values created successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getVariantsbyProductIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const variant = await getVariantsByProductId(Number(id));
+
+    if (!variant) throw new ApiError('No variant found', 400);
+
+    res.status(200).json(variant);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getVariantByIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const variant = await getVariantById(Number(id));
+
+    if (!variant) throw new ApiError('No variant found', 400);
+
+    res.status(200).json(variant);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateVariantController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const { sku, price, stock, image_url, is_active } = req.body;
+
+    if (
+      !id ||
+      !sku ||
+      price == null ||
+      stock == null ||
+      !image_url ||
+      is_active == null
+    ) {
+      throw new ApiError('Missing required fields', 400);
+    }
+
+    const success = await updateVariant(
+      Number(id),
+      sku,
+      Number(price),
+      Number(stock),
+      image_url,
+      Boolean(is_active)
+    );
+    if (!success) {
+      throw new ApiError('Variant not found or update failed', 404);
+    }
+
+    res.status(200).json({ message: 'Variant updated successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getVariantOptionsByVariantIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id } = req.params;
+
+  try {
+    const variantId = parseInt(id);
+
+    if (isNaN(variantId)) {
+      throw new ApiError('Variant ID is required', 400);
+    }
+
+    const options = await getVariantOptionsByVariantId(variantId);
+    res.json(options);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteVariantByIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    if (!id) throw new ApiError('Variant ID is required', 400);
+
+    const variant = await getVariantById(Number(id));
+
+    if (variant.image_url.includes('res.cloudinary.com')) {
+      await deleteImageByUrl(variant.image_url);
+    }
+
+    await deleteVariantById(Number(id));
+
+    res.status(200).json({ message: 'Variant deleted successfully.' });
   } catch (error) {
     next(error);
   }

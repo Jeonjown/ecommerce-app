@@ -1,13 +1,17 @@
 import { isAxiosError } from "axios";
 import api from "./axios";
-import type { CreateVariantPayload, Variant } from "@/types/api/variant";
+import type {
+  CreateVariantPayload,
+  UpdateVariantPayload,
+  Variant,
+} from "@/types/api/variant";
 import type { VariantOption } from "@/types/api/products";
 
 export const getVariantsByProductId = async (
   id: number,
 ): Promise<Variant[]> => {
   try {
-    const response = await api.get(`/products/variants/${id}`, {
+    const response = await api.get(`/api/products/${id}/variants`, {
       withCredentials: true,
     });
     return response.data;
@@ -71,5 +75,24 @@ export const createVariantByProductId = async (
       );
     }
     throw new Error("Unexpected error creating variant.");
+  }
+};
+
+export const updateVariantById = async (
+  id: number,
+  payload: UpdateVariantPayload,
+) => {
+  try {
+    const response = await api.patch(`/variants/${id}`, payload, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to update variant.",
+      );
+    }
+    throw new Error("Unexpected error updating variant.");
   }
 };

@@ -25,3 +25,11 @@ export interface CreateVariantPayload {
     product_option_value_id: number;
   }[];
 }
+
+export interface UpdateVariantPayload {
+  sku: string;
+  price: number;
+  stock: number;
+  image_url: string;
+  is_active: boolean;
+}

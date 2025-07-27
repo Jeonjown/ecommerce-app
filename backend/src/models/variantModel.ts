@@ -13,10 +13,10 @@ export const getVariantsByProductId = async (
   return rows as ProductVariant[];
 };
 
-export const getVariantById = async (id: number) => {
+export const getVariantById = async (variantId: number) => {
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT * FROM product_variants WHERE id = ?`,
-    [id]
+    [variantId]
   );
 
   return (rows as ProductVariant[])[0];
@@ -45,12 +45,13 @@ export const updateVariant = async (
   image_url: string,
   is_active: boolean
 ) => {
-  await pool.query(
+  const [result] = await pool.query(
     `UPDATE product_variants SET sku = ?, price = ?, stock = ?, image_url = ?, is_active = ? WHERE id = ?`,
     [sku, price, stock, image_url, is_active, id]
   );
-};
 
+  return (result as any).affectedRows > 0;
+};
 export const deleteVariantById = async (id: number) => {
   await pool.query(`DELETE FROM product_variants WHERE id = ?`, [id]);
 };
