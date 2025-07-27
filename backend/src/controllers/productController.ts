@@ -8,21 +8,13 @@ import {
   updateProduct,
   deleteProduct,
 } from '../models/productModel';
-import {
-  getOptionsByProductId,
-  deleteOptionsByProductId,
-  createOption,
-} from '../models/optionModel';
+import { getOptionsByProductId, createOption } from '../models/optionModel';
 import {
   getOptionValuesByOptionId,
   deleteOptionValuesByOptionId,
   createOptionValue,
 } from '../models/optionValueModel';
-import {
-  getVariantsByProductId,
-  deleteVariant,
-  createVariant,
-} from '../models/variantModel';
+import { getVariantsByProductId, createVariant } from '../models/variantModel';
 import {
   getVariantValuesByVariantId,
   deleteVariantValuesByVariantId,
@@ -109,52 +101,6 @@ export const createProductControllerTest = async (
       description,
       is_active
     );
-
-    const optionMap = new Map<
-      string,
-      { optionId: number; valueMap: Map<string, number> }
-    >();
-
-    for (const opt of options) {
-      const optionId = await createOption(productId, opt.name);
-      const valueMap = new Map<string, number>();
-
-      for (const val of opt.values) {
-        const valueId = await createOptionValue(optionId, val);
-        valueMap.set(val, valueId);
-      }
-
-      optionMap.set(opt.name, { optionId, valueMap });
-    }
-
-    for (const variant of variants) {
-      const generatedSku = await generateSku(cleanedName, variant.options);
-      const variantId = await createVariant(
-        productId,
-        generatedSku,
-        variant.price,
-        variant.stock,
-        variant.image_url,
-        variant.is_active ?? true
-      );
-
-      for (const selection of variant.options) {
-        const mapping = optionMap.get(selection.name);
-        if (!mapping) {
-          throw new ApiError(`Option "${selection.name}" not found`, 400);
-        }
-
-        const valueId = mapping.valueMap.get(selection.value);
-        if (!valueId) {
-          throw new ApiError(
-            `Value "${selection.value}" not found for option "${selection.name}"`,
-            400
-          );
-        }
-
-        await createVariantValue(variantId, mapping.optionId, valueId);
-      }
-    }
 
     const createdProduct = await getProductById(productId);
     res.status(201).json({

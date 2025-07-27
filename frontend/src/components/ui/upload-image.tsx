@@ -1,4 +1,3 @@
-// src/components/ui/UploadImageField.tsx
 import React from "react";
 import { useDropzone, type FileRejection } from "react-dropzone";
 import { useFormContext } from "react-hook-form";
@@ -17,21 +16,30 @@ import { Input } from "@/components/ui/input";
 interface UploadImageFieldProps {
   name: "image_file";
   label?: string;
+  defaultImageUrl?: string;
 }
 
 export const UploadImageField: React.FC<UploadImageFieldProps> = ({
   name,
   label = "Variant Image",
+  defaultImageUrl,
 }) => {
   const { control, setValue, resetField, clearErrors } = useFormContext();
-  const [preview, setPreview] = React.useState<string | null>(null);
+  const [localPreview, setLocalPreview] = React.useState<string | null>(null);
+
+  // Reset local preview when the default image changes (e.g., switching variants)
+  React.useEffect(() => {
+    setLocalPreview(null);
+  }, [defaultImageUrl]);
+
+  const preview = localPreview ?? defaultImageUrl ?? null;
 
   const onDrop = React.useCallback(
     (accepted: File[], rejections: FileRejection[]) => {
       if (rejections.length > 0) {
         toast.error("Image must be <1MB and PNG/JPG/JPEG");
         resetField(name);
-        setPreview(null);
+        setLocalPreview(null);
         return;
       }
       const file = accepted[0];
@@ -40,7 +48,7 @@ export const UploadImageField: React.FC<UploadImageFieldProps> = ({
 
       // local preview
       const reader = new FileReader();
-      reader.onload = () => setPreview(reader.result as string);
+      reader.onload = () => setLocalPreview(reader.result as string);
       reader.readAsDataURL(file);
     },
     [name, setValue, resetField, clearErrors],

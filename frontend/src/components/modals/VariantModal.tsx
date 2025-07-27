@@ -88,6 +88,7 @@ export function VariantModal({ product }: VariantModalProps) {
               product_id={product.id}
               variant_id={variantToUpdate}
               onSuccess={handleCloseForm}
+              onCancel={handleCloseForm}
             />
           )}
 
@@ -122,10 +123,14 @@ export function VariantModal({ product }: VariantModalProps) {
 
                       <CardContent className="pt-2">
                         <h3 className="text-sm font-semibold">{variant.sku}</h3>
+                        <p className="text-sm text-gray-600">
+                          ID: {variant.id}
+                        </p>
                         <div className="mt-5 flex items-center justify-between">
                           <p className="text-muted-foreground text-sm">
                             ₱{Number(variant.price).toFixed(2)}
                           </p>
+
                           <p className="text-sm text-gray-600">
                             Stock: {variant.stock}
                           </p>

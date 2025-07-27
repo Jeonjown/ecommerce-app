@@ -60,15 +60,37 @@ export const getVariantOptionsByVariantId = async (variantId: number) => {
   const [rows] = await pool.query<RowDataPacket[]>(
     `
     SELECT 
+      po.id AS option_id,
       po.name AS option_name,
-      pov.value AS option_value
+      pov.id AS value_id,
+      pov.value AS value_name
     FROM product_variant_values pvv
     JOIN product_option_values pov ON pvv.product_option_value_id = pov.id
-    JOIN product_options po ON pvv.product_option_id = po.id
+    JOIN product_options po ON pov.product_option_id = po.id
     WHERE pvv.product_variant_id = ?
     `,
     [variantId]
   );
 
-  return rows;
+  const grouped = rows.reduce((acc: any[], row) => {
+    const existingOption = acc.find((opt) => opt.option_id === row.option_id);
+    const value = {
+      value_id: row.value_id,
+      value_name: row.value_name,
+    };
+
+    if (existingOption) {
+      existingOption.values.push(value);
+    } else {
+      acc.push({
+        option_id: row.option_id,
+        option_name: row.option_name,
+        values: [value],
+      });
+    }
+
+    return acc;
+  }, []);
+
+  return grouped;
 };

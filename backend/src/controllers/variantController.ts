@@ -10,9 +10,13 @@ import {
 import { ApiError } from '../utils/ApiError';
 import { generateSku } from '../utils/generateSku';
 import { getProductById } from '../models/productModel';
-import { createVariantValues } from '../models/variantValueModel';
+import {
+  createVariantValues,
+  deleteVariantValuesByVariantId,
+} from '../models/variantValueModel';
 import { getOptionNameAndValue } from '../models/optionModel';
 import { deleteImageByUrl } from '../utils/deleteImageByUrl';
+import { editImageByUrl } from '../utils/editImageByUrl';
 
 export const createVariantByIdController = async (
   req: Request,
@@ -22,7 +26,6 @@ export const createVariantByIdController = async (
   try {
     const { id } = req.params;
     const { price, stock, image_url, is_active, variant_options } = req.body;
-    console.log(variant_options);
     if (!id) throw new ApiError('Product ID is required', 400);
     if (price === undefined || stock === undefined || !image_url) {
       throw new ApiError('Missing required fields', 400);
@@ -54,8 +57,6 @@ export const createVariantByIdController = async (
         }
       )
     );
-    console.log(options);
-    console.log('Generating SKU with:', product.name, options);
 
     const sku = await generateSku(product.name, options);
 
@@ -142,35 +143,90 @@ export const updateVariantController = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params;
-    const { sku, price, stock, image_url, is_active } = req.body;
+    const variantId = Number(req.params.id);
+    if (isNaN(variantId)) {
+      throw new ApiError('Invalid variant ID', 400);
+    }
+
+    const { price, stock, image_url, is_active, variant_options } =
+      req.body as {
+        price: number;
+        stock: number;
+        image_url: string;
+        is_active: boolean;
+        variant_options: {
+          product_option_id: number;
+          product_option_value_id: number;
+        }[];
+      };
 
     if (
-      !id ||
-      !sku ||
       price == null ||
       stock == null ||
-      !image_url ||
-      is_active == null
+      typeof image_url !== 'string' ||
+      typeof is_active !== 'boolean' ||
+      !Array.isArray(variant_options)
     ) {
-      throw new ApiError('Missing required fields', 400);
+      throw new ApiError('Missing or invalid required fields', 400);
     }
 
-    const success = await updateVariant(
-      Number(id),
-      sku,
-      Number(price),
-      Number(stock),
-      image_url,
-      Boolean(is_active)
+    const existing = await getVariantById(variantId);
+    if (!existing) {
+      throw new ApiError('Variant not found', 404);
+    }
+
+    // ✅ Delete old image if image_url changed
+    if (existing.image_url !== image_url) {
+      await deleteImageByUrl(existing.image_url);
+    }
+
+    // ✅ Validate variant option pairs
+    const optionDetails = await Promise.all(
+      variant_options.map(
+        async ({ product_option_id, product_option_value_id }) => {
+          const detail = await getOptionNameAndValue(
+            product_option_id,
+            product_option_value_id
+          );
+          if (!detail) {
+            throw new ApiError(
+              `Invalid option/value pair: option ${product_option_id}, value ${product_option_value_id}`,
+              400
+            );
+          }
+          return detail;
+        }
+      )
     );
-    if (!success) {
-      throw new ApiError('Variant not found or update failed', 404);
+
+    // ✅ Generate new SKU
+    const newSku = await generateSku(existing.sku.split('-')[0], optionDetails);
+
+    // ✅ Update variant
+    const updated = await updateVariant(
+      variantId,
+      newSku,
+      price,
+      stock,
+      image_url,
+      is_active
+    );
+
+    if (!updated) {
+      throw new ApiError('Failed to update variant', 500);
     }
 
-    res.status(200).json({ message: 'Variant updated successfully' });
-  } catch (error) {
-    next(error);
+    // ✅ Replace variant option values
+    await deleteVariantValuesByVariantId(variantId);
+    await createVariantValues(variantId, variant_options);
+
+    res.status(200).json({
+      message: 'Variant updated successfully',
+      variantId,
+      sku: newSku,
+    });
+  } catch (err) {
+    next(err);
   }
 };
 

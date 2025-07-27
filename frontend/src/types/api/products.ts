@@ -41,8 +41,10 @@ export interface Variant {
 export interface VariantOption {
   option_id: number;
   option_name: string;
-  option_value_id: number;
-  option_value: string;
+  values: {
+    value_id: number;
+    value_name: string;
+  }[];
 }
 
 export interface ProductOption {

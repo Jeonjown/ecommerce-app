@@ -142,3 +142,28 @@ export const getOptionNameAndValue = async (
     value: rows[0].value,
   };
 };
+
+export const getOptionsByVariantId = async (
+  variantId: number,
+  productOptionId: number,
+  productOptionValueId: number
+): Promise<{ name: string; value: string } | null> => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `
+    SELECT 
+      po.name AS name,
+      pov.value AS value
+    FROM product_options po
+    JOIN product_option_values pov ON pov.product_option_id = po.id
+    WHERE po.id = ? AND pov.id = ?
+    `,
+    [productOptionId, productOptionValueId]
+  );
+
+  if (rows.length === 0) return null;
+
+  return {
+    name: rows[0].name,
+    value: rows[0].value,
+  };
+};

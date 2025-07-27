@@ -11,7 +11,7 @@ export const getVariantsByProductId = async (
   id: number,
 ): Promise<Variant[]> => {
   try {
-    const response = await api.get(`/api/products/${id}/variants`, {
+    const response = await api.get(`/products/${id}/variants`, {
       withCredentials: true,
     });
     return response.data;
@@ -25,22 +25,6 @@ export const getVariantsByProductId = async (
   }
 };
 
-export const deleteVariantById = async (id: number) => {
-  try {
-    const response = await api.delete(`/products/variants/${id}`, {
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error: unknown) {
-    if (isAxiosError(error)) {
-      throw new Error(
-        error.response?.data?.message || "Failed to delete variant.",
-      );
-    }
-    throw new Error("Unexpected error deleting variant.");
-  }
-};
-
 export const getVariantOptions = async (
   variantId: number,
 ): Promise<VariantOption[]> => {
@@ -50,6 +34,38 @@ export const getVariantOptions = async (
     });
     return response.data;
   } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to delete variant.",
+      );
+    }
+    throw new Error("Unexpected error deleting variant.");
+  }
+};
+
+export const getVariantById = async (id: number): Promise<Variant> => {
+  try {
+    const response = await api.get(`/products/variants/${id}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch variant by ID.",
+      );
+    }
+    throw new Error("Unexpected error fetching variant.");
+  }
+};
+
+export const deleteVariantById = async (id: number) => {
+  try {
+    const response = await api.delete(`/products/variants/${id}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error: unknown) {
     if (isAxiosError(error)) {
       throw new Error(
         error.response?.data?.message || "Failed to delete variant.",
@@ -83,7 +99,7 @@ export const updateVariantById = async (
   payload: UpdateVariantPayload,
 ) => {
   try {
-    const response = await api.patch(`/variants/${id}`, payload, {
+    const response = await api.patch(`products/variants/${id}`, payload, {
       withCredentials: true,
     });
     return response.data;

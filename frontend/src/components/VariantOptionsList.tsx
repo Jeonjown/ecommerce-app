@@ -1,13 +1,13 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { useVariantOptions } from "@/hooks/useGetVariantOptions";
+import { useGetVariantOptions } from "@/hooks/useGetVariantOptions";
 
 interface Props {
   variantId: number;
 }
 
 const VariantOptionsList = ({ variantId }: Props) => {
-  const { data, isPending, isError } = useVariantOptions(variantId);
+  const { data, isPending, isError } = useGetVariantOptions(variantId);
 
   if (isPending) {
     return (
@@ -27,11 +27,13 @@ const VariantOptionsList = ({ variantId }: Props) => {
 
   return (
     <div className="mt-3 flex flex-wrap gap-2">
-      {data.map((option, index) => (
-        <Badge key={index} variant="secondary">
-          {option.option_value}
-        </Badge>
-      ))}
+      {data.flatMap((option) =>
+        option.values.map((value) => (
+          <Badge key={value.value_id} variant="secondary">
+            {value.value_name}
+          </Badge>
+        )),
+      )}
     </div>
   );
 };

@@ -25,37 +25,46 @@ import {
 
 import { useGetOptionsByProductId } from "@/hooks/useGetOptionsByProductId";
 import { useCreateVariantByProductId } from "@/hooks/useCreateVariantByProductId";
+import { useUpdateVariantById } from "@/hooks/useUpdateVariantById";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import Loading from "@/pages/Loading";
-import { useGetVariantsbyProductId } from "@/hooks/useGetVariantsbyProductId";
+import { useGetVariantById } from "@/hooks/useGetVariantById";
+import { useGetVariantOptions } from "@/hooks/useGetVariantOptions";
 
-interface VariantFormProps {
-  product_id: number;
-  variant_id: number;
-  onSuccess: () => void;
-}
-
-// this matches your API's expected payload type
 interface VariantOptionPayload {
   product_option_id: number;
   product_option_value_id: number;
 }
 
-export default function UpdateVariantForm({
+interface VariantFormProps {
+  product_id: number;
+  onSuccess: () => void;
+  onCancel?: () => void;
+  variant_id?: number;
+}
+
+const UpdateVariantForm = ({
   product_id,
   variant_id,
+  onCancel,
   onSuccess,
-}: VariantFormProps) {
-  const { data } = useGetOptionsByProductId(product_id);
-  const { data: variant } = useGetVariantsbyProductId(product_id);
-  console.log(variant);
+}: VariantFormProps) => {
+  const { data: optionsData } = useGetOptionsByProductId(product_id);
+  const { data: selectedVariantOptions } = useGetVariantOptions(
+    variant_id ?? 0,
+  );
+  const { data: variant } = useGetVariantById(variant_id ?? 0);
+
   const { mutate: createVariant, isPending: creating } =
     useCreateVariantByProductId(product_id);
+  const { mutate: updateVariant, isPending: updating } =
+    useUpdateVariantById(product_id);
   const { mutateAsync: uploadImage } = useUploadImage();
 
-  // Build a Zod schema piece for each option, but optional
+  const isEdit = !!variant_id;
+
   const dynamicOptionFields =
-    data?.options.reduce(
+    optionsData?.options.reduce(
       (acc, option) => {
         acc[`option_${option.option_id}`] = z.string().optional();
         return acc;
@@ -63,114 +72,111 @@ export default function UpdateVariantForm({
       {} as Record<string, z.ZodOptional<z.ZodString>>,
     ) ?? {};
 
-  const formSchema = z
-    .object({
-      product_id: z.coerce.number().min(1),
-      price: z.coerce.number().min(0, "Price must be ≥ 0"),
-      stock: z.coerce.number().min(0, "Stock must be ≥ 0"),
-      is_active: z.boolean(),
-      image_file: z
-        .instanceof(File)
-        .refine((f) => f.size > 0, "Please select an image file"),
-      ...dynamicOptionFields,
-    })
-    .superRefine((values, ctx) => {
-      if (!data) return;
+  const formSchema = z.object({
+    product_id: z.coerce.number().min(1),
+    price: z.coerce.number().min(0),
+    stock: z.coerce.number().min(0),
+    is_active: z.boolean(),
+    image_file: isEdit
+      ? z.instanceof(File).optional()
+      : z.instanceof(File).refine((f) => f.size > 0, "Please select an image"),
+    sku: z.string().optional(),
+    ...dynamicOptionFields,
+  });
 
-      // cast to a simple string map
-      type OptionValuesMap = Record<string, string | undefined>;
-      const opts = values as unknown as OptionValuesMap;
+  type FormValues = z.infer<typeof formSchema> & {
+    [key: `option_${number}`]: string | undefined;
+  };
 
-      const chosenCount = data.options.reduce((count, option) => {
-        const raw = opts[`option_${option.option_id}`];
-        return count + (raw && raw !== "none" ? 1 : 0);
-      }, 0);
-
-      if (chosenCount < 1) {
-        ctx.addIssue({
-          path: [`option_${data.options[0].option_id}`],
-          message: "Please select at least one option.",
-          code: z.ZodIssueCode.custom,
-        });
-      }
-    });
-  type FormValues = z.infer<typeof formSchema>;
+  const variantDefaults =
+    selectedVariantOptions?.reduce(
+      (acc, option) => {
+        const value = option.values?.[0]?.value_id;
+        if (value) acc[`option_${option.option_id}`] = String(value);
+        return acc;
+      },
+      {} as Record<string, string>,
+    ) ?? {};
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       product_id,
-      price: 0,
-      stock: 0,
-      is_active: true,
+      price: Number(variant?.price ?? 0),
+      stock: Number(variant?.stock ?? 0),
+      is_active: Boolean(variant?.is_active ?? true),
+      ...variantDefaults,
     },
   });
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const imageUrl = await uploadImage(values.image_file);
-
-      // map into payload, skipping "none" or undefined
-      const selectedOptions =
-        data?.options
+      const image_url = values.image_file
+        ? await uploadImage(values.image_file)
+        : (variant?.image_url ?? "");
+      const variant_options =
+        optionsData?.options
           .map((option) => {
-            const key = `option_${option.option_id}` as keyof FormValues;
-            // First read as unknown, then cast explicitly to string | undefined:
-            const raw = (values as Record<string, unknown>)[key] as
-              | string
-              | undefined;
-
-            // Now TS knows raw is string|undefined, so comparing to "none" is OK
-            if (!raw || raw === "none") return null;
-
+            const val = values[`option_${option.option_id}`];
+            if (!val || val === "none") return null;
             return {
               product_option_id: option.option_id,
-              product_option_value_id: parseInt(raw, 10),
-            } as VariantOptionPayload;
+              product_option_value_id: parseInt(val),
+            };
           })
-          .filter((o): o is VariantOptionPayload => o !== null) ?? [];
-      createVariant(
-        {
-          product_id,
-          price: values.price,
-          stock: values.stock,
-          is_active: values.is_active,
-          image_url: imageUrl,
-          variant_options: selectedOptions,
-        },
-        {
-          onSuccess: () => {
-            onSuccess();
-            methods.reset();
-          },
-        },
-      );
+          .filter((v): v is VariantOptionPayload => v !== null) ?? [];
+
+      const payload = {
+        product_id,
+        price: values.price,
+        stock: values.stock,
+        is_active: values.is_active,
+        image_url,
+        sku: values.sku ?? "",
+        variant_options,
+      };
+
+      const onSuccessHandler = () => {
+        methods.reset();
+        onSuccess();
+      };
+
+      if (isEdit && variant_id) {
+        updateVariant(
+          { id: variant_id, payload },
+          { onSuccess: onSuccessHandler },
+        );
+      } else {
+        createVariant(payload, { onSuccess: onSuccessHandler });
+      }
     } catch (err) {
-      console.error("Upload failed:", err);
+      console.error("Submit error:", err);
     }
   };
 
-  if (creating) return <Loading />;
+  if (creating || updating) return <Loading />;
 
   return (
     <FormProvider {...methods}>
       <Form {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-          {/* 1) Image upload */}
-          <UploadImageField name="image_file" label="Variant Image" />
+          <UploadImageField
+            name="image_file"
+            label="Variant Image"
+            defaultImageUrl={variant?.image_url}
+          />
 
-          {/* 2) Dynamic option selects */}
           <div className="flex flex-wrap gap-4">
-            {data?.options.map((option) => (
+            {optionsData?.options.map((option) => (
               <FormField
                 key={option.option_id}
                 name={`option_${option.option_id}`}
                 render={({ field }) => (
-                  <FormItem className="">
-                    <FormLabel>{option.option_name} </FormLabel>
+                  <FormItem>
+                    <FormLabel>{option.option_name}</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
                       value={field.value ?? "none"}
+                      onValueChange={field.onChange}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -178,7 +184,6 @@ export default function UpdateVariantForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {/* “None” must be a non-empty value for Radix */}
                         <SelectItem value="none">None</SelectItem>
                         {option.values.map((v) => (
                           <SelectItem
@@ -197,9 +202,7 @@ export default function UpdateVariantForm({
             ))}
           </div>
 
-          {/* 3) Price */}
           <FormField
-            control={methods.control}
             name="price"
             render={({ field }) => (
               <FormItem>
@@ -212,9 +215,7 @@ export default function UpdateVariantForm({
             )}
           />
 
-          {/* 4) Stock */}
           <FormField
-            control={methods.control}
             name="stock"
             render={({ field }) => (
               <FormItem>
@@ -227,12 +228,10 @@ export default function UpdateVariantForm({
             )}
           />
 
-          {/* 5) Active */}
           <FormField
-            control={methods.control}
             name="is_active"
             render={({ field }) => (
-              <FormItem className="flex items-center space-x-2">
+              <FormItem className="flex items-center gap-3">
                 <FormControl>
                   <Switch
                     checked={field.value}
@@ -243,13 +242,28 @@ export default function UpdateVariantForm({
               </FormItem>
             )}
           />
+          <div className="flex items-center gap-4">
+            <Button type="submit">
+              {isEdit ? "Update Variant" : "Create Variant"}
+            </Button>
 
-          {/* 6) Submit */}
-          <Button type="submit" disabled={creating}>
-            {creating ? "Submitting…" : "Create Variant"}
-          </Button>
+            {isEdit && onCancel && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  methods.reset();
+                  onCancel();
+                }}
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
         </form>
       </Form>
     </FormProvider>
   );
-}
+};
+
+export default UpdateVariantForm;
