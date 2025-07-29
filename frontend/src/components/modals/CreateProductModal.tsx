@@ -10,7 +10,6 @@ import {
 
 import { Button } from "../ui/button";
 import ProductForm from "../forms/ProductForm";
-import { OptionForm } from "../forms/OptionForm";
 
 const CreateProductModal = () => {
   return (
@@ -22,13 +21,12 @@ const CreateProductModal = () => {
             Add Products
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create Product</DialogTitle>
             <DialogDescription>Fill in to Create a Product.</DialogDescription>
 
             <ProductForm />
-            <OptionForm />
           </DialogHeader>
         </DialogContent>
       </Dialog>

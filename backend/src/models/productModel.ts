@@ -8,8 +8,6 @@ import {
   ProductWithCategory,
 } from '../types/models/products';
 
-// Create Product
-
 export const createProduct = async (
   category_id: number,
   name: string,
@@ -25,33 +23,6 @@ export const createProduct = async (
   return result.insertId;
 };
 
-export const createProductTest = async (
-  category_id: number,
-  name: string,
-  slug: string,
-  description: string,
-  is_active: boolean
-): Promise<number> => {
-  console.log('About to insert product with values:', {
-    category_id,
-    name,
-    slug,
-    description,
-    is_active,
-  });
-  console.log(
-    'SQL QUERY: INSERT INTO products (category_id, name, slug, description, is_active, created_at, updated_at)'
-  );
-  console.log('VALUES:', [category_id, name, slug, description, is_active]);
-  const [result] = await pool.query<ResultSetHeader>(
-    `INSERT INTO products (category_id, name, slug, description, is_active, created_at, updated_at)
-  VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
-    [category_id, name, slug, description, is_active]
-  );
-  return result.insertId;
-};
-
-// Get all products with variants and their options
 export const getProducts = async (): Promise<ProductWithCategory[]> => {
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT 
@@ -131,7 +102,6 @@ export const getProductById = async (id: number): Promise<Product | null> => {
   return { ...product, variants, options };
 };
 
-// Get variants for a specific product (with options)
 export const getProductVariants = async (
   productId: number
 ): Promise<ProductVariant[]> => {
