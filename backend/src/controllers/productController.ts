@@ -32,6 +32,7 @@ import { ApiError } from '../utils/ApiError';
 import { generateSlug } from '../utils/generateSlug';
 import { generateSku } from '../utils/generateSku';
 import { deleteImageByUrl } from '../utils/deleteImageByUrl';
+import { getCategoryById } from '../models/categoryModel';
 
 export const createProductController = async (
   req: Request,
@@ -50,6 +51,11 @@ export const createProductController = async (
     const cleanedName = name.trim();
     if (!cleanedName) {
       throw new ApiError('Invalid product name', 400);
+    }
+
+    const category = await getCategoryById(category_id);
+    if (!category) {
+      throw new ApiError('Category not found.', 400);
     }
 
     const slugToUse = await generateSlug(cleanedName, 'products');
@@ -172,17 +178,9 @@ export const updateProductController = async (
 ) => {
   try {
     const { id } = req.params;
-    const {
-      category_id,
-      name,
-      description,
-      image_url,
-      is_active,
-      options,
-      variants,
-    } = req.body;
+    const { category_id, name, description, is_active } = req.body;
 
-    if (!name || !category_id || !image_url || !description) {
+    if (!name || !category_id || !description) {
       throw new ApiError('Required fields are missing.', 400);
     }
 
@@ -202,87 +200,6 @@ export const updateProductController = async (
       is_active,
     });
 
-    // Delete existing variants + variant values
-    const existingVariants = await getVariantsByProductId(Number(id));
-    for (const variant of existingVariants) {
-      await deleteVariantValuesByVariantId(variant.id);
-    }
-    await deleteVariant(Number(id));
-
-    // Delete existing options + option values
-    const existingOptions = await getOptionsByProductId(Number(id));
-    for (const option of existingOptions) {
-      await deleteOptionValuesByOptionId(option.id);
-    }
-    await deleteOptionsByProductId(Number(id));
-
-    // Re-create options and option values
-    const optionMap = new Map<
-      string,
-      { optionId: number; valueMap: Map<string, number> }
-    >();
-
-    for (const option of options) {
-      const optionId = await createOption(Number(id), option.name);
-      const valueMap = new Map<string, number>();
-
-      for (const val of option.values) {
-        const valueId = await createOptionValue(optionId, val);
-        valueMap.set(val, valueId);
-      }
-
-      optionMap.set(option.name, { optionId, valueMap });
-    }
-
-    // Re-create variants and variant values
-    const createdVariants = [];
-
-    for (const variant of variants) {
-      const sku = await generateSku(name, variant.options);
-
-      const variantId = await createVariant(
-        Number(id),
-        sku,
-        variant.price,
-        variant.stock,
-        variant.image_url,
-        variant.is_active ?? true
-      );
-
-      const variantOptionSummary: { name: string; value: string }[] = [];
-
-      for (const selection of variant.options) {
-        const mapping = optionMap.get(selection.name);
-        if (!mapping) {
-          throw new ApiError(`Option "${selection.name}" not found`, 400);
-        }
-
-        const valueId = mapping.valueMap.get(selection.value);
-        if (!valueId) {
-          throw new ApiError(
-            `Value "${selection.value}" not found for option "${selection.name}"`,
-            400
-          );
-        }
-
-        await createVariantValue(variantId, mapping.optionId, valueId);
-
-        variantOptionSummary.push({
-          name: selection.name,
-          value: selection.value,
-        });
-      }
-
-      createdVariants.push({
-        sku,
-        price: variant.price,
-        stock: variant.stock,
-        image_url: variant.image_url,
-        is_active: variant.is_active ?? true,
-        options: variantOptionSummary,
-      });
-    }
-
     res.status(200).json({
       status: 200,
       message: 'Product updated successfully.',
@@ -293,11 +210,6 @@ export const updateProductController = async (
         description,
         category_id,
         is_active,
-        optionoptions: options.map((o: { name: string; values: string[] }) => ({
-          name: o.name,
-          values: o.values,
-        })),
-        variants: createdVariants,
       },
     });
   } catch (error) {

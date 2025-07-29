@@ -65,3 +65,10 @@ export interface CreateProductResponse {
   message: string;
   product: Product;
 }
+
+export interface UpdateProductPayload {
+  category_id: number;
+  name: string;
+  description: string;
+  is_active: boolean;
+}

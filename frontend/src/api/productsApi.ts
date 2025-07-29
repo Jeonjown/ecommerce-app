@@ -4,6 +4,7 @@ import type {
   CreateProductRequest,
   CreateProductResponse,
   ProductResponse,
+  UpdateProductPayload,
 } from "@/types/api/products";
 
 export const getProducts = async (): Promise<ProductResponse> => {
@@ -35,6 +36,25 @@ export const createProduct = async (
       );
     }
     throw new Error("Unexpected error creating product.");
+  }
+};
+
+export const updateProduct = async (
+  id: number,
+  payload: UpdateProductPayload,
+): Promise<ProductResponse> => {
+  try {
+    const response = await api.put(`/products/${id}`, payload, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to update product.",
+      );
+    }
+    throw new Error("Unexpected error updating product.");
   }
 };
 

@@ -178,11 +178,15 @@ export const updateProduct = async (
     Pick<Product, 'category_id' | 'name' | 'description' | 'is_active' | 'slug'>
   >
 ): Promise<void> => {
-  const fields: any = { ...payload };
+  if (Object.keys(payload).length === 0) {
+    throw new Error('No update fields provided');
+  }
+
   const [result] = await pool.query<ResultSetHeader>(
     `UPDATE products SET ? WHERE id = ?`,
-    [fields, id]
+    [payload, id]
   );
+
   if (result.affectedRows === 0) {
     throw new Error('Product not found or no changes applied');
   }

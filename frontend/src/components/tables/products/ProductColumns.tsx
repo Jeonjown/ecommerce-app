@@ -2,15 +2,8 @@ import { DataTableColumnHeader } from "@/components/ui/data-table-column-header"
 import type { ProductWithCategory } from "@/types/api/products";
 import type { ColumnDef } from "@tanstack/react-table";
 import { VariantModal } from "@/components/modals/VariantModal";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
-import DeleteProductModal from "@/components/modals/DeleteProductModal";
+
+import { ProductActionCell } from "@/components/ProductsActionCell";
 
 export const columns: ColumnDef<ProductWithCategory>[] = [
   {
@@ -36,6 +29,7 @@ export const columns: ColumnDef<ProductWithCategory>[] = [
   {
     id: "category",
     accessorFn: (row) => row.category?.name ?? "N/A",
+
     header: ({ column }) => (
       <div className="flex items-center gap-2">
         <DataTableColumnHeader column={column} title="Category" />
@@ -93,23 +87,7 @@ export const columns: ColumnDef<ProductWithCategory>[] = [
     cell: ({ row }) => {
       const product = row.original;
 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => console.log("Edit", product.id)}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <DeleteProductModal productId={product.id} />
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <ProductActionCell product={product} />;
     },
   },
 ];
