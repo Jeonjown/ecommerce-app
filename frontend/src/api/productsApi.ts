@@ -37,3 +37,16 @@ export const createProduct = async (
     throw new Error("Unexpected error creating product.");
   }
 };
+
+export const deleteProduct = async (productId: number): Promise<void> => {
+  try {
+    await api.delete(`/products/${productId}`, { withCredentials: true });
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to delete product.",
+      );
+    }
+    throw new Error("Unexpected error deleting product.");
+  }
+};

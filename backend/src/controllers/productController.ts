@@ -8,13 +8,21 @@ import {
   updateProduct,
   deleteProduct,
 } from '../models/productModel';
-import { getOptionsByProductId, createOption } from '../models/optionModel';
+import {
+  getOptionsByProductId,
+  createOption,
+  deleteOptionsByOptionsId,
+} from '../models/optionModel';
 import {
   getOptionValuesByOptionId,
   deleteOptionValuesByOptionId,
   createOptionValue,
 } from '../models/optionValueModel';
-import { getVariantsByProductId, createVariant } from '../models/variantModel';
+import {
+  getVariantsByProductId,
+  createVariant,
+  deleteVariantById,
+} from '../models/variantModel';
 import {
   getVariantValuesByVariantId,
   deleteVariantValuesByVariantId,
@@ -23,6 +31,7 @@ import {
 import { ApiError } from '../utils/ApiError';
 import { generateSlug } from '../utils/generateSlug';
 import { generateSku } from '../utils/generateSku';
+import { deleteImageByUrl } from '../utils/deleteImageByUrl';
 
 export const createProductController = async (
   req: Request,
@@ -308,15 +317,21 @@ export const deleteProductController = async (
     const existing = await getProductById(id);
     if (!existing) throw new ApiError('Product not found', 404);
 
-    // cascade delete in proper order:
-    await deleteVariantValuesByVariantId(id);
-    await deleteVariant(id);
-    await deleteOptionValuesByOptionId(id);
-    await deleteOptionsByProductId(id);
+    const variants = await getVariantsByProductId(id);
+
+    // Delete each variant image from Cloudinary
+    for (const variant of variants) {
+      const url = variant.image_url;
+      if (url && url.includes('res.cloudinary.com')) {
+        await deleteImageByUrl(url);
+      }
+    }
+
+    // Then delete the product
     await deleteProduct(id);
 
     res.status(200).json({
-      message: 'Product deleted',
+      message: 'Product and associated images deleted',
       deleted: {
         id: existing.id,
         name: existing.name,
