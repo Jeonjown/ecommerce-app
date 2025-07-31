@@ -5,7 +5,6 @@ import { ProductTable } from "./ProductTable";
 
 const ProductPage = () => {
   const { data, isPending, isError } = useGetProducts();
-  console.log(data);
 
   if (isError) {
     return <div className="text-red-600">Failed to load products.</div>;

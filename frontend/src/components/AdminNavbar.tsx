@@ -22,7 +22,7 @@ const AdminNavbar = () => {
   const links = [
     { label: "Dashboard", to: "#" },
     { label: "Products", to: "/admin/products" },
-    { label: "Categories", to: "#" },
+    { label: "Categories", to: "/admin/categories" },
     { label: "Orders", to: "#" },
     { label: "Users", to: "#" },
   ];
@@ -82,10 +82,10 @@ const AdminNavbar = () => {
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon">
-              <Menu className="h-6 w-6" />
+              <Menu className="!size-7" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="top" className="pt-6">
+          <SheetContent side="top" className="p-10">
             <ul className="flex flex-col space-y-4 font-semibold">
               {links.map((link) => (
                 <li key={link.label} className="text-center">

@@ -11,6 +11,7 @@ import AdminDashboard from "./components/AdminDashboard";
 import { useGetLoggedInUser } from "./hooks/useGetLoggedInUser";
 import AdminNavbar from "./components/AdminNavbar";
 import Products from "./pages/Products";
+import Categories from "./pages/Categories";
 function App() {
   const { data } = useGetLoggedInUser();
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/admin" element={<AdminRoutes />}>
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="products" element={<Products />} />
+            <Route path="categories" element={<Categories />} />
           </Route>
 
           {/* Private Routes */}
