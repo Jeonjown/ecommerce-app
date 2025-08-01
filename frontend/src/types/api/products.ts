@@ -23,8 +23,7 @@ export interface ProductWithCategory {
   slug: string;
   is_active: boolean;
   options: ProductOption[];
-  // variants: Variant[];
-  // options: ProductOption[];
+  variants: Variant[];
 }
 
 export interface Variant {

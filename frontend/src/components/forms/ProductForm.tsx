@@ -25,6 +25,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useGetCategories } from "@/hooks/useGetCategories";
 import { useCreateProducts } from "@/hooks/useCreateProducts";
 import { Textarea } from "../ui/textarea";
+import Loading from "@/pages/Loading";
+import Error from "@/pages/Error";
 // import { useUploadImage } from "@/hooks/useUploadImage";
 // import { VariantImageUploader } from "../VariantImageUploader ";
 
@@ -39,8 +41,16 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export const ProductForm: React.FC = () => {
-  const { data } = useGetCategories();
-  const { mutate: createProduct } = useCreateProducts();
+  const {
+    data,
+    isPending: isCategoriesPending,
+    isError: categoryError,
+  } = useGetCategories();
+  const {
+    mutate: createProduct,
+    isPending: isProductsPending,
+    isError: productError,
+  } = useCreateProducts();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -58,6 +68,13 @@ export const ProductForm: React.FC = () => {
     createProduct({ data, reset });
   };
 
+  if (isProductsPending || isCategoriesPending) {
+    return <Loading />;
+  }
+
+  if (categoryError || productError) {
+    return <Error />;
+  }
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

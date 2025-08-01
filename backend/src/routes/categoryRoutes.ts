@@ -7,14 +7,34 @@ import {
   getCategoryController,
   getProductsByCategorySlugController,
 } from '../controllers/categoryController';
+import { checkUserRole } from '../middlewares/checkUserRole';
+import { authenticateUser } from '../middlewares/authenticateUser';
+
 const router = express.Router();
 
+//  Public routes
 router.get('/', getCategoryController);
 router.get('/:id', getCategoryByIdController);
 router.get('/:slug/products', getProductsByCategorySlugController);
 
-router.post('/', createCategoryController);
-router.patch('/:id', editCategoryController);
-router.delete('/:id', deleteCategoryController);
+// Admin-only routes
+router.post(
+  '/',
+  authenticateUser,
+  checkUserRole('admin'),
+  createCategoryController
+);
+router.patch(
+  '/:id',
+  authenticateUser,
+  checkUserRole('admin'),
+  editCategoryController
+);
+router.delete(
+  '/:id',
+  authenticateUser,
+  checkUserRole('admin'),
+  deleteCategoryController
+);
 
 export default router;

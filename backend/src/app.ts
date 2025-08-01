@@ -34,12 +34,7 @@ app.use(
   userRoutes
 );
 
-app.use(
-  '/api/categories',
-  authenticateUser,
-  checkUserRole('admin'),
-  categoryRoutes
-);
+app.use('/api/categories', categoryRoutes);
 
 app.use(
   '/api/products/options',

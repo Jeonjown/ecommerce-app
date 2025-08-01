@@ -1,6 +1,7 @@
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Category } from "@/types/api/categories";
+import { CategoryActionCell } from "@/components/CategoryActionCell";
 
 export const columns: ColumnDef<Category>[] = [
   {
@@ -48,6 +49,16 @@ export const columns: ColumnDef<Category>[] = [
     cell: ({ getValue }) => {
       const date = new Date(getValue() as string);
       return <span>{date.toLocaleDateString()}</span>;
+    },
+  },
+
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      const category = row.original;
+
+      return <CategoryActionCell category={category} />;
     },
   },
 ];

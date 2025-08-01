@@ -1,9 +1,9 @@
 import { getCategories } from "@/api/categoryApi";
-import type { Categories } from "@/types/api/categories";
+import type { Category } from "@/types/api/categories";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetCategories = () => {
-  return useQuery<Categories>({
+  return useQuery<{ categories: Category[] }>({
     queryKey: ["categories"],
     queryFn: () => getCategories(),
     retry: false,
