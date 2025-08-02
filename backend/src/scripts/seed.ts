@@ -43,7 +43,15 @@ async function seed() {
       { name: 'Edition', values: ['Standard', 'Pro', 'Ultra'] },
     ];
 
-    // 4️⃣ Products + Variants
+    // 4️⃣ Images (Cloudinary)
+    const imageUrls = [
+      'https://res.cloudinary.com/dgf5yareo/image/upload/v1754053816/headphones-removebg-preview_tfn3ts.png',
+      'https://res.cloudinary.com/dgf5yareo/image/upload/v1754053817/mouse-removebg-preview_lcuvak.png',
+      'https://res.cloudinary.com/dgf5yareo/image/upload/v1754053815/earbuds-removebg-preview_lf4k66.png',
+      'https://res.cloudinary.com/dgf5yareo/image/upload/v1754053815/keyboard-removebg-preview_lvjr0f.png',
+      'https://res.cloudinary.com/dgf5yareo/image/upload/v1754053814/monitor-removebg-preview_kwq61i.png',
+    ];
+
     const productNames = [
       'Gaming Laptop',
       'Ultrawide Monitor',
@@ -52,16 +60,18 @@ async function seed() {
       'Studio Headphones',
     ];
     let totalVariants = 0;
+    let imageIndex = 0;
 
     for (const productName of productNames) {
       const categoryId = faker.helpers.arrayElement(categoryIds);
       const description = faker.commerce.productDescription();
       const prodSlug = await generateSlug(productName, 'products');
+
       const [pRes]: any = await pool.query(
         `INSERT INTO products
-     (category_id, name, description, slug, is_active, created_at, updated_at)
-   VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
-        [categoryId, productName, description, prodSlug, 1] //
+         (category_id, name, description, slug, is_active, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
+        [categoryId, productName, description, prodSlug, 1]
       );
       const productId = pRes.insertId;
 
@@ -81,7 +91,7 @@ async function seed() {
           const vSlug = await generateSlug(v, 'product_option_values');
           const [vRes]: any = await pool.query(
             `INSERT INTO product_option_values
-               (product_option_id,value,slug,created_at,updated_at)
+             (product_option_id,value,slug,created_at,updated_at)
              VALUES(?,?,?,NOW(),NOW())`,
             [optId[optName], v, vSlug]
           );
@@ -89,16 +99,17 @@ async function seed() {
         }
       }
 
-      // 2–3 variants
       const nv = faker.number.int({ min: 2, max: 3 });
+
       for (let i = 0; i < nv; i++) {
-        // pick values
         const picks: { opt: string; valId: number }[] = [];
         const names: string[] = [];
+
         for (const { name: optName } of optionSets) {
           const arr = valMap[optName];
           const vid = faker.helpers.arrayElement(arr);
           picks.push({ opt: optName, valId: vid });
+
           const [[row]] = (await pool.query<RowDataPacket[]>(
             'SELECT value FROM product_option_values WHERE id=?',
             [vid]
@@ -115,28 +126,26 @@ async function seed() {
         );
         const price = faker.commerce.price({ min: 100, max: 2000 });
         const stock = faker.number.int({ min: 10, max: 50 });
-        const img = faker.image.urlPicsumPhotos({
-          width: 800,
-          height: 600,
-        });
+        const img = imageUrls[imageIndex % imageUrls.length];
+        imageIndex++;
 
         const [vRes]: any = await pool.query(
           `INSERT INTO product_variants
-             (product_id,sku,price,stock,image_url,is_active,created_at,updated_at)
-             VALUES(?,?,?,?,?,1,NOW(),NOW())`,
+           (product_id,sku,price,stock,image_url,is_active,created_at,updated_at)
+           VALUES(?,?,?,?,?,1,NOW(),NOW())`,
           [productId, sku, price, stock, img]
         );
         const vid = vRes.insertId;
 
-        // link variant → option values
         for (const { opt, valId } of picks) {
           await pool.query(
             `INSERT INTO product_variant_values
-     (product_variant_id, product_option_id, product_option_value_id, created_at, updated_at)
-   VALUES (?, ?, ?, NOW(), NOW())`,
+             (product_variant_id, product_option_id, product_option_value_id, created_at, updated_at)
+             VALUES (?, ?, ?, NOW(), NOW())`,
             [vid, optId[opt], valId]
           );
         }
+
         totalVariants++;
       }
     }

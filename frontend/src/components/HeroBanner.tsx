@@ -20,7 +20,7 @@ const HeroBanner = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >
-          <Button className="mt-10 lg:mt-15 lg:py-6 lg:text-lg xl:text-xl">
+          <Button className="mt-5 lg:mt-15 lg:py-6 lg:text-lg xl:text-xl">
             Buy Now
           </Button>
         </motion.div>
@@ -32,7 +32,7 @@ const HeroBanner = () => {
         transition={{ duration: 0.6, delay: 0.8 }}
         src={heroImage}
         alt="hero-banner"
-        className="ml-auto h-[30vh] lg:h-[40vh] xl:h-[45vh]"
+        className="ml-auto h-[30vh] pt-5 lg:h-[40vh] xl:h-[45vh]"
       />
     </div>
   );
