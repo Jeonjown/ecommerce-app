@@ -18,8 +18,8 @@ export interface ProductWithCategory {
   slug: string;
   description: string;
   is_active: boolean;
-  variants?: ProductVariant[];
-  options?: ProductOptionWithValues[];
+  variants: ProductVariant[];
+  options: ProductOptionWithValues[];
 }
 
 export interface ProductVariant {
@@ -45,4 +45,10 @@ export interface ProductOptionWithValues {
   option_name: string;
   option_value_id: number;
   option_value: string;
+}
+
+export interface ProductFilters {
+  sort?: string;
+  availability?: string;
+  priceRange?: string;
 }

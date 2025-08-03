@@ -6,7 +6,10 @@ import {
   VariantOption,
   ProductOptionWithValues,
   ProductWithCategory,
+  ProductFilters,
 } from '../types/models/products';
+import { getLowestPrice } from '../utils/getLowestPrice';
+import { filterProducts } from '../utils/filterProducts';
 
 export const createProduct = async (
   category_id: number,
@@ -23,15 +26,20 @@ export const createProduct = async (
   return result.insertId;
 };
 
-export const getProductsByCategoryId = async (categoryId: number) => {
+export const getProductsByCategoryId = async (
+  categoryId: number,
+  filters: ProductFilters = {}
+): Promise<ProductWithCategory[]> => {
   const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT 
-       p.id, p.name, p.slug, p.description, p.is_active,
-       c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
-       c.created_at AS category_created_at, c.updated_at AS category_updated_at
-     FROM products p
-     JOIN categories c ON p.category_id = c.id
-     WHERE p.category_id = ?`,
+    `
+    SELECT 
+      p.id, p.name, p.slug, p.description, p.is_active,
+      c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
+      c.created_at AS category_created_at, c.updated_at AS category_updated_at
+    FROM products p
+    JOIN categories c ON p.category_id = c.id
+    WHERE p.category_id = ?
+    `,
     [categoryId]
   );
 
@@ -51,6 +59,8 @@ export const getProductsByCategoryId = async (categoryId: number) => {
         created_at: row.category_created_at,
         updated_at: row.category_updated_at,
       },
+      variants: [],
+      options: [],
     };
 
     const variants = await getProductVariants(product.id);
@@ -63,18 +73,22 @@ export const getProductsByCategoryId = async (categoryId: number) => {
     });
   }
 
-  return fullProducts;
+  const filtered = filterProducts(fullProducts, filters);
+
+  return filtered;
 };
 
-export const getProducts = async (): Promise<ProductWithCategory[]> => {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT 
-       p.id, p.name, p.slug, p.description, p.is_active,
-       c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
-       c.created_at AS category_created_at, c.updated_at AS category_updated_at
-     FROM products p
-     JOIN categories c ON p.category_id = c.id`
-  );
+export const getProducts = async (
+  filters: ProductFilters = {}
+): Promise<ProductWithCategory[]> => {
+  const [rows] = await pool.query<RowDataPacket[]>(`
+    SELECT 
+      p.id, p.name, p.slug, p.description, p.is_active,
+      c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
+      c.created_at AS category_created_at, c.updated_at AS category_updated_at
+    FROM products p
+    JOIN categories c ON p.category_id = c.id
+  `);
 
   const fullProducts: ProductWithCategory[] = [];
 
@@ -92,6 +106,8 @@ export const getProducts = async (): Promise<ProductWithCategory[]> => {
         created_at: row.category_created_at,
         updated_at: row.category_updated_at,
       },
+      variants: [],
+      options: [],
     };
 
     const variants = await getProductVariants(product.id);
@@ -104,7 +120,9 @@ export const getProducts = async (): Promise<ProductWithCategory[]> => {
     });
   }
 
-  return fullProducts;
+  const filtered = filterProducts(fullProducts, filters);
+
+  return filtered;
 };
 
 export const getProductBySlug = async (
@@ -119,6 +137,7 @@ export const getProductBySlug = async (
 
   return products.length > 0 ? products[0] : null;
 };
+
 // Get single product by ID with variants and options
 export const getProductById = async (id: number): Promise<Product | null> => {
   const [rows] = await pool.query<RowDataPacket[]>(

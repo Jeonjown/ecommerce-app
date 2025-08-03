@@ -2,6 +2,7 @@ import { type ProductWithCategory } from "@/types/api/products";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FaCartPlus } from "react-icons/fa6";
+import { getLowestPrice } from "@/utils/getLowestPrice";
 
 export const ProductCard = ({ product }: { product: ProductWithCategory }) => {
   const firstVariant = product.variants[0];
@@ -23,7 +24,7 @@ export const ProductCard = ({ product }: { product: ProductWithCategory }) => {
           <p className="text-lg font-semibold">{product.name}</p>
           {firstVariant.price && (
             <p className="text-primary text-base font-bold">
-              ₱{firstVariant.price}
+              ₱{getLowestPrice(product)}
             </p>
           )}
         </div>

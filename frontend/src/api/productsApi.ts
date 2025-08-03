@@ -7,9 +7,14 @@ import type {
   UpdateProductPayload,
 } from "@/types/api/products";
 
-export const getProducts = async (): Promise<ProductResponse> => {
+export const getProducts = async (
+  params?: Record<string, string | undefined>,
+): Promise<ProductResponse> => {
   try {
-    const response = await api.get("/products", { withCredentials: true });
+    const response = await api.get("/products", {
+      params,
+      withCredentials: true,
+    });
     return response.data;
   } catch (error: unknown) {
     if (isAxiosError(error)) {

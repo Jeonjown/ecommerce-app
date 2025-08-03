@@ -51,19 +51,24 @@ export const getProductsByCategorySlugController = async (
   try {
     const { slug } = req.params;
 
+    const filters = {
+      sort: req.query.sort as string | undefined,
+      availability: req.query.availability as string | undefined,
+      priceRange: req.query.priceRange as string | undefined,
+    };
+
     const category = await getCategoryBySlug(slug);
     if (!category) {
       res.status(404).json({ message: 'Category not found' });
       return;
     }
 
-    const products = await getProductsByCategoryId(category.id);
+    const products = await getProductsByCategoryId(category.id, filters); // 🔁 pass filters here
     res.status(200).json({ products });
   } catch (error) {
     next(error);
   }
 };
-
 export const createCategoryController = async (
   req: Request,
   res: Response,

@@ -33,9 +33,11 @@ export const getCategoryById = async (id: number): Promise<Category> => {
 
 export const getProductsByCategorySlug = async (
   slug: string,
+  filters: Record<string, string | undefined> = {},
 ): Promise<ProductResponse> => {
   try {
     const res = await api.get(`/categories/${slug}/products`, {
+      params: filters,
       withCredentials: true,
     });
     return res.data;

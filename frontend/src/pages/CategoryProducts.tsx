@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 
 import { useGetProductsByCategorySlug } from "@/hooks/useGetProductsByCategorySlug";
 import { useGetProducts } from "@/hooks/useGetProducts";
@@ -21,21 +21,32 @@ import {
 } from "@/components/ui/pagination";
 
 const CategoryProducts = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sortOrder = searchParams.get("sort") || "";
+  const priceRange = searchParams.get("priceRange") || "";
+  const availability = searchParams.get("availability") || "";
+
   const { slug } = useParams<{ slug?: string }>();
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 6;
+
+  const filters = {
+    sort: searchParams.get("sort") || undefined,
+    availability: searchParams.get("availability") || undefined,
+    priceRange: searchParams.get("priceRange") || undefined,
+  };
 
   const {
     data: categoryProducts,
     isPending: isCategoryLoading,
     isError: isCategoryError,
-  } = useGetProductsByCategorySlug(slug!);
+  } = useGetProductsByCategorySlug(slug!, filters);
 
   const {
     data: allProducts,
     isPending: isAllLoading,
     isError: isAllError,
-  } = useGetProducts();
+  } = useGetProducts(filters);
 
   const isPending = slug ? isCategoryLoading : isAllLoading;
   const isError = slug ? isCategoryError : isAllError;
@@ -102,7 +113,26 @@ const CategoryProducts = () => {
             ? products[0].category.name
             : "All Products"}
         </h2>
-        <Filters />
+        <Filters
+          sortOrder={sortOrder}
+          priceRange={priceRange}
+          availability={availability}
+          onSortChange={(value) => {
+            searchParams.set("sort", value);
+            setSearchParams(searchParams);
+            setCurrentPage(1);
+          }}
+          onPriceRangeChange={(value) => {
+            searchParams.set("priceRange", value);
+            setSearchParams(searchParams);
+            setCurrentPage(1);
+          }}
+          onAvailabilityChange={(value) => {
+            searchParams.set("availability", value);
+            setSearchParams(searchParams);
+            setCurrentPage(1);
+          }}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">

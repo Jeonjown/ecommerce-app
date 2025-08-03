@@ -75,65 +75,19 @@ export const createProductController = async (
   }
 };
 
-export const createProductControllerTest = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const {
-      category_id,
-      name,
-      description,
-      is_active = true,
-      options = [],
-      variants = [],
-      slug: incomingSlug,
-    } = req.body;
-
-    if (!category_id || !name || !description) {
-      throw new ApiError('Missing required product fields', 400);
-    }
-
-    const cleanedName = name.trim();
-    if (!cleanedName) {
-      throw new ApiError('Invalid product name', 400);
-    }
-
-    const slugToUse =
-      typeof incomingSlug === 'string' && incomingSlug.trim()
-        ? incomingSlug.trim()
-        : await generateSlug(cleanedName, 'products');
-
-    if (!slugToUse) {
-      throw new ApiError('Failed to generate a valid slug', 500);
-    }
-
-    const productId = await createProduct(
-      category_id,
-      cleanedName,
-      slugToUse,
-      description,
-      is_active
-    );
-
-    const createdProduct = await getProductById(productId);
-    res.status(201).json({
-      message: 'Product created successfully',
-      product: createdProduct,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
 export const getAllProductsController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const products = await getProducts();
+    const filters = {
+      sort: req.query.sort as string | undefined,
+      availability: req.query.availability as string | undefined,
+      priceRange: req.query.priceRange as string | undefined,
+    };
+
+    const products = await getProducts(filters);
     res.status(200).json({ products });
   } catch (err) {
     next(err);
