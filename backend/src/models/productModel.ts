@@ -23,6 +23,49 @@ export const createProduct = async (
   return result.insertId;
 };
 
+export const getProductsByCategoryId = async (categoryId: number) => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+       p.id, p.name, p.slug, p.description, p.is_active,
+       c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
+       c.created_at AS category_created_at, c.updated_at AS category_updated_at
+     FROM products p
+     JOIN categories c ON p.category_id = c.id
+     WHERE p.category_id = ?`,
+    [categoryId]
+  );
+
+  const fullProducts: ProductWithCategory[] = [];
+
+  for (const row of rows) {
+    const product: ProductWithCategory = {
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      description: row.description,
+      is_active: !!row.is_active,
+      category: {
+        id: row.category_id,
+        name: row.category_name,
+        slug: row.category_slug,
+        created_at: row.category_created_at,
+        updated_at: row.category_updated_at,
+      },
+    };
+
+    const variants = await getProductVariants(product.id);
+    const options = await getProductOptions(product.id);
+
+    fullProducts.push({
+      ...product,
+      variants,
+      options,
+    });
+  }
+
+  return fullProducts;
+};
+
 export const getProducts = async (): Promise<ProductWithCategory[]> => {
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT 

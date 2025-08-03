@@ -1,7 +1,7 @@
 import CreateProductModal from "@/components/modals/CreateProductModal";
 import ProductPage from "@/components/tables/products/ProductPage";
 
-const Products = () => {
+const AdminProducts = () => {
   return (
     <div className="mx-5 mt-10">
       <div className="flex items-center justify-between">
@@ -14,4 +14,4 @@ const Products = () => {
   );
 };
 
-export default Products;
+export default AdminProducts;

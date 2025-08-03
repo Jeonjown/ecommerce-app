@@ -9,7 +9,10 @@ import {
 } from '../models/categoryModel';
 import { ApiError } from '../utils/ApiError';
 import { generateSlug } from '../utils/generateSlug';
-import { getProductById } from '../models/productModel';
+import {
+  getProductById,
+  getProductsByCategoryId,
+} from '../models/productModel';
 
 export const getCategoryController = async (
   req: Request,
@@ -54,7 +57,7 @@ export const getProductsByCategorySlugController = async (
       return;
     }
 
-    const products = await getProductById(category.id);
+    const products = await getProductsByCategoryId(category.id);
     res.status(200).json({ products });
   } catch (error) {
     next(error);

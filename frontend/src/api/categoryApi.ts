@@ -1,9 +1,8 @@
 import api from "./axios";
 import { isAxiosError } from "axios";
 import type { Category } from "@/types/api/categories";
-import type { Product } from "@/types/api/products";
+import type { ProductResponse } from "@/types/api/products";
 
-// GET all categories
 export const getCategories = async (): Promise<{ categories: Category[] }> => {
   try {
     const res = await api.get("/categories", { withCredentials: true });
@@ -18,7 +17,6 @@ export const getCategories = async (): Promise<{ categories: Category[] }> => {
   }
 };
 
-// GET category by ID
 export const getCategoryById = async (id: number): Promise<Category> => {
   try {
     const res = await api.get(`/categories/${id}`, { withCredentials: true });
@@ -33,10 +31,9 @@ export const getCategoryById = async (id: number): Promise<Category> => {
   }
 };
 
-// GET products by category slug
 export const getProductsByCategorySlug = async (
   slug: string,
-): Promise<Product[]> => {
+): Promise<ProductResponse> => {
   try {
     const res = await api.get(`/categories/${slug}/products`, {
       withCredentials: true,
@@ -52,7 +49,6 @@ export const getProductsByCategorySlug = async (
   }
 };
 
-// CREATE a new category
 export const createCategory = async (name: string): Promise<Category> => {
   try {
     const res = await api.post(

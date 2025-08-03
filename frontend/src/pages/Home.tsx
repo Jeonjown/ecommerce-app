@@ -1,4 +1,5 @@
 import HeroBanner from "@/components/HeroBanner";
+import NewArrival from "@/components/NewArrival";
 import ProductCarousel from "@/components/ProductCarousel";
 
 const Home = () => {
@@ -7,6 +8,7 @@ const Home = () => {
       <HeroBanner />
       {/* <Filters /> */}
       <ProductCarousel />
+      <NewArrival />
     </>
   );
 };

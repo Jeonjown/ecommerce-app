@@ -9,6 +9,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Button } from "./ui/button";
+import { motion } from "motion/react";
 
 const ProductCarousel = () => {
   const { data } = useGetProducts();
@@ -22,8 +23,19 @@ const ProductCarousel = () => {
   );
 
   return (
-    <div className="relative mt-8 mb-10">
-      <h2 className="my-5 text-2xl font-bold">Your Next Find Awaits!</h2>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 1.0 }}
+      className="relative mt-8 mb-10"
+    >
+      <div className="flex items-center justify-between">
+        <h2 className="m-5 text-2xl font-bold">Your Next Find Awaits!</h2>
+        <h2 className="m-5 text-base font-semibold underline hover:cursor-pointer hover:font-bold">
+          See More
+        </h2>
+      </div>
+
       <Carousel
         plugins={[
           Autoplay({
@@ -74,7 +86,7 @@ const ProductCarousel = () => {
         <CarouselPrevious className="absolute top-1/2 left-2 z-10 -translate-y-1/2" />
         <CarouselNext className="absolute top-1/2 right-2 z-10 -translate-y-1/2" />
       </Carousel>
-    </div>
+    </motion.div>
   );
 };
 

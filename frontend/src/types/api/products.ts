@@ -8,7 +8,7 @@ export interface Product {
   id: number;
   name: string;
   description: string;
-  category_id: number;
+  category_id?: number;
   slug: string;
   is_active: boolean;
   // variants: Variant[];
@@ -22,6 +22,7 @@ export interface ProductWithCategory {
   category: Category;
   slug: string;
   is_active: boolean;
+  created_at: Date;
   options: ProductOption[];
   variants: Variant[];
 }

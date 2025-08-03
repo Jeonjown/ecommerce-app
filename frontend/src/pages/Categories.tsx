@@ -1,19 +1,17 @@
-import CreateCategoryModal from "@/components/modals/CreateCategoryModal";
-import CategoryPage from "@/components/tables/categories/CategoryPage";
-import { useGetCategories } from "@/hooks/useGetCategories";
+import { Outlet } from "react-router-dom";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { CategorySidebar } from "@/components/ProductSidebar";
 
 const Categories = () => {
-  const { data } = useGetCategories();
-  console.log(data);
   return (
-    <div className="mx-5 mt-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Category List</h1>
-        <CreateCategoryModal />
-      </div>
+    <SidebarProvider defaultOpen>
+      <CategorySidebar />
 
-      <CategoryPage />
-    </div>
+      <SidebarTrigger className="md:hidden" />
+      <div className="w-full">
+        <Outlet />
+      </div>
+    </SidebarProvider>
   );
 };
 
