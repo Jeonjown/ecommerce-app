@@ -32,13 +32,13 @@ export const getProductsByCategoryId = async (
 ): Promise<ProductWithCategory[]> => {
   const [rows] = await pool.query<RowDataPacket[]>(
     `
-    SELECT 
-      p.id, p.name, p.slug, p.description, p.is_active,
-      c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
-      c.created_at AS category_created_at, c.updated_at AS category_updated_at
-    FROM products p
-    JOIN categories c ON p.category_id = c.id
-    WHERE p.category_id = ?
+  SELECT 
+    p.id, p.name, p.slug, p.description, p.is_active, p.created_at,
+    c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
+    c.created_at AS category_created_at, c.updated_at AS category_updated_at
+  FROM products p
+  JOIN categories c ON p.category_id = c.id
+  WHERE p.category_id = ?
     `,
     [categoryId]
   );
@@ -52,6 +52,7 @@ export const getProductsByCategoryId = async (
       slug: row.slug,
       description: row.description,
       is_active: !!row.is_active,
+      created_at: new Date(row.created_at),
       category: {
         id: row.category_id,
         name: row.category_name,
@@ -82,13 +83,13 @@ export const getProducts = async (
   filters: ProductFilters = {}
 ): Promise<ProductWithCategory[]> => {
   const [rows] = await pool.query<RowDataPacket[]>(`
-    SELECT 
-      p.id, p.name, p.slug, p.description, p.is_active,
-      c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
-      c.created_at AS category_created_at, c.updated_at AS category_updated_at
-    FROM products p
-    JOIN categories c ON p.category_id = c.id
-  `);
+  SELECT 
+    p.id, p.name, p.slug, p.description, p.is_active, p.created_at,
+    c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
+    c.created_at AS category_created_at, c.updated_at AS category_updated_at
+  FROM products p
+  JOIN categories c ON p.category_id = c.id
+`);
 
   const fullProducts: ProductWithCategory[] = [];
 
@@ -99,6 +100,7 @@ export const getProducts = async (
       slug: row.slug,
       description: row.description,
       is_active: !!row.is_active,
+      created_at: new Date(row.created_at),
       category: {
         id: row.category_id,
         name: row.category_name,

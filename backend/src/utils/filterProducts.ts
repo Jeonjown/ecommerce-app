@@ -2,7 +2,7 @@ import { ProductWithCategory } from '../types/models/products';
 import { getLowestPrice } from './getLowestPrice';
 
 type Filters = {
-  availability?: string;
+  dateOrder?: string;
   priceRange?: string;
   sort?: string;
 };
@@ -13,14 +13,7 @@ export function filterProducts(
 ): ProductWithCategory[] {
   let filtered = [...products];
 
-  // Availability filter
-  if (filters.availability === 'in-stock') {
-    filtered = filtered.filter((product) =>
-      product.variants.some((v) => v.stock > 0)
-    );
-  }
-
-  // Price Range filter
+  // Price range filtering
   if (filters.priceRange) {
     const [min, max] = filters.priceRange.split('-').map(Number);
     filtered = filtered.filter((product) =>
@@ -28,7 +21,7 @@ export function filterProducts(
     );
   }
 
-  // Sorting
+  // Sort order (name or price)
   switch (filters.sort) {
     case 'low-to-high':
       filtered.sort((a, b) => getLowestPrice(a) - getLowestPrice(b));

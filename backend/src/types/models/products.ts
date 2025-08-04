@@ -20,6 +20,7 @@ export interface ProductWithCategory {
   is_active: boolean;
   variants: ProductVariant[];
   options: ProductOptionWithValues[];
+  created_at: Date;
 }
 
 export interface ProductVariant {

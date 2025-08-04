@@ -17,7 +17,7 @@ export function CategorySidebar() {
 
   return (
     <Sidebar variant="floating" className="relative w-64 shrink-0">
-      <SidebarContent>
+      <SidebarContent className="border bg-white">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xl">Categories</SidebarGroupLabel>
           <SidebarGroupContent>

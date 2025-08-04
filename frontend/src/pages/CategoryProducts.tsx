@@ -1,3 +1,4 @@
+// src/components/CategoryProducts.tsx
 import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
@@ -5,12 +6,10 @@ import { useGetProductsByCategorySlug } from "@/hooks/useGetProductsByCategorySl
 import { useGetProducts } from "@/hooks/useGetProducts";
 
 import { ProductCard } from "@/components/ProductCard";
-import Filters from "@/components/Filters";
 import Error from "./Error";
 
 import { Box } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
 import {
   Pagination,
   PaginationContent,
@@ -19,21 +18,20 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import Filters from "@/components/Filters";
 
-const CategoryProducts = () => {
+export default function CategoryProducts() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const sortOrder = searchParams.get("sort") || "";
-  const priceRange = searchParams.get("priceRange") || "";
-  const availability = searchParams.get("availability") || "";
+  const sortOrder = searchParams.get("sort") ?? "";
+  const priceRange = searchParams.get("priceRange") ?? "";
 
   const { slug } = useParams<{ slug?: string }>();
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 6;
 
   const filters = {
-    sort: searchParams.get("sort") || undefined,
-    availability: searchParams.get("availability") || undefined,
-    priceRange: searchParams.get("priceRange") || undefined,
+    sort: sortOrder || undefined,
+    priceRange,
   };
 
   const {
@@ -48,18 +46,18 @@ const CategoryProducts = () => {
     isError: isAllError,
   } = useGetProducts(filters);
 
-  const isPending = slug ? isCategoryLoading : isAllLoading;
-  const isError = slug ? isCategoryError : isAllError;
+  const isLoading = slug ? isCategoryLoading : isAllLoading;
+  const isErrorState = slug ? isCategoryError : isAllError;
   const products = slug
     ? (categoryProducts?.products ?? [])
     : (allProducts?.products ?? []);
 
+  // pagination
   const totalPages = Math.ceil(products.length / productsPerPage);
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const startIndex = (currentPage - 1) * productsPerPage;
   const currentProducts = products.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct,
+    startIndex,
+    startIndex + productsPerPage,
   );
 
   const handlePageChange = (page: number) => {
@@ -69,7 +67,8 @@ const CategoryProducts = () => {
     }
   };
 
-  if (isPending) {
+  // loading skeleton
+  if (isLoading) {
     return (
       <div className="p-4">
         <div className="mb-6">
@@ -79,9 +78,8 @@ const CategoryProducts = () => {
             <Skeleton className="h-8 w-24" />
           </div>
         </div>
-
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: productsPerPage }).map((_, i) => (
             <div key={i} className="flex flex-col gap-3">
               <Skeleton className="h-50 w-full" />
               <Skeleton className="h-5 w-3/4" />
@@ -94,21 +92,12 @@ const CategoryProducts = () => {
     );
   }
 
-  if (isError || !products) return <Error />;
-
-  if (products.length === 0) {
-    return (
-      <div className="text-muted-foreground flex h-[60vh] flex-col items-center justify-center p-10">
-        <Box className="mb-2 h-10 w-10" />
-        <p>No products found for this category.</p>
-      </div>
-    );
-  }
+  if (isErrorState) return <Error />;
 
   return (
     <div className="p-4">
-      <div className="mb-6">
-        <h2 className="mb-4 text-2xl font-semibold">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-2xl font-semibold">
           {slug && products[0]?.category
             ? products[0].category.name
             : "All Products"}
@@ -116,7 +105,6 @@ const CategoryProducts = () => {
         <Filters
           sortOrder={sortOrder}
           priceRange={priceRange}
-          availability={availability}
           onSortChange={(value) => {
             searchParams.set("sort", value);
             setSearchParams(searchParams);
@@ -127,64 +115,64 @@ const CategoryProducts = () => {
             setSearchParams(searchParams);
             setCurrentPage(1);
           }}
-          onAvailabilityChange={(value) => {
-            searchParams.set("availability", value);
-            setSearchParams(searchParams);
-            setCurrentPage(1);
-          }}
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {currentProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
-
-      {totalPages > 1 && (
-        <div className="mt-10 flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(currentPage - 1);
-                  }}
-                />
-              </PaginationItem>
-
-              {[...Array(totalPages)].map((_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink
-                    href="#"
-                    isActive={currentPage === i + 1}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePageChange(i + 1);
-                    }}
-                  >
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(currentPage + 1);
-                  }}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+      {products.length === 0 ? (
+        <div className="text-muted-foreground flex h-[60vh] flex-col items-center justify-center p-10">
+          <Box className="mb-2 h-10 w-10" />
+          <p>No products found for this category.</p>
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {currentProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-10 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(currentPage - 1);
+                      }}
+                    />
+                  </PaginationItem>
+                  {[...Array(totalPages)].map((_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        href="#"
+                        isActive={currentPage === i + 1}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(i + 1);
+                        }}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(currentPage + 1);
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
-};
-
-export default CategoryProducts;
+}
