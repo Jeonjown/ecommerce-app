@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FaCartPlus } from "react-icons/fa6";
 import { getLowestPrice } from "@/utils/getLowestPrice";
+import { Link } from "react-router-dom";
 
 export const ProductCard = ({ product }: { product: ProductWithCategory }) => {
   const firstVariant = product.variants[0];
@@ -35,11 +36,13 @@ export const ProductCard = ({ product }: { product: ProductWithCategory }) => {
 
         <div className="flex w-full gap-2">
           <Button
+            asChild
             variant="outline"
             className="hover:bg-primary flex-1 hover:text-white"
           >
-            Buy Now
+            <Link to={`/products/${product.slug}`}> Buy Now</Link>
           </Button>
+
           <Button
             variant="outline"
             size="icon"

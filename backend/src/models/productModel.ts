@@ -7,9 +7,17 @@ import {
   ProductOptionWithValues,
   ProductWithCategory,
   ProductFilters,
+  ProductWithVariantsAndOptions,
+  ProductVariantWithOptions,
+  GroupedProductOption,
+  ProductOptionValue,
 } from '../types/models/products';
 import { getLowestPrice } from '../utils/getLowestPrice';
 import { filterProducts } from '../utils/filterProducts';
+import { getVariantValuesByVariantId } from './variantValueModel';
+import { getVariantsByProductId } from './variantModel';
+import { getOptionsByProductId } from './optionModel';
+import { getOptionValuesByOptionId } from './optionValueModel';
 
 export const createProduct = async (
   category_id: number,
@@ -53,6 +61,7 @@ export const getProductsByCategoryId = async (
       description: row.description,
       is_active: !!row.is_active,
       created_at: new Date(row.created_at),
+      updated_at: new Date(row.updated_at),
       category: {
         id: row.category_id,
         name: row.category_name,
@@ -101,6 +110,7 @@ export const getProducts = async (
       description: row.description,
       is_active: !!row.is_active,
       created_at: new Date(row.created_at),
+      updated_at: new Date(row.updated_at),
       category: {
         id: row.category_id,
         name: row.category_name,
@@ -129,18 +139,59 @@ export const getProducts = async (
 
 export const getProductBySlug = async (
   slug: string
-): Promise<Product | null> => {
+): Promise<ProductWithVariantsAndOptions | null> => {
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT * FROM products WHERE slug = ? LIMIT 1`,
     [slug]
   );
 
-  const products = rows as Product[];
+  if (!rows.length) return null;
 
-  return products.length > 0 ? products[0] : null;
+  const raw = rows[0];
+
+  const product: ProductWithVariantsAndOptions = {
+    id: raw.id,
+    name: raw.name,
+    slug: raw.slug,
+    description: raw.description,
+    is_active: !!raw.is_active,
+    created_at: raw.created_at,
+    updated_at: raw.updated_at,
+    variants: [],
+    options: [],
+  };
+
+  // --- Fetch variants and their options ---
+  const variants = await getVariantsByProductId(product.id);
+
+  const variantsWithOptions: ProductVariantWithOptions[] = await Promise.all(
+    variants.map(async (variant) => ({
+      ...variant,
+      options: await getVariantValuesByVariantId(variant.id),
+    }))
+  );
+
+  product.variants = variantsWithOptions;
+
+  // --- Fetch grouped options and values ---
+  const rawOptions = await getOptionsByProductId(product.id);
+
+  const groupedOptions: GroupedProductOption[] = await Promise.all(
+    rawOptions.map(async (opt) => {
+      const values = await getOptionValuesByOptionId(opt.id);
+      return {
+        id: opt.id,
+        name: opt.name,
+        values: values as ProductOptionValue[],
+      };
+    })
+  );
+
+  product.options = groupedOptions;
+
+  return product;
 };
 
-// Get single product by ID with variants and options
 export const getProductById = async (id: number): Promise<Product | null> => {
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT * FROM products WHERE id = ?`,

@@ -7,6 +7,7 @@ import {
   getProductById,
   updateProduct,
   deleteProduct,
+  getProductBySlug,
 } from '../models/productModel';
 import {
   getOptionsByProductId,
@@ -125,6 +126,29 @@ export const getProductByIdController = async (
   }
 };
 
+export const getProductBySlugController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const slug = req.params.slug;
+
+    if (!slug) {
+      throw new ApiError('Missing product slug', 400);
+    }
+
+    const product = await getProductBySlug(slug);
+
+    if (!product) {
+      throw new ApiError('Product not found', 404);
+    }
+
+    res.status(200).json({ product });
+  } catch (err) {
+    next(err);
+  }
+};
 export const updateProductController = async (
   req: Request,
   res: Response,

@@ -11,8 +11,8 @@ export interface Product {
   category_id?: number;
   slug: string;
   is_active: boolean;
-  // variants: Variant[];
-  // options: ProductOption[];
+  variants: Variant[];
+  options: ProductOption[];
 }
 
 export interface ProductWithCategory {
@@ -45,6 +45,19 @@ export interface VariantOption {
     value_id: number;
     value_name: string;
   }[];
+}
+
+export interface ProductVariantWithOptions {
+  id: number;
+  product_id: number;
+  sku: string;
+  price: number | string;
+  stock: number;
+  image_url: string;
+  is_active: boolean | number;
+  created_at: string;
+  updated_at: string;
+  options: VariantOption[];
 }
 
 export interface ProductOption {

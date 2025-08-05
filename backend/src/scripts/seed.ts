@@ -43,7 +43,7 @@ async function seed() {
       { name: 'Edition', values: ['Standard', 'Pro', 'Ultra'] },
     ];
 
-    // 4️⃣ Images (Cloudinary)
+    // 4️⃣ Images
     const imageUrls = [
       'https://res.cloudinary.com/dgf5yareo/image/upload/v1754053816/headphones-removebg-preview_tfn3ts.png',
       'https://res.cloudinary.com/dgf5yareo/image/upload/v1754053817/mouse-removebg-preview_lcuvak.png',
@@ -59,6 +59,7 @@ async function seed() {
       'Wireless Mouse',
       'Studio Headphones',
     ];
+
     let totalVariants = 0;
     let imageIndex = 0;
 
@@ -75,7 +76,6 @@ async function seed() {
       );
       const productId = pRes.insertId;
 
-      // map of option → its DB id, and option → its value IDs
       const optId: Record<string, number> = {};
       const valMap: Record<string, number[]> = {};
 
@@ -119,11 +119,14 @@ async function seed() {
 
         const sku = await generateSku(
           productName,
-          picks.map(({ opt, valId }) => ({
+          picks.map(({ opt }, i) => ({
             name: opt,
-            value: names[picks.findIndex((p) => p.opt === opt)],
+            value: names[i],
           }))
         );
+
+        const variantName = `${productName} - ${names.join(' / ')}`;
+        const variantDescription = faker.commerce.productDescription();
         const price = faker.commerce.price({ min: 100, max: 2000 });
         const stock = faker.number.int({ min: 10, max: 50 });
         const img = imageUrls[imageIndex % imageUrls.length];
@@ -131,9 +134,9 @@ async function seed() {
 
         const [vRes]: any = await pool.query(
           `INSERT INTO product_variants
-           (product_id,sku,price,stock,image_url,is_active,created_at,updated_at)
-           VALUES(?,?,?,?,?,1,NOW(),NOW())`,
-          [productId, sku, price, stock, img]
+           (product_id, name, description, sku, price, stock, image_url, is_active, created_at, updated_at)
+           VALUES(?,?,?,?,?,?,?,1,NOW(),NOW())`,
+          [productId, variantName, variantDescription, sku, price, stock, img]
         );
         const vid = vRes.insertId;
 

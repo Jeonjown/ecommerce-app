@@ -25,7 +25,15 @@ export const createVariantByIdController = async (
 ) => {
   try {
     const { id } = req.params;
-    const { price, stock, image_url, is_active, variant_options } = req.body;
+    const {
+      price,
+      stock,
+      image_url,
+      is_active,
+      variant_options,
+      name,
+      description,
+    } = req.body;
     if (!id) throw new ApiError('Product ID is required', 400);
     if (price === undefined || stock === undefined || !image_url) {
       throw new ApiError('Missing required fields', 400);
@@ -66,7 +74,9 @@ export const createVariantByIdController = async (
       Number(price),
       Number(stock),
       image_url,
-      is_active ?? true
+      is_active ?? true,
+      name,
+      description
     );
 
     const variantValues = await createVariantValues(variantId, variant_options);
@@ -148,17 +158,26 @@ export const updateVariantController = async (
       throw new ApiError('Invalid variant ID', 400);
     }
 
-    const { price, stock, image_url, is_active, variant_options } =
-      req.body as {
-        price: number;
-        stock: number;
-        image_url: string;
-        is_active: boolean;
-        variant_options: {
-          product_option_id: number;
-          product_option_value_id: number;
-        }[];
-      };
+    const {
+      price,
+      stock,
+      image_url,
+      is_active,
+      variant_options,
+      name,
+      description,
+    } = req.body as {
+      price: number;
+      stock: number;
+      image_url: string;
+      is_active: boolean;
+      variant_options: {
+        product_option_id: number;
+        product_option_value_id: number;
+      }[];
+      name: string;
+      description: string;
+    };
 
     if (
       price == null ||
@@ -209,7 +228,9 @@ export const updateVariantController = async (
       price,
       stock,
       image_url,
-      is_active
+      is_active,
+      name,
+      description
     );
 
     if (!updated) {

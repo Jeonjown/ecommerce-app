@@ -63,6 +63,8 @@ export default function VariantForm({
       product_id: z.coerce.number().min(1),
       price: z.coerce.number().min(0, "Price must be ≥ 0"),
       stock: z.coerce.number().min(0, "Stock must be ≥ 0"),
+      name: z.string().min(1, "Name is required"),
+      description: z.string().min(1, "Description is required"),
       is_active: z.boolean(),
       image_file: z
         .instanceof(File)
@@ -127,6 +129,8 @@ export default function VariantForm({
       createVariant(
         {
           product_id,
+          name: values.name,
+          description: values.description,
           price: values.price,
           stock: values.stock,
           is_active: values.is_active,
@@ -201,6 +205,36 @@ export default function VariantForm({
                 <FormLabel>Price</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Name */}
+          <FormField
+            control={methods.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Description */}
+          <FormField
+            control={methods.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

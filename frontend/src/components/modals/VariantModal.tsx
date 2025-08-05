@@ -121,16 +121,27 @@ export function VariantModal({ product }: VariantModalProps) {
                         </div>
                       </CardHeader>
 
-                      <CardContent className="pt-2">
-                        <h3 className="text-sm font-semibold">{variant.sku}</h3>
-                        <p className="text-sm text-gray-600">
+                      <CardContent className="space-y-2 pt-2">
+                        {variant.name && (
+                          <h3 className="text-base font-semibold">
+                            {variant.name}
+                          </h3>
+                        )}
+                        <h4 className="text-xs">{variant.sku}</h4>
+                        {variant.description && (
+                          <p className="text-muted-foreground line-clamp-2 text-sm">
+                            {variant.description}
+                          </p>
+                        )}
+
+                        <p className="text-xs text-gray-500">
                           ID: {variant.id}
                         </p>
-                        <div className="mt-5 flex items-center justify-between">
-                          <p className="text-muted-foreground text-sm">
+
+                        <div className="mt-4 flex items-center justify-between">
+                          <p className="text-primary text-sm font-semibold">
                             ₱{Number(variant.price).toFixed(2)}
                           </p>
-
                           <p className="text-sm text-gray-600">
                             Stock: {variant.stock}
                           </p>

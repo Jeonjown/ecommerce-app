@@ -2,7 +2,7 @@ export interface Variants {
   variants: Variant[];
 }
 
-export interface Variant {
+export type Variant = {
   id: number;
   product_id: number;
   sku: string;
@@ -10,26 +10,33 @@ export interface Variant {
   stock: number;
   image_url: string;
   is_active: boolean;
-  created_at: Date;
-  updated_at: Date;
-}
+  created_at: string;
+  updated_at: string;
+  name: string;
+  description: string;
+};
 
-export interface CreateVariantPayload {
+export type CreateVariantPayload = {
   product_id: number;
+  sku?: string;
   price: number;
   stock: number;
-  is_active: boolean;
   image_url: string;
+  is_active: boolean;
+  name: string;
+  description: string;
   variant_options: {
     product_option_id: number;
     product_option_value_id: number;
   }[];
-}
+};
 
-export interface UpdateVariantPayload {
+export type UpdateVariantPayload = {
   sku: string;
   price: number;
   stock: number;
   image_url: string;
   is_active: boolean;
-}
+  name: string;
+  description: string;
+};

@@ -77,10 +77,12 @@ const UpdateVariantForm = ({
     price: z.coerce.number().min(0),
     stock: z.coerce.number().min(0),
     is_active: z.boolean(),
+    sku: z.string().min(1),
+    name: z.string().min(1, "Name is required"),
+    description: z.string().nonempty("Description is required"),
     image_file: isEdit
       ? z.instanceof(File).optional()
       : z.instanceof(File).refine((f) => f.size > 0, "Please select an image"),
-    sku: z.string().optional(),
     ...dynamicOptionFields,
   });
 
@@ -105,6 +107,9 @@ const UpdateVariantForm = ({
       price: Number(variant?.price ?? 0),
       stock: Number(variant?.stock ?? 0),
       is_active: Boolean(variant?.is_active ?? true),
+      sku: variant?.sku ?? "",
+      name: variant?.name ?? "",
+      description: variant?.description ?? "",
       ...variantDefaults,
     },
   });
@@ -114,6 +119,7 @@ const UpdateVariantForm = ({
       const image_url = values.image_file
         ? await uploadImage(values.image_file)
         : (variant?.image_url ?? "");
+
       const variant_options =
         optionsData?.options
           .map((option) => {
@@ -132,7 +138,9 @@ const UpdateVariantForm = ({
         stock: values.stock,
         is_active: values.is_active,
         image_url,
-        sku: values.sku ?? "",
+        sku: values.sku,
+        name: values.name,
+        description: values.description,
         variant_options,
       };
 
@@ -164,6 +172,45 @@ const UpdateVariantForm = ({
             name="image_file"
             label="Variant Image"
             defaultImageUrl={variant?.image_url}
+          />
+
+          <FormField
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Input type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            name="sku"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>SKU</FormLabel>
+                <FormControl>
+                  <Input type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
           <div className="flex flex-wrap gap-4">
@@ -242,6 +289,7 @@ const UpdateVariantForm = ({
               </FormItem>
             )}
           />
+
           <div className="flex items-center gap-4">
             <Button type="submit">
               {isEdit ? "Update Variant" : "Create Variant"}

@@ -15,6 +15,7 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminCategories from "./pages/AdminCategories";
 import Categories from "./pages/Categories";
 import CategoryProducts from "./pages/CategoryProducts";
+import ProductDetails from "./pages/ProductDetails";
 function App() {
   const { data } = useGetLoggedInUser();
 
@@ -41,6 +42,7 @@ function App() {
             <Route index element={<CategoryProducts />} />
             <Route path=":slug" element={<CategoryProducts />} />
           </Route>
+          <Route path="/products/:slug" element={<ProductDetails />} />
         </Routes>
       </main>
     </>

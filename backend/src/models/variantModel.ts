@@ -1,6 +1,6 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import pool from '../db';
-import { ProductVariant, VariantOption } from '../types/models/products';
+import { ProductVariant } from '../types/models/products';
 
 export const getVariantsByProductId = async (
   productId: number
@@ -28,12 +28,16 @@ export const createVariant = async (
   price: number,
   stock: number,
   image_url: string,
-  is_active: boolean
+  is_active: boolean,
+  name: string,
+  description: string
 ) => {
   const [result] = await pool.query<ResultSetHeader>(
-    `INSERT INTO product_variants (product_id, sku, price, stock, image_url, is_active) VALUES (?, ?, ?, ?, ?, ?)`,
-    [product_id, sku, price, stock, image_url, is_active]
+    `INSERT INTO product_variants (product_id, sku, price, stock, image_url, is_active, name, description)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [product_id, sku, price, stock, image_url, is_active, name, description]
   );
+
   return result.insertId;
 };
 
@@ -43,15 +47,20 @@ export const updateVariant = async (
   price: number,
   stock: number,
   image_url: string,
-  is_active: boolean
+  is_active: boolean,
+  name: string,
+  description: string
 ) => {
   const [result] = await pool.query(
-    `UPDATE product_variants SET sku = ?, price = ?, stock = ?, image_url = ?, is_active = ? WHERE id = ?`,
-    [sku, price, stock, image_url, is_active, id]
+    `UPDATE product_variants
+     SET sku = ?, price = ?, stock = ?, image_url = ?, is_active = ?, name = ?, description = ?
+     WHERE id = ?`,
+    [sku, price, stock, image_url, is_active, name, description, id]
   );
 
   return (result as any).affectedRows > 0;
 };
+
 export const deleteVariantById = async (id: number) => {
   await pool.query(`DELETE FROM product_variants WHERE id = ?`, [id]);
 };

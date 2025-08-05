@@ -3,8 +3,11 @@ import api from "./axios";
 import type {
   CreateProductRequest,
   CreateProductResponse,
+  Product,
+  ProductOption,
   ProductResponse,
   UpdateProductPayload,
+  Variant,
 } from "@/types/api/products";
 
 export const getProducts = async (
@@ -23,6 +26,28 @@ export const getProducts = async (
       );
     }
     throw new Error("Unexpected error fetching products.");
+  }
+};
+
+export const getProductBySlug = async (
+  slug: string,
+): Promise<{
+  product: Product;
+  options: ProductOption[];
+  variants: Variant[];
+}> => {
+  try {
+    const response = await api.get(`/products/slug/${slug}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch product by slug.",
+      );
+    }
+    throw new Error("Unexpected error fetching product.");
   }
 };
 
