@@ -14,17 +14,30 @@ import {
 
 import type { ProductVariantWithOptions } from "@/types/api/products";
 import Counter from "@/components/Counter";
+import { useCartStore } from "@/stores/useCartStore";
 
 const ProductDetails = () => {
+  const addItem = useCartStore((state) => state.addItem);
   const { slug } = useParams<{ slug: string }>();
   const { data, isLoading, isError } = useGetProductBySlug(slug!);
-
-  console.log(data);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] =
     useState<ProductVariantWithOptions | null>(null);
 
+  const handleAddToCart = () => {
+    if (!selectedVariant) return;
+
+    addItem({
+      variant_id: Number(selectedVariant.id),
+      product_id: Number(selectedVariant.product_id),
+      name: selectedVariant.name,
+      price: Number(selectedVariant.price),
+      image_url: selectedVariant.image_url,
+      quantity,
+      stock: Number(selectedVariant.stock),
+    });
+  };
   useEffect(() => {
     if (data?.product?.variants?.length) {
       setSelectedVariant(data.product.variants[0] as ProductVariantWithOptions);
@@ -60,11 +73,11 @@ const ProductDetails = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/components">Components</BreadcrumbLink>
+              <BreadcrumbLink href="/categories">Components</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+              <BreadcrumbPage>{data.product.name}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -109,7 +122,7 @@ const ProductDetails = () => {
                       disabled={isOutOfStock}
                       className={`rounded border px-3 py-1 text-sm transition ${isSelected ? "border-primary text-primary bg-neutral-100" : ""} ${isOutOfStock ? "cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400" : "border-gray-300 text-gray-700 hover:bg-neutral-100"} `}
                     >
-                      {variant.sku}
+                      {variant.name}
                     </button>
                   );
                 })}
@@ -137,15 +150,26 @@ const ProductDetails = () => {
             {/* Description */}
             <div>
               <p className="text-sm text-gray-600">
-                {data.product.description}
+                {selectedVariant?.description}
               </p>
             </div>
 
             {/* Add to Cart */}
             <div className="pt-4">
-              <Button className="bg-primary w-full text-white">
+              <Button
+                className="bg-primary w-full text-white"
+                disabled={
+                  !selectedVariant || quantity > (selectedVariant?.stock ?? 0)
+                }
+                onClick={handleAddToCart}
+              >
                 Add to Cart
               </Button>
+              {selectedVariant && quantity > selectedVariant.stock && (
+                <p className="pt-2 text-sm text-red-600">
+                  Quantity exceeds available stock.
+                </p>
+              )}
             </div>
           </div>
         </div>

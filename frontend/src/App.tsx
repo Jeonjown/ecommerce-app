@@ -4,7 +4,6 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Cart from "./components/Cart";
 import PrivateRoutes from "./components/PrivateRoutes";
 import AdminRoutes from "./components/AdminRoutes";
 import AdminDashboard from "./components/AdminDashboard";
@@ -16,6 +15,7 @@ import AdminCategories from "./pages/AdminCategories";
 import Categories from "./pages/Categories";
 import CategoryProducts from "./pages/CategoryProducts";
 import ProductDetails from "./pages/ProductDetails";
+import Cart from "./pages/Cart";
 function App() {
   const { data } = useGetLoggedInUser();
 

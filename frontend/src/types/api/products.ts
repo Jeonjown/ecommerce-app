@@ -28,6 +28,7 @@ export interface ProductWithCategory {
 }
 
 export interface Variant {
+  name: string;
   id: number;
   product_id: number;
   sku: string;
@@ -55,6 +56,8 @@ export interface ProductVariantWithOptions {
   stock: number;
   image_url: string;
   is_active: boolean | number;
+  name: string;
+  description: string;
   created_at: string;
   updated_at: string;
   options: VariantOption[];
