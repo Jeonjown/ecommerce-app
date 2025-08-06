@@ -11,8 +11,9 @@ const Counter = ({ quantity, setQuantity }: CounterProps) => {
   return (
     <div className="flex w-fit">
       <Button
-        onClick={() => setQuantity((prev) => Math.max(0, prev - 1))}
+        onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
         className="rounded-none"
+        disabled={quantity <= 1}
       >
         <Minus />
       </Button>

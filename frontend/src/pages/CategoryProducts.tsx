@@ -19,6 +19,14 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import Filters from "@/components/Filters";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function CategoryProducts() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -71,7 +79,7 @@ export default function CategoryProducts() {
   if (isLoading) {
     return (
       <div className="p-4">
-        <div className="mb-6">
+        <div className="">
           <Skeleton className="mb-4 h-6 w-40" />
           <div className="flex gap-2">
             <Skeleton className="h-8 w-24" />
@@ -96,12 +104,13 @@ export default function CategoryProducts() {
 
   return (
     <div className="p-4">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-semibold">
           {slug && products[0]?.category
             ? products[0].category.name
             : "All Products"}
         </h2>
+
         <Filters
           sortOrder={sortOrder}
           priceRange={priceRange}
@@ -125,6 +134,18 @@ export default function CategoryProducts() {
         </div>
       ) : (
         <>
+          <Breadcrumb className="mb-5 hidden md:block">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Categories</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {currentProducts.map((product) => (
               <ProductCard key={product.id} product={product} />

@@ -73,7 +73,7 @@ const ProductDetails = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/categories">Components</BreadcrumbLink>
+              <BreadcrumbLink href="/categories">Categories</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>

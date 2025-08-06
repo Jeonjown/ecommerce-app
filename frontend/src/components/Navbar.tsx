@@ -15,12 +15,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import HamburgerMenu from "./Hamburger";
+import { useCartStore } from "@/stores/useCartStore";
+import getTotalQuantity from "@/utils/getTotalQuantity";
+import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 
 const Navbar = () => {
   const { data } = useGetLoggedInUser();
   const { mutate } = useLogoutUser();
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleMenu = () => setMenuOpen((prev) => !prev);
+
+  const items = useCartStore((state) => state.items);
+  const totalQuantity = getTotalQuantity(items);
 
   return (
     <nav className="relative container mx-auto flex flex-wrap items-center justify-between gap-4 py-4">
@@ -61,10 +67,13 @@ const Navbar = () => {
       {/* Icons */}
       <div className="ml-auto flex items-center space-x-4">
         {/* Cart (unchanged) */}
-        <Link to="cart">
-          <button className="flex items-center space-x-1">
+        <Link to="cart" className="hover:bg-muted relative">
+          <button className="flex items-center space-x-1 md:cursor-pointer">
             <BsCartPlus size={24} />
             <span className="font-semibold">Cart</span>
+            <span className="bg-destructive absolute -top-2 -left-2 flex h-5 w-5 items-center justify-center rounded-full text-xs text-white">
+              {totalQuantity}
+            </span>
           </button>
         </Link>
 
@@ -72,9 +81,10 @@ const Navbar = () => {
         {data ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="flex items-center gap-1 hover:cursor-pointer">
+              <div className="hover:bg-muted' flex items-center gap-1 hover:cursor-pointer">
                 <FaRegUser size={22} />
                 <span className="font-medium">{data.user.name}</span>
+                <MdOutlineKeyboardArrowDown />
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
