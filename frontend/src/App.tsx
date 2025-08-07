@@ -33,6 +33,7 @@ function App() {
           {/* Private Routes */}
           <Route element={<PrivateRoutes />}>
             <Route path="/cart" element={<Cart />} />
+            <Route path="/products/:slug" element={<ProductDetails />} />
           </Route>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
@@ -42,7 +43,6 @@ function App() {
             <Route index element={<CategoryProducts />} />
             <Route path=":slug" element={<CategoryProducts />} />
           </Route>
-          <Route path="/products/:slug" element={<ProductDetails />} />
         </Routes>
       </main>
     </>

@@ -1,11 +1,12 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface ControlledCounterProps {
   quantity: number;
   setQuantity: (value: number) => void;
-  stock?: number; // Optional: if not provided, no max limit
+  stock?: number;
 }
 
 const ControlledCounter = ({
@@ -13,19 +14,34 @@ const ControlledCounter = ({
   setQuantity,
   stock,
 }: ControlledCounterProps) => {
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = Number(e.target.value);
-    if (isNaN(value)) return;
+  const [inputValue, setInputValue] = useState(String(quantity));
 
-    // Clamp to valid range
-    if (value < 0) value = 0;
+  useEffect(() => {
+    setInputValue(String(quantity));
+  }, [quantity]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    // Allow only numeric input
+    if (/^\d*$/.test(val)) {
+      setInputValue(val);
+    }
+  };
+
+  const handleBlur = () => {
+    let value = parseInt(inputValue, 10);
+
+    if (isNaN(value) || value < 1) value = 1;
     if (stock !== undefined && value > stock) value = stock;
 
     setQuantity(value);
+    setInputValue(String(value));
   };
 
   const handleDecrement = () => {
-    if (quantity > 0) setQuantity(quantity - 1);
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
   };
 
   const handleIncrement = () => {
@@ -40,21 +56,22 @@ const ControlledCounter = ({
         onClick={handleDecrement}
         disabled={quantity <= 1}
         className="rounded-none"
+        type="button"
       >
         <Minus />
       </Button>
       <Input
-        value={quantity}
+        type="text"
+        value={inputValue}
         onChange={handleInputChange}
-        className="max-w-15 rounded-none text-center"
-        type="number"
-        min={0}
-        max={stock}
+        onBlur={handleBlur}
+        className="w-16 rounded-none text-center"
       />
       <Button
         onClick={handleIncrement}
         disabled={stock !== undefined && quantity >= stock}
         className="rounded-none"
+        type="button"
       >
         <Plus />
       </Button>

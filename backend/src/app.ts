@@ -13,6 +13,7 @@ import optionRoutes from './routes/optionRoutes';
 import imageRoutes from './routes/imageRoutes';
 import optionValueRoutes from './routes/optionValueRoutes';
 import variantRoutes from './routes/variantRoutes';
+import cartRoutes from './routes/cartRoutes';
 
 const app = express();
 
@@ -55,6 +56,13 @@ app.use(
   authenticateUser,
   checkUserRole('admin'),
   variantRoutes
+);
+
+app.use(
+  '/api/cart',
+  authenticateUser,
+  checkUserRole('user', 'admin'),
+  cartRoutes
 );
 
 app.use('/api/products', productRoutes);

@@ -14,13 +14,12 @@ import {
 
 import type { ProductVariantWithOptions } from "@/types/api/products";
 import Counter from "@/components/Counter";
-import { useCartStore } from "@/stores/useCartStore";
+import { useAddToCart } from "@/hooks/useAddToCart";
 
 const ProductDetails = () => {
-  const addItem = useCartStore((state) => state.addItem);
   const { slug } = useParams<{ slug: string }>();
   const { data, isLoading, isError } = useGetProductBySlug(slug!);
-
+  const { mutate } = useAddToCart();
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] =
     useState<ProductVariantWithOptions | null>(null);
@@ -28,14 +27,14 @@ const ProductDetails = () => {
   const handleAddToCart = () => {
     if (!selectedVariant) return;
 
-    addItem({
-      variant_id: Number(selectedVariant.id),
-      product_id: Number(selectedVariant.product_id),
+    mutate({
+      product_id: selectedVariant.product_id,
+      variant_id: selectedVariant.id,
       name: selectedVariant.name,
-      price: Number(selectedVariant.price),
+      price: +selectedVariant.price,
       image_url: selectedVariant.image_url,
       quantity,
-      stock: Number(selectedVariant.stock),
+      stock: selectedVariant.stock,
     });
   };
   useEffect(() => {

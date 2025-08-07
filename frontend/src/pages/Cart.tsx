@@ -1,14 +1,21 @@
 import ControlledCounter from "@/components/ControlledCounter";
 import { Button } from "@/components/ui/button";
-import { useCartStore } from "@/stores/useCartStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import getTotalPrice from "@/utils/getTotalPrice";
 import getTotalQuantity from "@/utils/getTotalQuantity";
+import { useGetUserCart } from "@/hooks/useGetUserCart";
+import Loading from "./Loading";
+import Error from "./Error";
+import { useUpdateCartItem } from "@/hooks/useUpdateCartItem";
+import { useRemoveCartItem } from "@/hooks/useRemoveCartItem";
 
 const Cart = () => {
-  const items = useCartStore((state) => state.items);
-  const removeItem = useCartStore((state) => state.removeItem);
-  const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const { data: items, isPending, isError } = useGetUserCart();
+  const { mutate: updateQuantity } = useUpdateCartItem();
+  const { mutate: removeItem } = useRemoveCartItem();
+
+  if (isPending) return <Loading />;
+  if (isError || !items) return <Error />;
 
   const totalPrice = getTotalPrice(items);
 
@@ -39,7 +46,7 @@ const Cart = () => {
 
               <CardContent className="space-y-2 p-0">
                 <p className="text-muted-foreground">
-                  ₱ {item.price.toFixed(2)}
+                  ₱ {Number(item.price).toFixed(2)}
                 </p>
 
                 <p className="text-sm text-gray-600">Stock: {item.stock}</p>
@@ -48,7 +55,7 @@ const Cart = () => {
                 <div className="flex items-center gap-2 text-sm">
                   <p>Total Price:</p>
                   <p className="text-muted-foreground">
-                    ₱ {(item.price * item.quantity).toFixed(2)}
+                    ₱ {(Number(item.price) * item.quantity).toFixed(2)}
                   </p>
                 </div>
 
@@ -56,7 +63,10 @@ const Cart = () => {
                   <ControlledCounter
                     quantity={item.quantity}
                     setQuantity={(value) =>
-                      updateQuantity(item.variant_id, value)
+                      updateQuantity({
+                        ...item,
+                        quantity: value,
+                      })
                     }
                     stock={item.stock}
                   />

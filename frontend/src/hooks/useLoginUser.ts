@@ -11,9 +11,11 @@ export const useLoginUser = () => {
 
   return useMutation<AuthResponse, Error, LoginRequest>({
     mutationFn: loginUser,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
       toast.success(data.message || "Login successful");
+
       navigate("/");
     },
     onError: (error) => {

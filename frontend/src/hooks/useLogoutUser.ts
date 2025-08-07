@@ -10,9 +10,10 @@ export const useLogoutUser = () => {
 
   return useMutation({
     mutationFn: logoutUser,
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.setQueryData(["loggedInUser"], null);
-      toast.success(data.message || "Logged out successfully");
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+
       navigate("/login");
     },
     onError: (error) => {

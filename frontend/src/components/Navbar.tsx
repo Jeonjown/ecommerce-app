@@ -15,18 +15,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import HamburgerMenu from "./Hamburger";
-import { useCartStore } from "@/stores/useCartStore";
 import getTotalQuantity from "@/utils/getTotalQuantity";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
+import { useGetUserCart } from "@/hooks/useGetUserCart";
 
 const Navbar = () => {
+  const { data: items } = useGetUserCart();
   const { data } = useGetLoggedInUser();
   const { mutate } = useLogoutUser();
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleMenu = () => setMenuOpen((prev) => !prev);
 
-  const items = useCartStore((state) => state.items);
-  const totalQuantity = getTotalQuantity(items);
+  const totalQuantity = items ? getTotalQuantity(items) : 0;
 
   return (
     <nav className="relative container mx-auto flex flex-wrap items-center justify-between gap-4 py-4">
@@ -55,7 +55,7 @@ const Navbar = () => {
       </ul>
 
       {/* Search */}
-      <div className="border-input focus-within:ring-ring order-3 flex w-full items-center gap-2 rounded-xl border bg-white px-3 py-2 focus-within:ring-2 md:order-none md:w-[400px] lg:mx-auto lg:w-[500px]">
+      <div className="border-input focus-within:ring-ring order-3 mx-2 flex w-full items-center gap-2 rounded-xl border bg-white px-3 py-2 focus-within:ring-2 md:order-none md:w-[400px] lg:mx-auto lg:w-[500px]">
         <IoSearch size={20} className="text-muted-foreground" />
         <input
           type="text"
