@@ -69,7 +69,14 @@ export const getAddressesController = async (
     const userId = user.id;
 
     const addresses = await getAddressesByUserId(userId);
-    res.status(200).json({ addresses });
+
+    // Convert is_default from 0/1 to boolean
+    const convertedAddresses = addresses.map((address) => ({
+      ...address,
+      is_default: Boolean(address.is_default),
+    }));
+
+    res.status(200).json({ addresses: convertedAddresses });
   } catch (error) {
     next(error);
   }
