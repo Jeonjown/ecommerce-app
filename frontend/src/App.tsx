@@ -16,6 +16,8 @@ import Categories from "./pages/Categories";
 import CategoryProducts from "./pages/CategoryProducts";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import Profile from "./pages/Profile";
 function App() {
   const { data } = useGetLoggedInUser();
 
@@ -34,6 +36,8 @@ function App() {
           <Route element={<PrivateRoutes />}>
             <Route path="/cart" element={<Cart />} />
             <Route path="/products/:slug" element={<ProductDetails />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />

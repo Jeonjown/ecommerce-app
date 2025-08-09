@@ -1,5 +1,3 @@
-// src/controllers/productController.ts
-
 import { Request, Response, NextFunction } from 'express';
 import {
   createProduct,
@@ -9,29 +7,12 @@ import {
   deleteProduct,
   getProductBySlug,
 } from '../models/productModel';
-import {
-  getOptionsByProductId,
-  createOption,
-  deleteOptionsByOptionsId,
-} from '../models/optionModel';
-import {
-  getOptionValuesByOptionId,
-  deleteOptionValuesByOptionId,
-  createOptionValue,
-} from '../models/optionValueModel';
-import {
-  getVariantsByProductId,
-  createVariant,
-  deleteVariantById,
-} from '../models/variantModel';
-import {
-  getVariantValuesByVariantId,
-  deleteVariantValuesByVariantId,
-  createVariantValue,
-} from '../models/variantValueModel';
+import { getOptionsByProductId } from '../models/optionModel';
+import { getOptionValuesByOptionId } from '../models/optionValueModel';
+import { getVariantsByProductId } from '../models/variantModel';
+import { getVariantValuesByVariantId } from '../models/variantValueModel';
 import { ApiError } from '../utils/ApiError';
 import { generateSlug } from '../utils/generateSlug';
-import { generateSku } from '../utils/generateSku';
 import { deleteImageByUrl } from '../utils/deleteImageByUrl';
 import { getCategoryById } from '../models/categoryModel';
 

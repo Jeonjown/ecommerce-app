@@ -1,6 +1,6 @@
 // controllers/userController.ts
 import { NextFunction, Request, Response } from 'express';
-import { getAllUsers, createUser, getUserById } from '../models/userModel';
+import { getAllUsers, getUserById } from '../models/userModel';
 import { ApiError } from '../utils/ApiError';
 import { AuthenticatedRequest } from '../middlewares/authenticateUser';
 

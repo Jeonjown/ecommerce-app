@@ -8,6 +8,7 @@ import Loading from "./Loading";
 import Error from "./Error";
 import { useUpdateCartItem } from "@/hooks/useUpdateCartItem";
 import { useRemoveCartItem } from "@/hooks/useRemoveCartItem";
+import { Link } from "react-router-dom";
 
 const Cart = () => {
   const { data: items, isPending, isError } = useGetUserCart();
@@ -91,7 +92,21 @@ const Cart = () => {
               <span className="text-xl font-semibold">
                 ₱{totalPrice.toFixed(2)}
               </span>
-              <Button>Check Out</Button>
+              <Button asChild>
+                <Link
+                  to={"/checkout"}
+                  state={{ items, totalPrice, totalQuantity }}
+                  onClick={() => {
+                    console.log("Passing to checkout:", {
+                      items,
+                      totalPrice,
+                      totalQuantity,
+                    });
+                  }}
+                >
+                  Check Out
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

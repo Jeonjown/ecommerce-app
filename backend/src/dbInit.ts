@@ -1,14 +1,133 @@
 import pool from './db';
 
 export async function initDb() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
+  const tables = [
+    // 1. users
+    `CREATE TABLE IF NOT EXISTS users (
       id INT AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
       email VARCHAR(100) UNIQUE NOT NULL,
       password VARCHAR(255) NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  console.log('✅ Users table ensured.');
+    )`,
+
+    // 2. addresses (linked to users)
+    `CREATE TABLE IF NOT EXISTS addresses (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      full_name VARCHAR(255),
+      phone VARCHAR(30),
+      street_address TEXT,
+      city VARCHAR(100),
+      province VARCHAR(100),
+      postal_code VARCHAR(20),
+      country VARCHAR(100) DEFAULT 'Philippines',
+      is_default TINYINT(1) DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )`,
+
+    // 3. categories
+    `CREATE TABLE IF NOT EXISTS categories (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      slug VARCHAR(255) NOT NULL UNIQUE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )`,
+
+    // 4. products
+    `CREATE TABLE IF NOT EXISTS products (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      category_id INT NOT NULL,
+      full_name VARCHAR(255) NOT NULL,
+      brand VARCHAR(100) NOT NULL,
+      slug VARCHAR(255) NOT NULL UNIQUE,
+      description TEXT,
+      is_active TINYINT(1) DEFAULT 1,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+    )`,
+
+    // 5. product_options
+    `CREATE TABLE IF NOT EXISTS product_options (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      product_id INT NOT NULL,
+      name VARCHAR(100) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    )`,
+
+    // 6. product_option_values
+    `CREATE TABLE IF NOT EXISTS product_option_values (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      product_option_id INT NOT NULL,
+      value VARCHAR(100) NOT NULL,
+      slug VARCHAR(100) NOT NULL UNIQUE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (product_option_id) REFERENCES product_options(id) ON DELETE CASCADE
+    )`,
+
+    // 7. product_variants
+    `CREATE TABLE IF NOT EXISTS product_variants (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      product_id INT NOT NULL,
+      sku VARCHAR(100) UNIQUE,
+      price DECIMAL(10,2) NOT NULL,
+      name TEXT,
+      description TEXT,
+      stock INT DEFAULT 0,
+      image_url VARCHAR(255),
+      is_active TINYINT(1) DEFAULT 1,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    )`,
+
+    // 8. product_variant_values
+    `CREATE TABLE IF NOT EXISTS product_variant_values (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      product_variant_id INT NOT NULL,
+      product_option_id INT NOT NULL,
+      product_option_value_id INT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (product_variant_id) REFERENCES product_variants(id) ON DELETE CASCADE,
+      FOREIGN KEY (product_option_id) REFERENCES product_options(id) ON DELETE CASCADE,
+      FOREIGN KEY (product_option_value_id) REFERENCES product_option_values(id) ON DELETE CASCADE
+    )`,
+
+    // 9. cart
+    `CREATE TABLE IF NOT EXISTS cart (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT,
+      product_id INT NOT NULL,
+      variant_id INT NOT NULL,
+      name VARCHAR(255) NOT NULL,
+      price DECIMAL(10, 2) NOT NULL,
+      image_url VARCHAR(255),
+      quantity INT NOT NULL DEFAULT 1,
+      stock INT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY unique_cart (user_id, variant_id),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+      FOREIGN KEY (variant_id) REFERENCES product_variants(id) ON DELETE CASCADE
+    )`,
+  ];
+
+  for (const sql of tables) {
+    try {
+      await pool.query(sql);
+    } catch (err) {
+      console.error('Failed to run SQL:', err);
+      throw err;
+    }
+  }
+
+  console.log('✅ All tables ensured.');
 }

@@ -65,7 +65,7 @@ const Navbar = () => {
       </div>
 
       {/* Icons */}
-      <div className="ml-auto flex items-center space-x-4">
+      <div className="mr-3 ml-auto flex items-center space-x-4">
         {/* Cart (unchanged) */}
         <Link to="cart" className="hover:bg-muted relative">
           <button className="flex items-center space-x-1 md:cursor-pointer">
@@ -81,7 +81,7 @@ const Navbar = () => {
         {data ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="hover:bg-muted' flex items-center gap-1 hover:cursor-pointer">
+              <div className="hover:bg-muted flex items-center gap-1 hover:cursor-pointer">
                 <FaRegUser size={22} />
                 <span className="font-medium">{data.user.name}</span>
                 <MdOutlineKeyboardArrowDown />

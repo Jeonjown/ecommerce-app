@@ -2,8 +2,10 @@ import pool from '../db';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { User } from '../types/models/user';
 
+type UserRow = User & RowDataPacket;
+
 export const getAllUsers = async (): Promise<User[]> => {
-  const [rows] = await pool.query<User[]>(
+  const [rows] = await pool.query<UserRow[]>(
     'SELECT id, name, email, role, created_at FROM users'
   );
   return rows;
@@ -19,7 +21,7 @@ export const createUser = async (
     [name, email, password]
   );
 
-  const [rows] = await pool.query<User[]>(
+  const [rows] = await pool.query<UserRow[]>(
     `SELECT id, name, email, role, created_at FROM users WHERE id = ?`,
     [result.insertId]
   );
@@ -30,7 +32,7 @@ export const createUser = async (
 export const getUserByEmail = async (
   email: string
 ): Promise<User | undefined> => {
-  const [rows] = await pool.query<User[]>(
+  const [rows] = await pool.query<UserRow[]>(
     'SELECT id, name, email, role, created_at, password FROM users WHERE email = ?',
     [email]
   );
@@ -40,9 +42,9 @@ export const getUserByEmail = async (
 export const getUserById = async (
   resultId: number
 ): Promise<User | undefined> => {
-  const [row] = await pool.query<User[]>(
+  const [rows] = await pool.query<UserRow[]>(
     'SELECT id, name, email, role, created_at FROM users WHERE id = ?',
     [resultId]
   );
-  return row[0];
+  return rows[0];
 };
