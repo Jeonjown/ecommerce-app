@@ -15,6 +15,7 @@ import optionValueRoutes from './routes/optionValueRoutes';
 import variantRoutes from './routes/variantRoutes';
 import cartRoutes from './routes/cartRoutes';
 import addressRoutes from './routes/addressRoutes';
+import orderRoutes from './routes/orderRoutes';
 
 const app = express();
 
@@ -55,7 +56,7 @@ app.use(
 app.use(
   '/api/products/variants',
   authenticateUser,
-  checkUserRole('admin'),
+  checkUserRole('user', 'admin'),
   variantRoutes
 );
 
@@ -64,6 +65,13 @@ app.use(
   authenticateUser,
   checkUserRole('user', 'admin'),
   cartRoutes
+);
+
+app.use(
+  '/api/orders',
+  authenticateUser,
+  checkUserRole('user', 'admin'),
+  orderRoutes
 );
 
 app.use(

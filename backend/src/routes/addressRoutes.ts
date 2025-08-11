@@ -15,7 +15,7 @@ router.get('/', getAddressesController);
 
 router.get('/:id', getAddressByIdController);
 
-router.put('/:id', updateAddressController);
+router.patch('/:id', updateAddressController);
 
 router.delete('/:id', deleteAddressController);
 

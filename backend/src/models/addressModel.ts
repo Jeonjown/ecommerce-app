@@ -112,3 +112,18 @@ export const deleteAddressByIdAndUserId = async (
   );
   return result.affectedRows > 0;
 };
+
+export const unsetDefaultAddresses = async (
+  userId: number,
+  excludeAddressId?: number
+) => {
+  let query = `UPDATE addresses SET is_default = 0 WHERE user_id = ?`;
+  const params: any[] = [userId];
+
+  if (excludeAddressId) {
+    query += ` AND id != ?`;
+    params.push(excludeAddressId);
+  }
+
+  await pool.query(query, params);
+};

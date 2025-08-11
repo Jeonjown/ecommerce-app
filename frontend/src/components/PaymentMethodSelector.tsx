@@ -12,7 +12,7 @@ const PaymentMethodSelector = ({
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Payment Method</h3>
 
-      <RadioGroup value={value} onValueChange={onChange} className="space-y-3">
+      <RadioGroup value={value} onValueChange={onChange} className="flex">
         {/* Online */}
         <div
           onClick={() => onChange("online")}

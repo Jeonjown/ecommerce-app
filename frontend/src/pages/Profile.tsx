@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useGetLoggedInUser } from "@/hooks/useGetLoggedInUser";
-import AddressModal from "@/components/AddressModal";
 import Avatar from "react-avatar";
+import AddressCard from "@/components/AddressCard";
 
 const Profile = () => {
   const { data: userData } = useGetLoggedInUser();
@@ -46,7 +46,7 @@ const Profile = () => {
       </Card>
 
       {/* Address Card */}
-      <AddressModal />
+      <AddressCard />
     </div>
   );
 };

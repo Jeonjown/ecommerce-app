@@ -231,6 +231,8 @@ export const getProductVariants = async (
     const variant: ProductVariant = {
       id: row.id,
       product_id: row.product_id,
+      name: row.name,
+      description: row.description,
       sku: row.sku,
       price: row.price,
       stock: row.stock,

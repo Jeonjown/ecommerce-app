@@ -1,20 +1,19 @@
+import DeliveryAddress from "@/components/DeliveryAddress";
 import PaymentMethodSelector from "@/components/PaymentMethodSelector";
 import { Button } from "@/components/ui/button";
-import { useGetLoggedInUser } from "@/hooks/useGetLoggedInUser";
 import type { CartItem } from "@/types/api/cart";
 import { useState } from "react";
-import { FaLocationDot } from "react-icons/fa6";
 import { useLocation } from "react-router-dom";
 
 const Checkout = () => {
-  const { data } = useGetLoggedInUser();
-  console.log(data);
   const { state } = useLocation();
   const { items = [], totalPrice = 0 } = state || {};
   const [paymentMethod, setPaymentMethod] = useState("online");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
 
   const handlePlaceOrder = () => {
     const payload = {
+      deliveryAddress,
       paymentMethod,
       items: items.map((item: CartItem) => ({
         productId: item.product_id,
@@ -34,29 +33,7 @@ const Checkout = () => {
   return (
     <div className="space-y-6">
       {/* Delivery Address */}
-      <div className="rounded-lg border bg-white p-6 shadow-sm">
-        <div className="mb-4 flex items-center space-x-2">
-          <FaLocationDot />
-          <h3 className="text-xl font-semibold">Delivery Address</h3>
-        </div>
-
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="font-semibold">
-            <p>John Doe</p>
-            <p>0930492049</p>
-          </div>
-
-          <p className="flex-1 text-gray-700 md:mx-8">
-            123 Palmview Street, Barangay San Isidro, Quezon City, Metro Manila,
-            Philippines, 1101
-          </p>
-
-          <button className="font-semibold text-blue-500 hover:underline">
-            Change
-          </button>
-        </div>
-      </div>
-
+      <DeliveryAddress setDeliveryAddress={setDeliveryAddress} />
       {/* Products Ordered */}
       <div className="rounded-lg border bg-white p-6 shadow-sm">
         <h3 className="mb-4 text-xl font-semibold">Products Ordered</h3>

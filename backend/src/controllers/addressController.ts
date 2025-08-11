@@ -4,6 +4,7 @@ import {
   deleteAddressByIdAndUserId,
   getAddressByIdAndUserId,
   getAddressesByUserId,
+  unsetDefaultAddresses,
   updateAddressByIdAndUserId,
 } from '../models/addressModel';
 import { ApiError } from '../utils/ApiError';
@@ -38,6 +39,10 @@ export const createAddressController = async (
       !postal_code
     ) {
       throw new ApiError('Please fill all required fields.', 400);
+    }
+
+    if (req.body.is_default) {
+      await unsetDefaultAddresses(userId);
     }
 
     const address = await createAddress({
@@ -117,6 +122,10 @@ export const updateAddressController = async (
     const userId = user.id;
 
     const { id } = req.params;
+
+    if (req.body.is_default) {
+      await unsetDefaultAddresses(userId, Number(id));
+    }
 
     const updated = await updateAddressByIdAndUserId(
       Number(id),

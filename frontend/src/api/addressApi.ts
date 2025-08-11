@@ -57,7 +57,7 @@ export const updateAddress = async (
   payload: Partial<Address>,
 ): Promise<{ message: string }> => {
   try {
-    const res = await api.put(`/users/address/${id}`, payload, {
+    const res = await api.patch(`/users/address/${id}`, payload, {
       withCredentials: true,
     });
 
