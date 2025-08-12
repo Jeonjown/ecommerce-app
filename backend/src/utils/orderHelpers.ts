@@ -1,9 +1,15 @@
 import { getVariantById } from '../models/variantModel';
 import { ApiError } from './ApiError';
+import type { OrderItem } from '../types/models/orderItems';
 
-export async function prepareOrderData(items: any[]) {
+export async function prepareOrderData(
+  items: { productId: number; variantId: number; quantity: number }[]
+): Promise<{
+  totalPrice: number;
+  orderItems: Omit<OrderItem, 'id' | 'order_id'>[];
+}> {
   let totalPrice = 0;
-  const preparedItems = [];
+  const orderItems: Omit<OrderItem, 'id' | 'order_id'>[] = [];
 
   for (const item of items) {
     const variant = await getVariantById(item.variantId);
@@ -25,14 +31,14 @@ export async function prepareOrderData(items: any[]) {
     const itemTotal = variant.price * item.quantity;
     totalPrice += itemTotal;
 
-    preparedItems.push({
-      productId: item.productId,
-      variantId: item.variantId,
+    orderItems.push({
+      product_id: item.productId,
+      variant_id: item.variantId,
       quantity: item.quantity,
-      unitPrice: variant.price,
-      totalPrice: itemTotal,
+      unit_price: variant.price,
+      name: variant.name,
     });
   }
 
-  return { totalPrice, preparedItems };
+  return { totalPrice, orderItems };
 }

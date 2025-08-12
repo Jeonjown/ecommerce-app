@@ -11,7 +11,7 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("online");
   const [deliveryAddress, setDeliveryAddress] = useState("");
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     const payload = {
       deliveryAddress,
       paymentMethod,
@@ -22,11 +22,46 @@ const Checkout = () => {
       })),
     };
 
-    if (payload.paymentMethod === "online") {
-      console.log("Order payload:", payload);
-    } else {
-      console.log("Order payload:", payload);
-      // send `payload` to your backend
+    try {
+      if (paymentMethod === "online") {
+        // Call your Stripe order endpoint
+        const res = await fetch("http://localhost:3000/api/orders/stripe", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to create Stripe checkout session");
+        }
+
+        const data = await res.json();
+        // Redirect to Stripe Checkout page
+        window.location.href = data.url;
+      } else {
+        // Call your COD order endpoint
+        const res = await fetch("http://localhost:3000/api/orders/cod", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to create COD order");
+        }
+
+        const data = await res.json();
+        alert(`Order placed successfully! Order ID: ${data.orderId}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("There was an error placing your order. Please try again.");
     }
   };
 

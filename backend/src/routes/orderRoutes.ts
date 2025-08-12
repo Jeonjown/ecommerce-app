@@ -1,11 +1,15 @@
 import express from 'express';
-import { createOrderController } from '../controllers/orderController';
+import {
+  createCodOrderController,
+  createStripeCheckoutSessionController,
+} from '../controllers/orderController';
 
 const router = express.Router();
 
 // POST	/orders	Create a new order
 
-router.post('/', createOrderController);
+router.post('/cod', createCodOrderController);
+router.post('/stripe', createStripeCheckoutSessionController);
 
 // GET	/orders	List all orders (for admin or user)
 // GET	/orders/:id	Get details of a specific order

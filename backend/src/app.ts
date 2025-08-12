@@ -16,6 +16,7 @@ import variantRoutes from './routes/variantRoutes';
 import cartRoutes from './routes/cartRoutes';
 import addressRoutes from './routes/addressRoutes';
 import orderRoutes from './routes/orderRoutes';
+import webhook from './routes/webhook';
 
 const app = express();
 
@@ -86,6 +87,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/images', imageRoutes);
 
 app.use('/api/auth', authRoutes);
+
+app.use('/stripe-webhook', webhook);
 
 app.use(errorHandler);
 

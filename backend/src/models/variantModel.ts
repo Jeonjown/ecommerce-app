@@ -1,4 +1,4 @@
-import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import { PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import pool from '../db';
 import { ProductVariant } from '../types/models/products';
 
@@ -103,3 +103,18 @@ export const getVariantOptionsByVariantId = async (variantId: number) => {
 
   return grouped;
 };
+
+export async function deductVariantStock(
+  variantId: number,
+  quantity: number,
+  connection: PoolConnection
+) {
+  const [result] = await connection.query<ResultSetHeader>(
+    `UPDATE product_variants
+     SET stock = stock - ?
+     WHERE id = ? AND stock >= ?`,
+    [quantity, variantId, quantity]
+  );
+
+  return result.affectedRows > 0;
+}
