@@ -141,8 +141,8 @@ export const createStripeCheckoutSessionController = async (
         quantity: item.quantity,
       })),
       mode: 'payment',
-      success_url: `${process.env.CLIENT_URL}/order-success?orderId=${orderId}`,
-      cancel_url: `${process.env.CLIENT_URL}/order-cancelled?orderId=${orderId}`,
+      success_url: `${process.env.CLIENT_URL}/order-success/${orderId}`,
+      cancel_url: `${process.env.CLIENT_URL}/order-cancelled/${orderId}`,
       metadata: {
         orderId: orderId.toString(),
       },

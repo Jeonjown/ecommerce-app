@@ -37,3 +37,7 @@ server/*.log
 coverage/
 cypress/videos/
 cypress/screenshots/
+
+
+
+certs/

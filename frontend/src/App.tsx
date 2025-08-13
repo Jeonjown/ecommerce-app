@@ -18,6 +18,8 @@ import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Profile from "./pages/Profile";
+import SuccessOrder from "./pages/SuccessOrder";
+import FailedOrder from "./pages/FailedOrder";
 function App() {
   const { data } = useGetLoggedInUser();
 
@@ -38,6 +40,8 @@ function App() {
             <Route path="/products/:slug" element={<ProductDetails />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/order-success/:orderId" element={<SuccessOrder />} />
+            <Route path="/order-failed/:orderId" element={<FailedOrder />} />
           </Route>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
