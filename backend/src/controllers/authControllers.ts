@@ -74,8 +74,8 @@ export const logoutUserController = async (
   try {
     res.clearCookie('authToken', {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production', // only HTTPS in prod
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // <--- important
       path: '/',
     });
 
