@@ -23,7 +23,10 @@ const app = express();
 // parsers
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: [
+      'http://localhost:5173',
+      'https://techhaven-frontend.onrender.com',
+    ],
     credentials: true,
   })
 );
