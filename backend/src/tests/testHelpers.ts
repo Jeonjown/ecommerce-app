@@ -1,6 +1,6 @@
 import { hashPassword } from '../utils/hashPassword';
 import { validateEmail } from '../utils/validateEmail';
-import validatePassword from '../utils/validatePassword';
+import { validatePassword } from '../utils/validatePassword';
 
 (async () => {
   try {
