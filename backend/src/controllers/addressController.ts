@@ -27,7 +27,7 @@ export const createAddressController = async (
       province,
       postal_code,
       country = 'Philippines',
-      is_default = 0,
+      is_default = false,
     } = req.body;
 
     if (
@@ -41,7 +41,15 @@ export const createAddressController = async (
       throw new ApiError('Please fill all required fields.', 400);
     }
 
-    if (req.body.is_default) {
+    const existing = await getAddressesByUserId(userId);
+
+    let finalIsDefault = is_default;
+
+    if (existing.length === 0) {
+      // First address always becomes default
+      finalIsDefault = true;
+    } else if (is_default) {
+      // If making this one default, unset the current default
       await unsetDefaultAddresses(userId);
     }
 
@@ -54,7 +62,7 @@ export const createAddressController = async (
       province,
       postal_code,
       country,
-      is_default,
+      is_default: finalIsDefault,
     });
 
     res.status(201).json({ message: 'Address created successfully', address });
