@@ -25,7 +25,8 @@ app.use(
   cors({
     origin: [
       'http://localhost:5173',
-      'https://techhaven-frontend.onrender.com',
+      'https://techhaven-backend.onrender.com',
+      'https://techhaven-frontend.netlify.app/',
     ],
     credentials: true,
   })
