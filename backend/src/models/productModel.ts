@@ -92,49 +92,111 @@ export const getProducts = async (
   filters: ProductFilters = {}
 ): Promise<ProductWithCategory[]> => {
   const [rows] = await pool.query<RowDataPacket[]>(`
-  SELECT 
-    p.id, p.name, p.slug, p.description, p.is_active, p.created_at,
-    c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
-    c.created_at AS category_created_at, c.updated_at AS category_updated_at
-  FROM products p
-  JOIN categories c ON p.category_id = c.id
-`);
+    SELECT 
+      p.id, p.name, p.slug, p.description, p.is_active, p.created_at, p.updated_at,
+      c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
+      c.created_at AS category_created_at, c.updated_at AS category_updated_at
+    FROM products p
+    JOIN categories c ON p.category_id = c.id
+  `);
 
-  const fullProducts: ProductWithCategory[] = [];
+  if (!rows.length) return [];
 
-  for (const row of rows) {
-    const product: ProductWithCategory = {
-      id: row.id,
-      name: row.name,
-      slug: row.slug,
-      description: row.description,
-      is_active: !!row.is_active,
-      created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at),
-      category: {
-        id: row.category_id,
-        name: row.category_name,
-        slug: row.category_slug,
-        created_at: row.category_created_at,
-        updated_at: row.category_updated_at,
-      },
-      variants: [],
-      options: [],
-    };
+  const productIds = rows.map((r) => r.id);
 
-    const variants = await getProductVariants(product.id);
-    const options = await getProductOptions(product.id);
+  // Fetch all variants for all products
+  const [variantRows] = await pool.query<RowDataPacket[]>(
+    `SELECT * FROM product_variants WHERE product_id IN (?)`,
+    [productIds]
+  );
 
-    fullProducts.push({
-      ...product,
-      variants,
-      options,
+  // Fetch all variant option values for all variants
+  const variantIds = variantRows.map((v) => v.id);
+  const [variantOptionRows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+       pvv.product_variant_id,
+       po.id AS option_id,
+       po.name AS option_name,
+       pov.id AS option_value_id,
+       pov.value AS option_value
+     FROM product_variant_values pvv
+     JOIN product_options po ON po.id = pvv.product_option_id
+     JOIN product_option_values pov ON pov.id = pvv.product_option_value_id
+     WHERE pvv.product_variant_id IN (?)`,
+    [variantIds]
+  );
+
+  // Fetch all product options & values for all products
+  const [productOptionRows] = await pool.query<RowDataPacket[]>(
+    `SELECT 
+       po.product_id,
+       po.id AS option_id,
+       po.name AS option_name,
+       pov.id AS option_value_id,
+       pov.value AS option_value
+     FROM product_options po
+     JOIN product_option_values pov ON pov.product_option_id = po.id
+     WHERE po.product_id IN (?)`,
+    [productIds]
+  );
+
+  // Group data
+  const variantsMap: Record<number, ProductVariant[]> = {};
+  variantRows.forEach((v) => {
+    variantsMap[v.product_id] = variantsMap[v.product_id] || [];
+    variantsMap[v.product_id].push({
+      id: v.id,
+      product_id: v.product_id,
+      name: v.name,
+      description: v.description,
+      sku: v.sku,
+      price: v.price,
+      stock: v.stock,
+      image_url: v.image_url,
+      is_active: !!v.is_active,
+      options: variantOptionRows
+        .filter((o) => o.product_variant_id === v.id)
+        .map((o) => ({
+          option_id: o.option_id,
+          option_name: o.option_name,
+          option_value_id: o.option_value_id,
+          option_value: o.option_value,
+        })),
     });
-  }
+  });
 
-  const filtered = filterProducts(fullProducts, filters);
+  const optionsMap: Record<number, ProductOptionWithValues[]> = {};
+  productOptionRows.forEach((o) => {
+    optionsMap[o.product_id] = optionsMap[o.product_id] || [];
+    optionsMap[o.product_id].push({
+      option_id: o.option_id,
+      option_name: o.option_name,
+      option_value_id: o.option_value_id,
+      option_value: o.option_value,
+    });
+  });
 
-  return filtered;
+  // Build products
+  const products: ProductWithCategory[] = rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description,
+    is_active: !!row.is_active,
+    created_at: new Date(row.created_at),
+    updated_at: new Date(row.updated_at),
+    category: {
+      id: row.category_id,
+      name: row.category_name,
+      slug: row.category_slug,
+      created_at: row.category_created_at,
+      updated_at: row.category_updated_at,
+    },
+    variants: variantsMap[row.id] || [],
+    options: optionsMap[row.id] || [],
+  }));
+
+  return filterProducts(products, filters);
 };
 
 export const getProductBySlug = async (
