@@ -1,2 +1,6 @@
-- products
-- add product icons
+- add success / failed page on cod and cash payment
+- change stripe webhook to match new domain
+- clear the cart items when order is success
+- make an admin dashboard for the order
+- make default address on click
+- make address have modal when no address
