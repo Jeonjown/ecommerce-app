@@ -26,7 +26,7 @@ app.use(
     origin: [
       'http://localhost:5173',
       'https://techhaven-backend.onrender.com',
-      'https://techhaven-frontend.netlify.app/',
+      'https://ecommerce-app-two-dun.vercel.app',
     ],
     credentials: true,
   })
