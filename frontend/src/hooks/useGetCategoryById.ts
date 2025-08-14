@@ -3,7 +3,7 @@ import type { Category } from "@/types/api/categories";
 
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetCategoryById = (id: string) => {
+export const useGetCategoryById = (id: number) => {
   return useQuery<Category>({
     queryKey: ["categoryById", id],
     queryFn: () => getCategoryById(id),

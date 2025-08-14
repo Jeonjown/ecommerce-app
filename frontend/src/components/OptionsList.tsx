@@ -27,7 +27,7 @@ interface OptionListProps {
 }
 
 const OptionsList = ({ id }: OptionListProps) => {
-  const { data } = useGetOptionsByProductId(String(id));
+  const { data } = useGetOptionsByProductId(Number(id));
   const { mutate } = useCreateOptions(String(id));
   const { mutate: createOptionValues } = useCreateOptionValue(String(id));
 
