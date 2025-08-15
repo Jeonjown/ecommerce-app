@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const isDev = import.meta.env.MODE === "production";
+const isDev = import.meta.env.MODE === "development";
 
 const api = axios.create({
   baseURL: isDev
