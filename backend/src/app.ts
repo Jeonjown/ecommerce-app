@@ -32,6 +32,10 @@ app.use(
   })
 );
 app.use(cookieParser());
+
+// stripe webhook
+app.use('/stripe-webhook', webhook);
+
 app.use(express.json());
 
 // routes
@@ -91,8 +95,6 @@ app.use('/api/products', productRoutes);
 app.use('/api/images', imageRoutes);
 
 app.use('/api/auth', authRoutes);
-
-app.use('/stripe-webhook', webhook);
 
 app.use(errorHandler);
 
