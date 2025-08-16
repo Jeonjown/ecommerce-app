@@ -145,6 +145,7 @@ export const createStripeCheckoutSessionController = async (
       cancel_url: `${process.env.CLIENT_URL}/order-cancelled/${orderId}`,
       metadata: {
         orderId: orderId.toString(),
+        userId: user.id.toString(),
       },
     });
 

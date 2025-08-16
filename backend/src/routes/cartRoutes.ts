@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   addItemtoCartController,
+  clearCartItemsFromCartController,
   getCartItemsByLoggedUserController,
   removeItemFromCartController,
   syncUserCartController,
@@ -20,6 +21,9 @@ router.get('/', getCartItemsByLoggedUserController);
 
 //  Update item in cart (e.g. quantity)
 router.put('/', updateItemFromCartController);
+
+//  Clear items from cart
+router.delete('/clear', clearCartItemsFromCartController);
 
 //  Remove item from cart
 router.delete('/:variant_id', removeItemFromCartController);

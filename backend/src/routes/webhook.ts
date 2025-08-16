@@ -4,11 +4,12 @@ import Stripe from 'stripe';
 import bodyParser from 'body-parser';
 import { stripe } from '../config/stripe';
 import { markOrderPaid } from '../models/orderModel';
+import { clearCartItem } from '../models/cartModel';
 
 const router = express.Router();
 
 router.post(
-  '/',
+  '/stripe-webhook',
   bodyParser.raw({ type: 'application/json' }),
   async (req: Request, res: Response): Promise<void> => {
     const sig = req.headers['stripe-signature'];
@@ -23,15 +24,17 @@ router.post(
     } catch (err) {
       console.error('Webhook signature verification failed.', err);
       res.status(400).send(`Webhook Error: ${(err as Error).message}`);
-      return; // stop execution
+      return;
     }
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       const orderId = session.metadata?.orderId;
+      const userId = session.metadata?.userId;
 
-      if (orderId) {
+      if (orderId && userId) {
         await markOrderPaid(Number(orderId));
+        await clearCartItem(Number(userId));
       }
     }
 

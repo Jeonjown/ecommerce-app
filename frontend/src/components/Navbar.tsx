@@ -70,10 +70,12 @@ const Navbar = () => {
         <Link to="cart" className="hover:bg-muted relative">
           <button className="flex items-center space-x-1 md:cursor-pointer">
             <BsCartPlus size={24} />
-            <span className="font-semibold">Cart</span>
-            <span className="bg-destructive absolute -top-2 -left-2 flex h-5 w-5 items-center justify-center rounded-full text-xs text-white">
-              {totalQuantity}
-            </span>
+            <span className="hidden font-semibold sm:block">Cart</span>
+            {totalQuantity !== 0 && (
+              <span className="bg-destructive absolute -top-2 -left-2 flex h-5 w-5 items-center justify-center rounded-full text-xs text-white">
+                {totalQuantity}
+              </span>
+            )}
           </button>
         </Link>
 
@@ -83,8 +85,10 @@ const Navbar = () => {
             <DropdownMenuTrigger asChild>
               <div className="hover:bg-muted flex items-center gap-1 hover:cursor-pointer">
                 <FaRegUser size={22} />
-                <span className="font-medium">{data.user.name}</span>
-                <MdOutlineKeyboardArrowDown />
+                <span className="hidden font-medium sm:block">
+                  {data.user.name}
+                </span>
+                <MdOutlineKeyboardArrowDown className="hidden sm:block" />
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

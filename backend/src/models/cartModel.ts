@@ -119,3 +119,12 @@ export const removeCartItem = async (userId: number, variantId: number) => {
 
   return result.affectedRows;
 };
+
+export const clearCartItem = async (userId: number) => {
+  const [result] = await pool.query<ResultSetHeader>(
+    `DELETE FROM cart WHERE user_id = ? `,
+    [userId]
+  );
+
+  return result.affectedRows;
+};

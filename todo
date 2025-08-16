@@ -1,4 +1,3 @@
-- add success / failed page on cod and cash payment
 - change stripe webhook to match new domain
 - make default address on click
 - make address have modal when no address

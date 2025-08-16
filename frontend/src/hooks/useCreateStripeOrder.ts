@@ -6,6 +6,9 @@ import { useMutation } from "@tanstack/react-query";
 export const useCreateStripeOrder = () => {
   return useMutation({
     mutationFn: createStripeOrder,
+    onSuccess: ({ url }) => {
+      window.location.href = url;
+    },
     onError: (error: unknown) => {
       if (error instanceof Error) {
         toast.error(error.message);

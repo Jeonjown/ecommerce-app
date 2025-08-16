@@ -88,3 +88,19 @@ export const removeCartItem = async (
     throw new Error("Unexpected error removing cart item.");
   }
 };
+
+export const clearCartItem = async (): Promise<{ message: string }> => {
+  try {
+    const res = await api.delete(`/cart/clear`, {
+      withCredentials: true,
+    });
+    return res.data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to remove cart item.",
+      );
+    }
+    throw new Error("Unexpected error removing cart item.");
+  }
+};

@@ -24,8 +24,6 @@ const AddressList = ({ addresses, onEdit, onDelete }: AddressListProps) => {
     }
   };
 
-  console.log(addresses);
-
   return (
     <>
       {addresses.map((address) => (

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ApiError } from '../utils/ApiError';
 import {
   addItemtoCart,
+  clearCartItem,
   getCartItemsByLoggedUser,
   removeCartItem,
   syncUserCart,
@@ -130,6 +131,33 @@ export const updateItemFromCartController = async (
     }
 
     res.status(200).json({ message: 'Cart item updated', result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const clearCartItemsFromCartController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { user } = req as Request & { user: User };
+
+    if (!user) {
+      throw new ApiError('Unauthorized', 401);
+    }
+
+    const affectedRows = await clearCartItem(user.id);
+
+    if (affectedRows === 0) {
+      throw new ApiError('No cart items found for this user', 404);
+    }
+
+    res.status(200).json({
+      message: 'Cart cleared successfully',
+      cleared: affectedRows,
+    });
   } catch (error) {
     next(error);
   }
