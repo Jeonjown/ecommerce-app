@@ -1,7 +1,6 @@
 // routes/webhook.ts
 import express, { Request, Response } from 'express';
 import Stripe from 'stripe';
-import bodyParser from 'body-parser';
 import { stripe } from '../config/stripe';
 import { markOrderPaid } from '../models/orderModel';
 import { clearCartItem } from '../models/cartModel';
@@ -10,7 +9,7 @@ const router = express.Router();
 
 router.post(
   '/',
-  bodyParser.raw({ type: 'application/json' }),
+  express.raw({ type: 'application/json' }),
   async (req: Request, res: Response): Promise<void> => {
     const sig = req.headers['stripe-signature'];
 
@@ -32,26 +31,9 @@ router.post(
       const orderId = session.metadata?.orderId;
       const userId = session.metadata?.userId;
 
-      console.log('✅ Webhook triggered. Metadata:', session.metadata);
-
       if (orderId && userId) {
-        console.log(
-          `🔔 Marking order ${orderId} paid and clearing cart for user ${userId}`
-        );
-
-        const mark = await markOrderPaid(Number(orderId));
-        console.log('Order update result:', mark);
-
-        const cleared = await clearCartItem(Number(userId));
-        console.log(
-          `🛒 Cleared cart for user ${userId}, rows deleted:`,
-          cleared
-        );
-      } else {
-        console.warn(
-          '⚠️ Missing metadata. OrderId or UserId not found:',
-          session.metadata
-        );
+        await markOrderPaid(Number(orderId));
+        await clearCartItem(Number(userId));
       }
     }
 
