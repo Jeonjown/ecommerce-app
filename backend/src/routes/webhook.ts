@@ -9,7 +9,7 @@ import { clearCartItem } from '../models/cartModel';
 const router = express.Router();
 
 router.post(
-  '/stripe-webhook',
+  '/',
   bodyParser.raw({ type: 'application/json' }),
   async (req: Request, res: Response): Promise<void> => {
     const sig = req.headers['stripe-signature'];
