@@ -17,8 +17,14 @@ interface DeliveryAddressProps {
 const DeliveryAddress = ({ setDeliveryAddress }: DeliveryAddressProps) => {
   const { data } = useGetAddresses();
 
-  const defaultAddress =
+  // find default
+  let defaultAddress =
     data?.addresses.find((address) => address.is_default) || null;
+
+  // if no default but still have addresses, fallback to the first one
+  if (!defaultAddress && data?.addresses.length) {
+    defaultAddress = data.addresses[0];
+  }
 
   // Format address string
   useEffect(() => {
@@ -77,7 +83,26 @@ const DeliveryAddress = ({ setDeliveryAddress }: DeliveryAddressProps) => {
           </Dialog>
         </div>
       ) : (
-        <p className="text-gray-500">No default address found.</p>
+        <div className="flex items-center justify-between">
+          <p className="text-gray-500">No Default address found.</p>
+
+          {/* Add Button (always shows modal) */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="font-semibold text-blue-500 hover:underline">
+                Add
+              </button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Address</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <AddressCard />
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       )}
     </div>
   );

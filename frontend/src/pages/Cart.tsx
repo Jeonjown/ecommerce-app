@@ -9,6 +9,7 @@ import Error from "./Error";
 import { useUpdateCartItem } from "@/hooks/useUpdateCartItem";
 import { useRemoveCartItem } from "@/hooks/useRemoveCartItem";
 import { Link } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
 
 const Cart = () => {
   const { data: items, isPending, isError } = useGetUserCart();
@@ -22,7 +23,22 @@ const Cart = () => {
 
   const totalQuantity = getTotalQuantity(items);
   if (items.length === 0)
-    return <p className="p-6 text-center">Your cart is empty</p>;
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Card className="w-full max-w-md text-center shadow-lg">
+          <CardContent className="flex flex-col items-center gap-4 p-8">
+            <ShoppingCart className="text-muted-foreground h-16 w-16" />
+            <h2 className="text-2xl font-semibold">Your cart is empty</h2>
+            <p className="text-muted-foreground">
+              Looks like you haven’t added anything yet.
+            </p>
+            <Button asChild>
+              <Link to="/categories">Continue Shopping</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">

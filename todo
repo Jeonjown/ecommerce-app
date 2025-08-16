@@ -1,6 +1,1 @@
-- change stripe webhook to match new domain
-- make default address on click
-- make address have modal when no address
-
-- clear the cart items when order is success
 - make an admin dashboard for the order

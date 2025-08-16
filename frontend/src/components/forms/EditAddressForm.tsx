@@ -53,7 +53,9 @@ export const EditAddressForm: React.FC<EditAddressFormProps> = ({
     mutate(
       { id: addressId, payload: values },
       {
-        onSuccess: () => onDone(),
+        onSuccess: () => {
+          onDone(); // close the form after success
+        },
       },
     );
   };
