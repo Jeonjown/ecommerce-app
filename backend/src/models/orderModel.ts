@@ -30,7 +30,9 @@ export async function markOrderPaid(orderId: number) {
   const connection = await pool.getConnection();
   try {
     await connection.execute(
-      `UPDATE orders SET payment_status = 'paid', status = 'processing' WHERE id = ?`,
+      `UPDATE orders 
+       SET payment_status = 'paid', order_status = 'processing', updated_at = NOW() 
+       WHERE id = ?`,
       [orderId]
     );
   } finally {
