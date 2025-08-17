@@ -110,7 +110,7 @@ export const createStripeCheckoutSessionController = async (
       })),
       mode: 'payment',
       success_url: `${process.env.CLIENT_URL}/order-success`,
-      cancel_url: `${process.env.CLIENT_URL}/order-cancelled`,
+      cancel_url: `${process.env.CLIENT_URL}/cart`,
       metadata: {
         userId: user.id.toString(),
         deliveryAddress,

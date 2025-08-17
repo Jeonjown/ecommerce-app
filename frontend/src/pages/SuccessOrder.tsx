@@ -1,9 +1,7 @@
 import { FaCircleCheck } from "react-icons/fa6";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const SuccessOrder = () => {
-  const { orderId } = useParams<{ orderId: string }>();
-
   return (
     <div className="flex h-[80vh] items-center justify-center px-4">
       <div className="flex flex-col items-center justify-center rounded-2xl border bg-white p-10 text-center shadow-lg">
@@ -13,15 +11,8 @@ const SuccessOrder = () => {
         </h1>
 
         <p className="text-gray-600">
-          Your order was successful. We’ll send you an update once your order is
-          on its way.
+          Your payment was successful. Your order will be processed shortly.
         </p>
-
-        {orderId && (
-          <p className="mt-4 text-gray-700">
-            Order ID: <strong>{orderId}</strong>
-          </p>
-        )}
 
         {/* Return Home button */}
         <Link
