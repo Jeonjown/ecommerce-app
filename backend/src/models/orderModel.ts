@@ -26,14 +26,35 @@ export const createOrder = async (
   return result.insertId;
 };
 
-export async function markOrderPaid(orderId: number) {
+export async function markOrderPaidAndSaveDetails(
+  orderId: number,
+  {
+    stripe_session_id,
+    stripe_payment_intent_id,
+    payment_details,
+  }: {
+    stripe_session_id: string | null;
+    stripe_payment_intent_id: string | null;
+    payment_details: any | null;
+  }
+) {
   const connection = await pool.getConnection();
   try {
     await connection.execute(
       `UPDATE orders 
-       SET payment_status = 'paid', order_status = 'processing', updated_at = NOW() 
+       SET payment_status = 'paid',
+           order_status = 'processing',
+           stripe_session_id = ?,
+           stripe_payment_intent_id = ?,
+           payment_details = ?,
+           updated_at = NOW()
        WHERE id = ?`,
-      [orderId]
+      [
+        stripe_session_id,
+        stripe_payment_intent_id,
+        payment_details ? JSON.stringify(payment_details) : null,
+        orderId,
+      ]
     );
   } finally {
     connection.release();
@@ -53,5 +74,33 @@ export async function markOrderFailed(orderId: number) {
     );
   } finally {
     connection.release();
+  }
+}
+
+export async function updateOrderStripeIds(
+  orderId: number,
+  stripeSessionId: string | null,
+  stripePaymentIntentId: string | null
+) {
+  const conn = await pool.getConnection();
+  try {
+    await conn.execute(
+      `UPDATE orders SET stripe_session_id = ?, stripe_payment_intent_id = ?, updated_at = NOW() WHERE id = ?`,
+      [stripeSessionId, stripePaymentIntentId, orderId]
+    );
+  } finally {
+    conn.release();
+  }
+}
+
+export async function updateOrderPaymentDetails(orderId: number, details: any) {
+  const conn = await pool.getConnection();
+  try {
+    await conn.execute(
+      `UPDATE orders SET payment_details = ?, updated_at = NOW() WHERE id = ?`,
+      [details ? JSON.stringify(details) : null, orderId]
+    );
+  } finally {
+    conn.release();
   }
 }

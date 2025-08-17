@@ -3,7 +3,7 @@ import { ApiError } from '../utils/ApiError';
 import { deductVariantStock } from '../models/variantModel';
 import { prepareOrderData } from '../utils/orderHelpers';
 import { User } from '../types/models/user';
-import { createOrder } from '../models/orderModel';
+import { createOrder, updateOrderStripeIds } from '../models/orderModel';
 import { createOrderItems } from '../models/orderItemModel';
 import pool from '../db';
 import { stripe } from '../config/stripe';
@@ -133,9 +133,7 @@ export const createStripeCheckoutSessionController = async (
       line_items: orderItems.map((item) => ({
         price_data: {
           currency: 'php',
-          product_data: {
-            name: item.name,
-          },
+          product_data: { name: item.name },
           unit_amount: Math.round(item.unit_price * 100),
         },
         quantity: item.quantity,
@@ -148,6 +146,12 @@ export const createStripeCheckoutSessionController = async (
         userId: user.id.toString(),
       },
     });
+
+    await updateOrderStripeIds(
+      orderId,
+      session.id,
+      session.payment_intent as string | null
+    );
 
     res.status(200).json({ url: session.url });
   } catch (error) {
