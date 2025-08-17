@@ -13,6 +13,7 @@ import {
   getProductById,
   getProductsByCategoryId,
 } from '../models/productModel';
+import { fromCents } from '../utils/priceConverter';
 
 export const getCategoryController = async (
   req: Request,
@@ -63,8 +64,17 @@ export const getProductsByCategorySlugController = async (
       return;
     }
 
-    const products = await getProductsByCategoryId(category.id, filters); // 🔁 pass filters here
-    res.status(200).json({ products });
+    const products = await getProductsByCategoryId(category.id, filters);
+
+    const formatted = products.map((product) => ({
+      ...product,
+      variants: product.variants.map((variant) => ({
+        ...variant,
+        price: fromCents(variant.price),
+      })),
+    }));
+
+    res.status(200).json({ products: formatted });
   } catch (error) {
     next(error);
   }

@@ -15,6 +15,7 @@ import { ApiError } from '../utils/ApiError';
 import { generateSlug } from '../utils/generateSlug';
 import { deleteImageByUrl } from '../utils/deleteImageByUrl';
 import { getCategoryById } from '../models/categoryModel';
+import { fromCents } from '../utils/priceConverter';
 
 export const createProductController = async (
   req: Request,
@@ -70,7 +71,16 @@ export const getAllProductsController = async (
     };
 
     const products = await getProducts(filters);
-    res.status(200).json({ products });
+    const formatted = products.map((product) => ({
+      ...product,
+      variants:
+        product.variants?.map((variant) => ({
+          ...variant,
+          price: fromCents(variant.price),
+        })) || [],
+    }));
+
+    res.status(200).json({ products: formatted });
   } catch (err) {
     next(err);
   }
@@ -99,6 +109,7 @@ export const getProductByIdController = async (
     const variants = await getVariantsByProductId(id);
     for (const v of variants) {
       v.options = await getVariantValuesByVariantId(v.id);
+      v.price = fromCents(v.price);
     }
 
     res.status(200).json({ product, options, variants });
@@ -124,6 +135,11 @@ export const getProductBySlugController = async (
     if (!product) {
       throw new ApiError('Product not found', 404);
     }
+
+    product.variants = product.variants.map((variant) => ({
+      ...variant,
+      price: fromCents(variant.price),
+    }));
 
     res.status(200).json({ product });
   } catch (err) {
