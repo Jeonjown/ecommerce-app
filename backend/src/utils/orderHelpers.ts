@@ -1,11 +1,12 @@
 import { getVariantById } from '../models/variantModel';
+import { OrderItem } from '../types/models/orderItems';
 import { ApiError } from './ApiError';
-import type { OrderItem } from '../types/models/orderItems';
+import { toCents } from './priceConverter';
 
 export async function prepareOrderData(
   items: { productId: number; variantId: number; quantity: number }[]
 ): Promise<{
-  totalPrice: number;
+  totalPrice: number; // in cents
   orderItems: Omit<OrderItem, 'id' | 'order_id'>[];
 }> {
   let totalPrice = 0;
@@ -28,14 +29,16 @@ export async function prepareOrderData(
       );
     }
 
-    const itemTotal = variant.price * item.quantity;
+    const unitPrice = variant.price;
+    const itemTotal = unitPrice * item.quantity;
+
     totalPrice += itemTotal;
 
     orderItems.push({
       product_id: item.productId,
       variant_id: item.variantId,
       quantity: item.quantity,
-      unit_price: variant.price,
+      unit_price: unitPrice,
       name: variant.name,
     });
   }

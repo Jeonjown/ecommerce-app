@@ -77,7 +77,7 @@ export async function initDb() {
       id INT AUTO_INCREMENT PRIMARY KEY,
       product_id INT NOT NULL,
       sku VARCHAR(100) UNIQUE,
-      price DECIMAL(10,2) NOT NULL,
+      price INT NOT NULL,
       name TEXT,
       description TEXT,
       stock INT DEFAULT 0,
@@ -108,7 +108,7 @@ export async function initDb() {
       product_id INT NOT NULL,
       variant_id INT NOT NULL,
       name VARCHAR(255) NOT NULL,
-      price DECIMAL(10, 2) NOT NULL,
+      price INT NOT NULL,
       image_url VARCHAR(255),
       quantity INT NOT NULL DEFAULT 1,
       stock INT NOT NULL,
@@ -129,7 +129,7 @@ export async function initDb() {
       payment_status ENUM('unpaid', 'pending', 'paid', 'failed', 'refunded') DEFAULT 'unpaid',
       order_status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
       
-      total_price DECIMAL(10, 2) NOT NULL,
+      total_price INT NOT NULL,
       delivery_address TEXT,
 
       stripe_session_id VARCHAR(255) UNIQUE NULL,
@@ -149,7 +149,7 @@ export async function initDb() {
       product_id INT NOT NULL,
       variant_id INT NOT NULL,
       quantity INT NOT NULL,
-      unit_price DECIMAL(10, 2) NOT NULL,
+      unit_price INT NOT NULL,
       FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
       FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
       FOREIGN KEY (variant_id) REFERENCES product_variants(id) ON DELETE CASCADE

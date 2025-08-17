@@ -7,6 +7,7 @@ import { createOrder, updateOrderStripeIds } from '../models/orderModel';
 import { createOrderItems } from '../models/orderItemModel';
 import pool from '../db';
 import { stripe } from '../config/stripe';
+import { fromCents } from '../utils/priceConverter';
 
 export const createCodOrderController = async (
   req: Request,
@@ -68,8 +69,11 @@ export const createCodOrderController = async (
     res.status(201).json({
       message: 'COD Order Created Successfully',
       orderId,
-      totalPrice,
-      items: orderItems,
+      totalPrice: fromCents(totalPrice),
+      items: orderItems.map((item) => ({
+        ...item,
+        unit_price: fromCents(item.unit_price),
+      })),
     });
   } catch (error) {
     await connection.rollback();
@@ -134,7 +138,7 @@ export const createStripeCheckoutSessionController = async (
         price_data: {
           currency: 'php',
           product_data: { name: item.name },
-          unit_amount: Math.round(item.unit_price * 100),
+          unit_amount: item.unit_price,
         },
         quantity: item.quantity,
       })),
