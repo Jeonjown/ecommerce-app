@@ -39,3 +39,19 @@ export async function markOrderPaid(orderId: number) {
     connection.release();
   }
 }
+
+export async function markOrderFailed(orderId: number) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.execute(
+      `UPDATE orders 
+       SET payment_status = 'failed', 
+           order_status = 'cancelled', 
+           updated_at = NOW() 
+       WHERE id = ?`,
+      [orderId]
+    );
+  } finally {
+    connection.release();
+  }
+}

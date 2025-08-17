@@ -16,7 +16,7 @@ import variantRoutes from './routes/variantRoutes';
 import cartRoutes from './routes/cartRoutes';
 import addressRoutes from './routes/addressRoutes';
 import orderRoutes from './routes/orderRoutes';
-import webhook from './routes/webhook';
+import webhook from './webhooks/stripeWebhook';
 
 const app = express();
 

@@ -1,9 +1,7 @@
-// routes/webhook.ts
 import express, { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { stripe } from '../config/stripe';
-import { markOrderPaid } from '../models/orderModel';
-import { clearCartItem } from '../models/cartModel';
+import webhookHandlers from '../webhooks';
 
 const router = express.Router();
 
@@ -21,20 +19,22 @@ router.post(
         process.env.STRIPE_WEBHOOK_SECRET!
       );
     } catch (err) {
-      console.error('Webhook signature verification failed.', err);
+      console.error('❌ Webhook signature verification failed:', err);
       res.status(400).send(`Webhook Error: ${(err as Error).message}`);
       return;
     }
 
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const orderId = session.metadata?.orderId;
-      const userId = session.metadata?.userId;
-
-      if (orderId && userId) {
-        await markOrderPaid(Number(orderId));
-        await clearCartItem(Number(userId));
+    const handler = webhookHandlers[event.type];
+    if (handler) {
+      try {
+        await handler(event);
+      } catch (err) {
+        console.error(`❌ Error handling event ${event.type}:`, err);
+        res.status(500).send('Webhook handler failed');
+        return;
       }
+    } else {
+      console.log(`⚠️ Unhandled event type: ${event.type}`);
     }
 
     res.status(200).send('Received');
