@@ -88,80 +88,38 @@ export const createStripeCheckoutSessionController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const connection = await pool.getConnection();
   try {
     const { user } = req as Request & { user: User };
-    const { deliveryAddress, paymentMethod, items } = req.body;
+    const { deliveryAddress, items } = req.body;
 
-    if (!deliveryAddress || !paymentMethod || !items?.length) {
+    if (!deliveryAddress || !items?.length) {
       throw new ApiError('Missing required fields', 400);
     }
 
-    // Prepare order details
-    const { totalPrice, orderItems } = await prepareOrderData(items);
+    const { orderItems } = await prepareOrderData(items);
 
-    await connection.beginTransaction();
-
-    // Create order with unpaid status
-    const orderId = await createOrder(
-      user.id,
-      paymentMethod,
-      totalPrice,
-      'pending',
-      deliveryAddress,
-      connection,
-      'unpaid'
-    );
-
-    await createOrderItems(orderId, orderItems, connection);
-
-    for (const item of orderItems) {
-      const updated = await deductVariantStock(
-        item.variant_id,
-        item.quantity,
-        connection
-      );
-      if (!updated) {
-        throw new ApiError(
-          `Insufficient stock for variant ${item.variant_id}`,
-          400
-        );
-      }
-    }
-
-    await connection.commit();
-
-    // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: orderItems.map((item) => ({
         price_data: {
           currency: 'php',
           product_data: { name: item.name },
-          unit_amount: item.unit_price,
+          unit_amount: item.unit_price, // in cents
         },
         quantity: item.quantity,
       })),
       mode: 'payment',
-      success_url: `${process.env.CLIENT_URL}/order-success/${orderId}`,
-      cancel_url: `${process.env.CLIENT_URL}/order-cancelled/${orderId}`,
+      success_url: `${process.env.CLIENT_URL}/order-success`,
+      cancel_url: `${process.env.CLIENT_URL}/order-cancelled`,
       metadata: {
-        orderId: orderId.toString(),
         userId: user.id.toString(),
+        deliveryAddress,
+        items: JSON.stringify(orderItems), // snapshot for webhook
       },
     });
 
-    await updateOrderStripeIds(
-      orderId,
-      session.id,
-      session.payment_intent as string | null
-    );
-
     res.status(200).json({ url: session.url });
   } catch (error) {
-    await connection.rollback();
     next(error);
-  } finally {
-    connection.release();
   }
 };

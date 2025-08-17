@@ -104,3 +104,19 @@ export async function updateOrderPaymentDetails(orderId: number, details: any) {
     conn.release();
   }
 }
+
+export async function getOrderByStripeSession(
+  stripeSessionId: string
+): Promise<{ id: number } | null> {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(
+      `SELECT id FROM orders WHERE stripe_session_id = ? LIMIT 1`,
+      [stripeSessionId]
+    );
+    const result = (rows as any[])[0];
+    return result ? { id: result.id } : null;
+  } finally {
+    conn.release();
+  }
+}
