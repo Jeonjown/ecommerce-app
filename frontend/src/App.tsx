@@ -40,8 +40,8 @@ function App() {
             <Route path="/products/:slug" element={<ProductDetails />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/order-success/:orderId" element={<SuccessOrder />} />
-            <Route path="/order-failed/:orderId" element={<FailedOrder />} />
+            <Route path="/order-success" element={<SuccessOrder />} />
+            <Route path="/order-failed" element={<FailedOrder />} />
           </Route>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
