@@ -10,8 +10,9 @@ export const useCreateCODOrder = () => {
 
   return useMutation({
     mutationFn: createCODOrder,
-    onSuccess: ({ orderId }) => {
-      navigate(`/order-success/${orderId}`);
+    onSuccess: () => {
+      navigate(`/order-success`);
+
       mutate();
     },
     onError: (error: unknown) => {
