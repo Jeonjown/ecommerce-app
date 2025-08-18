@@ -1,4 +1,4 @@
-import { ResultSetHeader, PoolConnection } from 'mysql2/promise';
+import { ResultSetHeader, PoolConnection, RowDataPacket } from 'mysql2/promise';
 import pool from '../db';
 
 export const createOrder = async (
@@ -120,3 +120,38 @@ export async function getOrderByStripeSession(
     conn.release();
   }
 }
+
+export const getOrdersByUserId = async (userId: number) => {
+  const [rows] = await pool.query(
+    `SELECT 
+     o.id AS order_id,
+     o.user_id,
+     o.payment_method,
+     o.payment_status,
+     o.order_status,
+     o.refund_status,
+     o.total_price AS order_total,
+     o.delivery_address,
+     o.created_at,  -- add this
+     oi.id AS order_item_id,
+     oi.product_id,
+     oi.variant_id,
+     oi.quantity,
+     oi.unit_price,
+     p.name AS product_name,
+     p.brand AS product_brand,
+     pv.name AS variant_name,
+     pv.sku AS variant_sku,
+     pv.price AS variant_price,
+     pv.image_url AS variant_image
+   FROM orders o
+   JOIN order_items oi ON o.id = oi.order_id
+   JOIN products p ON oi.product_id = p.id
+   JOIN product_variants pv ON oi.variant_id = pv.id
+   WHERE o.user_id = ?
+   ORDER BY o.created_at DESC`,
+    [userId]
+  );
+
+  return rows;
+};

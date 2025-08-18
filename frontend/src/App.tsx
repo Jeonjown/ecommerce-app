@@ -20,6 +20,7 @@ import Checkout from "./pages/Checkout";
 import Profile from "./pages/Profile";
 import SuccessOrder from "./pages/SuccessOrder";
 import FailedOrder from "./pages/FailedOrder";
+import Orders from "./pages/Orders";
 function App() {
   const { data } = useGetLoggedInUser();
 
@@ -42,6 +43,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/order-success" element={<SuccessOrder />} />
             <Route path="/order-failed" element={<FailedOrder />} />
+            <Route path="/orders" element={<Orders />} />
           </Route>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />

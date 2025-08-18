@@ -2,6 +2,7 @@ import express from 'express';
 import {
   createCodOrderController,
   createStripeCheckoutSessionController,
+  getOrdersByUserIdController,
 } from '../controllers/orderController';
 
 const router = express.Router();
@@ -10,6 +11,8 @@ const router = express.Router();
 
 router.post('/cod', createCodOrderController);
 router.post('/stripe', createStripeCheckoutSessionController);
+
+router.get('/me', getOrdersByUserIdController);
 
 // GET	/orders	List all orders (for admin or user)
 // GET	/orders/:id	Get details of a specific order

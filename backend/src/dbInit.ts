@@ -128,7 +128,7 @@ export async function initDb() {
       payment_method ENUM('cod', 'online') NOT NULL,
       payment_status ENUM('unpaid', 'pending', 'paid', 'failed', 'refunded') DEFAULT 'unpaid',
       order_status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
-      
+      refund_status ENUM('none','requested','processing','completed','rejected'),
       total_price INT NOT NULL,
       delivery_address TEXT,
 

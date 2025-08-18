@@ -3,7 +3,11 @@ import { ApiError } from '../utils/ApiError';
 import { deductVariantStock } from '../models/variantModel';
 import { prepareOrderData } from '../utils/orderHelpers';
 import { User } from '../types/models/user';
-import { createOrder, updateOrderStripeIds } from '../models/orderModel';
+import {
+  createOrder,
+  getOrdersByUserId,
+  updateOrderStripeIds,
+} from '../models/orderModel';
 import { createOrderItems } from '../models/orderItemModel';
 import pool from '../db';
 import { stripe } from '../config/stripe';
@@ -119,6 +123,24 @@ export const createStripeCheckoutSessionController = async (
     });
 
     res.status(200).json({ url: session.url });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getOrdersByUserIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { user } = req as Request & { user: User };
+    if (!user) {
+      throw new ApiError('Not Authorized', 401);
+    }
+
+    const orders = await getOrdersByUserId(user.id);
+    res.status(200).json(orders);
   } catch (error) {
     next(error);
   }
