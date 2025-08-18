@@ -21,7 +21,7 @@ export const StatusTabs = <T extends string>({
           <TabsTrigger
             key={status}
             value={status}
-            className="flex-none px-4 py-2 text-center font-semibold whitespace-nowrap md:text-lg"
+            className="flex-1 px-4 py-2 text-center font-semibold whitespace-nowrap"
           >
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </TabsTrigger>
