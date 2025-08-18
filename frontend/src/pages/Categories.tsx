@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { CategorySidebar } from "@/components/ProductSidebar";
+import { CategorySidebar } from "@/components/CategorySidebar";
 
 const Categories = () => {
   return (

@@ -1,5 +1,5 @@
 // src/components/CategoryProducts.tsx
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
 import { useGetProductsByCategorySlug } from "@/hooks/useGetProductsByCategorySlug";
@@ -32,21 +32,30 @@ export default function CategoryProducts() {
   const [searchParams, setSearchParams] = useSearchParams();
   const sortOrder = searchParams.get("sort") ?? "";
   const priceRange = searchParams.get("priceRange") ?? "";
+  const pageParam = Number(searchParams.get("page") ?? "1");
 
   const { slug } = useParams<{ slug?: string }>();
-  const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 6;
 
-  const filters = {
-    sort: sortOrder || undefined,
-    priceRange,
-  };
+  // Keep current page in state but initialize from URL param.
+  const [currentPage, setCurrentPage] = useState<number>(
+    isNaN(pageParam) || pageParam < 1 ? 1 : pageParam,
+  );
+  const productsPerPage = 9;
+
+  // Use raw priceRange (e.g. "0-500") — no conversion to cents here.
+  const filters = useMemo(
+    () => ({
+      sort: sortOrder || undefined,
+      priceRange: priceRange || undefined,
+    }),
+    [sortOrder, priceRange],
+  );
 
   const {
     data: categoryProducts,
     isPending: isCategoryLoading,
     isError: isCategoryError,
-  } = useGetProductsByCategorySlug(slug!, filters);
+  } = useGetProductsByCategorySlug(slug ?? "", filters);
 
   const {
     data: allProducts,
@@ -56,12 +65,58 @@ export default function CategoryProducts() {
 
   const isLoading = slug ? isCategoryLoading : isAllLoading;
   const isErrorState = slug ? isCategoryError : isAllError;
+
   const products = slug
     ? (categoryProducts?.products ?? [])
     : (allProducts?.products ?? []);
 
-  // pagination
-  const totalPages = Math.ceil(products.length / productsPerPage);
+  // compute total pages (allow 1 minimum so pagination UI is consistent)
+  const totalPages = Math.max(1, Math.ceil(products.length / productsPerPage));
+
+  // Ensure currentPage is within bounds whenever totalPages or products change
+  useEffect(() => {
+    if (products.length === 0) {
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set("page", "1");
+        setSearchParams(newParams);
+      }
+      return;
+    }
+
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set("page", String(totalPages));
+      setSearchParams(newParams);
+    } else if (currentPage < 1) {
+      setCurrentPage(1);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set("page", "1");
+      setSearchParams(newParams);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalPages, products.length]);
+
+  // Reset page to 1 when user navigates to a different category or changes filters
+  useEffect(() => {
+    setCurrentPage(1);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("page", "1");
+    setSearchParams(newParams);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug, sortOrder, priceRange]);
+
+  // update URL param when currentPage changes (so state persists via URL)
+  useEffect(() => {
+    const p = isNaN(currentPage) || currentPage < 1 ? 1 : currentPage;
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("page", String(p));
+    setSearchParams(newParams);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
+
   const startIndex = (currentPage - 1) * productsPerPage;
   const currentProducts = products.slice(
     startIndex,
@@ -73,6 +128,19 @@ export default function CategoryProducts() {
       setCurrentPage(page);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
+  };
+
+  // helper to update searchParams from Filters (keeps other params intact)
+  const setFilterParam = (key: string, value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (!value || value === "default") {
+      newParams.delete(key);
+    } else {
+      newParams.set(key, value);
+    }
+    // reset page when filter changes
+    newParams.set("page", "1");
+    setSearchParams(newParams);
   };
 
   // loading skeleton
@@ -115,14 +183,11 @@ export default function CategoryProducts() {
           sortOrder={sortOrder}
           priceRange={priceRange}
           onSortChange={(value) => {
-            searchParams.set("sort", value);
-            setSearchParams(searchParams);
-            setCurrentPage(1);
+            // treat "default" or empty as clearing the param
+            setFilterParam("sort", value);
           }}
           onPriceRangeChange={(value) => {
-            searchParams.set("priceRange", value);
-            setSearchParams(searchParams);
-            setCurrentPage(1);
+            setFilterParam("priceRange", value);
           }}
         />
       </div>

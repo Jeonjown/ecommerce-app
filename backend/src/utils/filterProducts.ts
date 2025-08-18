@@ -1,5 +1,6 @@
 import { ProductWithCategory } from '../types/models/products';
 import { getLowestPrice } from './getLowestPrice';
+import { toCents } from './priceConverter';
 
 type Filters = {
   dateOrder?: string;
@@ -15,7 +16,9 @@ export function filterProducts(
 
   // Price range filtering
   if (filters.priceRange) {
-    const [min, max] = filters.priceRange.split('-').map(Number);
+    const [min, max] = filters.priceRange
+      .split('-')
+      .map((v) => toCents(Number(v)));
     filtered = filtered.filter((product) =>
       product.variants.some((v) => v.price >= min && v.price <= max)
     );
