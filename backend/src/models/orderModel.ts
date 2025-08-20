@@ -288,3 +288,49 @@ export const getAllOrders = async () => {
 
   return rows;
 };
+
+export async function updateOrderStatuses(
+  orderId: number,
+  {
+    payment_status,
+    order_status,
+    refund_status,
+  }: {
+    payment_status?: string;
+    order_status?: string;
+    refund_status?: string;
+  },
+  connection?: PoolConnection
+) {
+  const conn = connection ?? (await pool.getConnection());
+  try {
+    const fields: string[] = [];
+    const values: any[] = [];
+
+    if (payment_status !== undefined) {
+      fields.push('payment_status = ?');
+      values.push(payment_status);
+    }
+    if (order_status !== undefined) {
+      fields.push('order_status = ?');
+      values.push(order_status);
+    }
+    if (refund_status !== undefined) {
+      fields.push('refund_status = ?');
+      values.push(refund_status);
+    }
+
+    if (fields.length === 0) {
+      return; // nothing to update
+    }
+
+    values.push(orderId);
+
+    await conn.execute(
+      `UPDATE orders SET ${fields.join(', ')}, updated_at = NOW() WHERE id = ?`,
+      values
+    );
+  } finally {
+    if (!connection) conn.release(); // only release if we created it
+  }
+}

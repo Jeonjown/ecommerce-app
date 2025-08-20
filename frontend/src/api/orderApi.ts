@@ -80,3 +80,26 @@ export const getAllOrders = async (): Promise<OrderResponse[]> => {
     throw new Error("Unexpected error fetching orders.");
   }
 };
+
+export const updateOrderStatus = async (
+  orderId: number,
+  payload: {
+    payment_status?: string;
+    order_status?: string;
+    refund_status?: string;
+  },
+): Promise<OrderResponse> => {
+  try {
+    const res = await api.patch(`/orders/${orderId}/status`, payload, {
+      withCredentials: true,
+    });
+    return res.data as OrderResponse;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to update order status.",
+      );
+    }
+    throw new Error("Unexpected error updating order status.");
+  }
+};

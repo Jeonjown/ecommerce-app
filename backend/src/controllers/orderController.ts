@@ -8,6 +8,7 @@ import {
   getAllOrders,
   getOrderById,
   getOrdersByUserId,
+  updateOrderStatuses,
   updateOrderStripeIds,
 } from '../models/orderModel';
 import { createOrderItems } from '../models/orderItemModel';
@@ -183,12 +184,30 @@ export const getAllOrdersController = async (
   next: NextFunction
 ) => {
   try {
-    const { user } = req as Request & { user: User };
-
     const orders = await getAllOrders();
 
     res.status(200).json(orders);
   } catch (error) {
     next(error);
   }
+};
+
+export const updateOrderStatusesController = async (
+  req: Request,
+  res: Response
+) => {
+  const { id } = req.params;
+  const { payment_status, order_status, refund_status } = req.body;
+
+  if (!id) {
+    throw new ApiError('Order ID is required', 400);
+  }
+
+  await updateOrderStatuses(Number(id), {
+    payment_status,
+    order_status,
+    refund_status,
+  });
+
+  res.json({ message: 'Order status updated successfully' });
 };
