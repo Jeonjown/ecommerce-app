@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { equalsFilterFn } from "@/utils/tableFilters";
 
 const statusStyles: Record<string, { bg: string; text: string }> = {
   unpaid: { bg: "bg-yellow-500", text: "text-black" },
@@ -26,14 +27,6 @@ const statusStyles: Record<string, { bg: string; text: string }> = {
   rejected: { bg: "bg-red-500", text: "text-white" },
 
   none: { bg: "bg-gray-200", text: "text-black" },
-};
-
-// strict equality filter function — case-insensitive
-const equalsFilterFn = (row: any, columnId: string, filterValue: unknown) => {
-  if (filterValue === undefined || filterValue === null) return true;
-  const cell = row.getValue(columnId);
-  if (cell === undefined || cell === null) return false;
-  return String(cell).toLowerCase() === String(filterValue).toLowerCase();
 };
 
 export const orderColumns: ColumnDef<OrderResponse>[] = [

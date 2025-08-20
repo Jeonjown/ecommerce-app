@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import * as React from "react";
 import {
   type ColumnDef,
   flexRender,
@@ -6,14 +6,10 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
   type SortingState,
   type ColumnFiltersState,
-  type Row,
-  type Column,
+  useReactTable,
 } from "@tanstack/react-table";
-
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -22,41 +18,62 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-import { IoSearch } from "react-icons/io5";
-import { DataTableViewOptions } from "@/components/ui/data-table-column-toggle";
-import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import ColumnSelectFilter from "./ColumnSelectFilter";
+// ---- Types ----
+interface OrderLike {
+  payment_method?: string | null;
+  payment_status?: string | null;
+  order_status?: string | null;
+  refund_status?: string | null;
+}
 
-interface DataTableProps<TData extends object> {
+interface DataTableProps<TData extends OrderLike> {
   columns: ColumnDef<TData>[];
   data: TData[];
 }
 
-/** simple global filter: substring across all values */
-function globalFilterFn<TData extends object>(
-  row: Row<TData>,
-  _columnId: string,
-  filterValue: string,
-): boolean {
-  const search = filterValue.toLowerCase();
-  return Object.values(row.original).some((val) =>
-    String(val).toLowerCase().includes(search),
+// ---- Helper outside component ----
+function extractUnique<T extends OrderLike, K extends keyof OrderLike>(
+  data: T[],
+  key: K,
+): string[] {
+  return Array.from(
+    new Set(
+      data
+        .map((row) => row[key] ?? "")
+        .filter((val): val is string => Boolean(val)),
+    ),
   );
 }
 
-export function OrdersTable<TData extends object>({
+// ---- Component ----
+export function OrdersTable<TData extends OrderLike>({
   columns,
   data,
 }: DataTableProps<TData>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState<string>("");
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
+  const [globalFilter, setGlobalFilter] = React.useState<string>("");
 
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, columnFilters, globalFilter },
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+    },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
@@ -64,177 +81,203 @@ export function OrdersTable<TData extends object>({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    globalFilterFn,
   });
 
-  // derive unique, non-empty options from data
-  const paymentMethodOptions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (data as any[])
-            .map((r) => String(r.payment_method ?? ""))
-            .filter(Boolean),
-        ),
-      ),
+  // ---- Options ----
+  const paymentMethodOptions = React.useMemo(
+    () => extractUnique(data, "payment_method"),
     [data],
   );
-  const paymentStatusOptions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (data as any[])
-            .map((r) => String(r.payment_status ?? ""))
-            .filter(Boolean),
-        ),
-      ),
+  const paymentStatusOptions = React.useMemo(
+    () => extractUnique(data, "payment_status"),
     [data],
   );
-  const orderStatusOptions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (data as any[])
-            .map((r) => String(r.order_status ?? ""))
-            .filter(Boolean),
-        ),
-      ),
+  const orderStatusOptions = React.useMemo(
+    () => extractUnique(data, "order_status"),
     [data],
   );
-  const refundStatusOptions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (data as any[])
-            .map((r) => String(r.refund_status ?? ""))
-            .filter(Boolean),
-        ),
-      ),
+  const refundStatusOptions = React.useMemo(
+    () => extractUnique(data, "refund_status"),
     [data],
   );
 
-  // safe column lookup
-  const findColumn = (id: string) =>
-    table.getAllLeafColumns().find((c) => c.id === id) as
-      | Column<TData, unknown>
-      | undefined;
-
-  const paymentMethodColumn = findColumn("payment_method");
-  const paymentStatusColumn = findColumn("payment_status");
-  const orderStatusColumn = findColumn("order_status");
-  const refundStatusColumn = findColumn("refund_status");
-
+  // ---- Render ----
   return (
-    <div className="">
-      {/* Header: search + filters */}
-      <div className="flex items-center justify-between py-5">
-        <div className="flex w-full max-w-2xl items-center gap-3">
-          {/* Search input */}
-          <div className="relative mr-3 w-full max-w-xs">
-            <IoSearch
-              size={16}
-              className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400"
-            />
-            <Input
-              placeholder="Search"
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="py-2 text-sm"
-            />
-          </div>
+    <div>
+      {/* Search + Filters */}
+      <div className="flex items-center gap-2 py-4">
+        <Input
+          placeholder="Search..."
+          value={globalFilter ?? ""}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          className="max-w-sm"
+        />
 
-          {/* Filters beside search; no chips, no clear-all */}
-          <div className="flex items-center gap-2">
-            {paymentMethodColumn && (
-              <ColumnSelectFilter
-                column={paymentMethodColumn}
-                options={paymentMethodOptions}
-                placeholder="Payment method"
-              />
-            )}
+        {/* Payment Method Filter */}
+        <Select
+          value={
+            (table.getColumn("payment_method")?.getFilterValue() as string) ??
+            ""
+          }
+          onValueChange={(value) =>
+            table
+              .getColumn("payment_method")
+              ?.setFilterValue(value === "none" ? "" : value)
+          }
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Payment Method" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            {paymentMethodOptions.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-            {paymentStatusColumn && (
-              <ColumnSelectFilter
-                column={paymentStatusColumn}
-                options={paymentStatusOptions}
-                placeholder="Payment status"
-              />
-            )}
+        {/* Payment Status Filter */}
+        <Select
+          value={
+            (table.getColumn("payment_status")?.getFilterValue() as string) ??
+            ""
+          }
+          onValueChange={(value) =>
+            table
+              .getColumn("payment_status")
+              ?.setFilterValue(value === "none" ? "" : value)
+          }
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Payment Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            {paymentStatusOptions.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-            {orderStatusColumn && (
-              <ColumnSelectFilter
-                column={orderStatusColumn}
-                options={orderStatusOptions}
-                placeholder="Order status"
-              />
-            )}
+        {/* Order Status Filter */}
+        <Select
+          value={
+            (table.getColumn("order_status")?.getFilterValue() as string) ?? ""
+          }
+          onValueChange={(value) =>
+            table
+              .getColumn("order_status")
+              ?.setFilterValue(value === "none" ? "" : value)
+          }
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Order Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            {orderStatusOptions.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-            {refundStatusColumn && (
-              <ColumnSelectFilter
-                column={refundStatusColumn}
-                options={refundStatusOptions}
-                placeholder="Refund status"
-              />
-            )}
-          </div>
-        </div>
-
-        <DataTableViewOptions table={table} />
+        {/* Refund Status Filter */}
+        <Select
+          value={
+            (table.getColumn("refund_status")?.getFilterValue() as string) ?? ""
+          }
+          onValueChange={(value) =>
+            table
+              .getColumn("refund_status")
+              ?.setFilterValue(value === "none" ? "" : value)
+          }
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Refund Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            {refundStatusOptions.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}
       <div className="rounded-md border">
-        <div className="max-h-[65vh] overflow-y-auto">
-          <Table>
-            <TableHeader className="sticky top-0 z-10 bg-white">
-              {table.getHeaderGroups().map((hg) => (
-                <TableRow key={hg.id}>
-                  {hg.headers.map((header) => (
-                    <TableHead key={header.id} className="px-5">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
                   ))}
                 </TableRow>
-              ))}
-            </TableHeader>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        <DataTablePagination table={table} />
+      {/* Pagination */}
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );
 }
-
-export default OrdersTable;

@@ -1,5 +1,7 @@
+import type { OrderResponse } from "@/types/api/orders";
+import type { Row } from "@tanstack/react-table";
 export const equalsFilterFn = (
-  row: any,
+  row: Row<OrderResponse>,
   columnId: string,
   filterValue: unknown,
 ) => {

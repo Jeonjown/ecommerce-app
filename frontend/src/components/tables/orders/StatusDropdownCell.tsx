@@ -1,4 +1,3 @@
-import React from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +23,7 @@ export function StatusDropdownCell({
   onChange: (orderId: number, field: StatusField, newValue: string) => void;
 }) {
   // current value
-  const current = (row as any)[field] ?? "none";
+  const current = row[field] ?? "none";
 
   // If this is payment_status and payment_method === 'online', filter out 'unpaid'
   const filteredOptions =
