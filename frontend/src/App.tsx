@@ -21,6 +21,8 @@ import Profile from "./pages/Profile";
 import SuccessOrder from "./pages/SuccessOrder";
 import FailedOrder from "./pages/FailedOrder";
 import Orders from "./pages/Orders";
+import OrderDetails from "./pages/OrderDetails";
+import AdminOrders from "./pages/AdminOrders";
 function App() {
   const { data } = useGetLoggedInUser();
 
@@ -34,6 +36,7 @@ function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="categories" element={<AdminCategories />} />
+            <Route path="orders" element={<AdminOrders />} />
           </Route>
           {/* Private Routes */}
           <Route element={<PrivateRoutes />}>
@@ -44,6 +47,7 @@ function App() {
             <Route path="/order-success" element={<SuccessOrder />} />
             <Route path="/order-failed" element={<FailedOrder />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/orders/:id" element={<OrderDetails />} />
           </Route>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />

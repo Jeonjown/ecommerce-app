@@ -81,3 +81,81 @@ export interface Order {
 export interface OrdersResponse {
   orders: Order[];
 }
+
+export interface OrderItemResponse {
+  order_item_id: number;
+  quantity: number;
+  unit_price: number; // cents
+  product_id: number;
+  product_name: string;
+  brand: string;
+  variant_id: number;
+  sku: string;
+  variant_name: string;
+  image_url: string;
+  variant_price: number; // cents
+}
+
+export interface OrderResponse {
+  order_id: number;
+  user_id: number;
+  customer_name: string;
+  customer_email: string;
+  payment_method: "cod" | "online";
+  payment_status: "unpaid" | "paid" | "pending" | "failed" | "refunded";
+  order_status:
+    | "pending"
+    | "processing"
+    | "shipped"
+    | "delivered"
+    | "cancelled";
+  refund_status:
+    | "none"
+    | "requested"
+    | "processing"
+    | "completed"
+    | "rejected"
+    | null;
+  total_price: number; // cents
+  delivery_address: string;
+  stripe_session_id: string | null;
+  stripe_payment_intent_id: string | null;
+  payment_details: PaymentDetails | null; // reuse your existing PaymentDetails
+  order_date: string; // ISO string
+  last_updated: string; // ISO string
+  items: OrderItemResponse[];
+}
+
+export interface OrderRow {
+  order_id: number;
+  user_id: number;
+  payment_method: "cod" | "online";
+  payment_status: "unpaid" | "pending" | "paid" | "failed" | "refunded" | null;
+  order_status:
+    | "pending"
+    | "processing"
+    | "shipped"
+    | "delivered"
+    | "cancelled";
+  refund_status:
+    | "none"
+    | "requested"
+    | "processing"
+    | "completed"
+    | "rejected"
+    | null;
+  order_total: number;
+  delivery_address: string;
+  created_at: string;
+  order_item_id: number;
+  product_id: number;
+  variant_id: number;
+  quantity: number;
+  unit_price: number;
+  product_name: string;
+  product_brand: string;
+  variant_name: string;
+  variant_sku: string;
+  variant_price: number;
+  variant_image?: string;
+}

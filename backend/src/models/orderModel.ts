@@ -155,3 +155,136 @@ export const getOrdersByUserId = async (userId: number) => {
 
   return rows;
 };
+
+export const getOrderById = async (userId: number, orderId: number) => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `
+    SELECT 
+      o.id AS order_id,
+      o.user_id,
+      u.name AS customer_name,
+      u.email AS customer_email,
+
+      o.payment_method,
+      o.payment_status,
+      o.order_status,
+      o.refund_status,
+      o.total_price,
+      o.delivery_address,
+      o.stripe_session_id,
+      o.stripe_payment_intent_id,
+      o.payment_details,
+      o.created_at AS order_date,
+      o.updated_at AS last_updated,
+
+      -- Item details
+      oi.id AS order_item_id,
+      oi.quantity,
+      oi.unit_price,
+
+      -- Product details
+      p.id AS product_id,
+      p.name AS product_name,
+      p.brand,
+      pv.id AS variant_id,
+      pv.sku,
+      pv.name AS variant_name,
+      pv.image_url,
+      pv.price AS variant_price
+
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
+    LEFT JOIN order_items oi ON o.id = oi.order_id
+    LEFT JOIN products p ON oi.product_id = p.id
+    LEFT JOIN product_variants pv ON oi.variant_id = pv.id
+    WHERE o.id = ? AND o.user_id = ?
+    `,
+    [orderId, userId]
+  );
+
+  if (rows.length === 0) return null;
+
+  const {
+    order_id,
+    user_id,
+    customer_name,
+    customer_email,
+    payment_method,
+    payment_status,
+    order_status,
+    refund_status,
+    total_price,
+    delivery_address,
+    stripe_session_id,
+    stripe_payment_intent_id,
+    payment_details,
+    order_date,
+    last_updated,
+  } = rows[0];
+
+  const items = rows.map((row) => ({
+    order_item_id: row.order_item_id,
+    quantity: row.quantity,
+    unit_price: row.unit_price,
+    product_id: row.product_id,
+    product_name: row.product_name,
+    brand: row.brand,
+    variant_id: row.variant_id,
+    sku: row.sku,
+    variant_name: row.variant_name,
+    image_url: row.image_url,
+    variant_price: row.variant_price,
+  }));
+
+  return {
+    order_id,
+    user_id,
+    customer_name,
+    customer_email,
+    payment_method,
+    payment_status,
+    order_status,
+    refund_status,
+    total_price,
+    delivery_address,
+    stripe_session_id,
+    stripe_payment_intent_id,
+    payment_details,
+    order_date,
+    last_updated,
+    items,
+  };
+};
+
+export const getAllOrders = async () => {
+  const [rows] = await pool.query(
+    `SELECT 
+      o.id AS order_id,
+      o.user_id,
+      o.payment_method,
+      o.payment_status,
+      o.order_status,
+      o.refund_status,
+      o.total_price AS order_total,
+      o.delivery_address,
+      o.created_at,
+      oi.id AS order_item_id,
+      oi.product_id,
+      oi.variant_id,
+      oi.quantity,
+      oi.unit_price,
+      p.name AS product_name,
+      p.brand AS product_brand,
+      pv.name AS variant_name,
+      pv.sku AS variant_sku,
+      pv.price AS variant_price,
+      pv.image_url AS variant_image
+    FROM orders o
+    JOIN order_items oi ON o.id = oi.order_id
+    JOIN products p ON oi.product_id = p.id
+    JOIN product_variants pv ON oi.variant_id = pv.id
+    ORDER BY o.created_at DESC`
+  );
+
+  return rows;
+};

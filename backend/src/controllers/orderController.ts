@@ -5,6 +5,8 @@ import { prepareOrderData } from '../utils/orderHelpers';
 import { User } from '../types/models/user';
 import {
   createOrder,
+  getAllOrders,
+  getOrderById,
   getOrdersByUserId,
   updateOrderStripeIds,
 } from '../models/orderModel';
@@ -140,6 +142,51 @@ export const getOrdersByUserIdController = async (
     }
 
     const orders = await getOrdersByUserId(user.id);
+    res.status(200).json(orders);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getOrderByIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { user } = req as Request & { user: User };
+    const { id } = req.params;
+
+    if (!user) {
+      throw new ApiError('Not Authorized', 401);
+    }
+
+    if (!id) {
+      throw new ApiError('Order ID is required', 400);
+    }
+
+    const order = await getOrderById(user.id, Number(id));
+
+    if (!order) {
+      throw new ApiError('Order not found', 404);
+    }
+
+    res.status(200).json(order);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllOrdersController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { user } = req as Request & { user: User };
+
+    const orders = await getAllOrders();
+
     res.status(200).json(orders);
   } catch (error) {
     next(error);
