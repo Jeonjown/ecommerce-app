@@ -159,3 +159,13 @@ export interface OrderRow {
   variant_price: number;
   variant_image?: string;
 }
+
+export interface CancelOrderPayload {
+  reason: string;
+}
+
+export interface CancelOrderResponse {
+  message: string;
+  orderId: number;
+  reason: string;
+}

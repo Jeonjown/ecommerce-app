@@ -1,6 +1,8 @@
 import { isAxiosError } from "axios";
 import api from "./axios";
 import type {
+  CancelOrderPayload,
+  CancelOrderResponse,
   OrderItem,
   OrderPayload,
   OrderResponse,
@@ -101,5 +103,25 @@ export const updateOrderStatus = async (
       );
     }
     throw new Error("Unexpected error updating order status.");
+  }
+};
+
+export const requestCancelOrder = async (
+  orderId: number,
+  payload: CancelOrderPayload,
+): Promise<CancelOrderResponse> => {
+  try {
+    const res = await api.post(`/orders/${orderId}/request-cancel`, payload, {
+      withCredentials: true,
+    });
+    return res.data as CancelOrderResponse;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message ||
+          "Failed to request order cancellation.",
+      );
+    }
+    throw new Error("Unexpected error requesting cancellation.");
   }
 };

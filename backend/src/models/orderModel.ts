@@ -256,6 +256,55 @@ export const getOrderById = async (userId: number, orderId: number) => {
   };
 };
 
+export const getOrderByIdForAdmin = async (orderId: number) => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `
+    SELECT 
+      o.id AS order_id,
+      o.user_id,
+      u.name AS customer_name,
+      u.email AS customer_email,
+
+      o.payment_method,
+      o.payment_status,
+      o.order_status,
+      o.refund_status,
+      o.total_price,
+      o.delivery_address,
+      o.stripe_session_id,
+      o.stripe_payment_intent_id,
+      o.payment_details,
+      o.created_at AS order_date,
+      o.updated_at AS last_updated,
+
+      -- Item details
+      oi.id AS order_item_id,
+      oi.quantity,
+      oi.unit_price,
+
+      -- Product details
+      p.id AS product_id,
+      p.name AS product_name,
+      p.brand,
+      pv.id AS variant_id,
+      pv.sku,
+      pv.name AS variant_name,
+      pv.image_url,
+      pv.price AS variant_price
+
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
+    LEFT JOIN order_items oi ON o.id = oi.order_id
+    LEFT JOIN products p ON oi.product_id = p.id
+    LEFT JOIN product_variants pv ON oi.variant_id = pv.id
+    WHERE o.id = ?
+    `,
+    [orderId]
+  );
+
+  return rows[0] || null;
+};
+
 export const getAllOrders = async () => {
   const [rows] = await pool.query(
     `SELECT 
@@ -331,6 +380,19 @@ export async function updateOrderStatuses(
       values
     );
   } finally {
-    if (!connection) conn.release(); // only release if we created it
+    if (!connection) conn.release();
   }
+}
+
+export async function insertOrderReason(orderId: number, reason: string) {
+  const [result] = await pool.query<ResultSetHeader>(
+    `
+    UPDATE orders
+    SET cancellation_reason = ?
+    WHERE id = ?
+    `,
+    [reason, orderId]
+  );
+
+  return result.affectedRows > 0;
 }

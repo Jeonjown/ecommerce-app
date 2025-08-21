@@ -21,13 +21,16 @@ export const OrderCard = ({ order }: OrderCardProps) => {
     <Link to={`/orders/${order.order_id}`}>
       <Card className="w-full rounded-xl border border-gray-200 shadow-lg">
         <CardHeader className="flex flex-col gap-2">
-          <div className="flex items-start justify-between">
+          <div className="flex w-full items-start">
             <CardTitle className="text-lg font-bold">
               Order #{order.order_id}
             </CardTitle>
             {order.refund_status && order.refund_status !== "none" && (
-              <Badge variant="destructive" className="text-xs uppercase">
-                {order.refund_status}
+              <Badge
+                variant="destructive"
+                className="ml-auto flex text-xs uppercase"
+              >
+                {`REFUND ${order.refund_status}`}
               </Badge>
             )}
           </div>

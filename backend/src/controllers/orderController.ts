@@ -7,14 +7,17 @@ import {
   createOrder,
   getAllOrders,
   getOrderById,
+  getOrderByIdForAdmin,
   getOrdersByUserId,
+  insertOrderReason,
   updateOrderStatuses,
-  updateOrderStripeIds,
 } from '../models/orderModel';
 import { createOrderItems } from '../models/orderItemModel';
 import pool from '../db';
 import { stripe } from '../config/stripe';
 import { fromCents } from '../utils/priceConverter';
+import { mapStripeRefundStatus } from '../utils/mapStripeRefundStatus';
+import { processRefund } from '../services/refundService';
 
 export const createCodOrderController = async (
   req: Request,
@@ -210,4 +213,133 @@ export const updateOrderStatusesController = async (
   });
 
   res.json({ message: 'Order status updated successfully' });
+};
+
+export const requestCancelOrderController = async (
+  req: Request,
+  res: Response
+) => {
+  const { user } = req as Request & { user: User };
+  const { id } = req.params;
+  const { reason } = req.body;
+
+  if (!id) throw new ApiError('Order ID is required', 400);
+  if (!reason) throw new ApiError('Cancellation reason is required', 400);
+
+  const conn = await pool.getConnection();
+  try {
+    const order = await getOrderById(user.id, +id);
+    if (!order) throw new ApiError('Order not found', 404);
+
+    if (order.refund_status !== 'none') {
+      throw new ApiError(
+        'A refund/cancellation request already exists for this order',
+        400
+      );
+    }
+
+    if (order.payment_method === 'cod') {
+      if (!['pending', 'processing'].includes(order.order_status)) {
+        throw new ApiError(
+          'COD orders can only be cancelled if pending or processing',
+          400
+        );
+      }
+
+      // Cancel COD immediately
+      await updateOrderStatuses(
+        Number(id),
+        { order_status: 'cancelled', refund_status: 'completed' },
+        conn
+      );
+      await insertOrderReason(Number(id), reason);
+      return res.status(200).json({
+        message: 'Order cancelled successfully',
+        orderId: id,
+        reason,
+      });
+    }
+
+    // Online orders
+    if (order.payment_method === 'online') {
+      if (
+        order.payment_status !== 'paid' ||
+        !['pending', 'processing', 'shipped', 'delivered'].includes(
+          order.order_status
+        )
+      ) {
+        throw new ApiError(
+          'Online orders can only request refund if paid and not cancelled',
+          400
+        );
+      }
+
+      await updateOrderStatuses(
+        Number(id),
+        { refund_status: 'requested' },
+        conn
+      );
+      await insertOrderReason(Number(id), reason);
+      return res.status(200).json({
+        message: 'Refund request submitted',
+        orderId: id,
+        reason,
+      });
+    }
+  } finally {
+    conn.release();
+  }
+};
+
+export const cancelOrderController = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id) throw new ApiError('Order ID is required', 400);
+
+  const conn = await pool.getConnection();
+  try {
+    const order = await getOrderByIdForAdmin(Number(id));
+    if (!order) throw new ApiError('Order not found', 404);
+
+    if (order.payment_method !== 'online') {
+      throw new ApiError(
+        'Only online payment orders can be cancelled here',
+        400
+      );
+    }
+
+    if (order.payment_status !== 'paid') {
+      throw new ApiError('Order must be paid before cancellation/refund', 400);
+    }
+
+    if (!['pending', 'processing'].includes(order.order_status)) {
+      throw new ApiError(
+        'Only pending or processing orders can be cancelled',
+        400
+      );
+    }
+
+    const refund = await processRefund(
+      order.stripe_payment_intent_id,
+      order.payment_details
+    );
+
+    await updateOrderStatuses(
+      Number(id),
+      {
+        payment_status: 'refunded',
+        order_status: 'cancelled',
+        refund_status: mapStripeRefundStatus(refund.status),
+      },
+      conn
+    );
+
+    res.status(200).json({
+      message: 'Order cancelled and refund initiated',
+      orderId: id,
+      refund,
+    });
+  } finally {
+    conn.release();
+  }
 };

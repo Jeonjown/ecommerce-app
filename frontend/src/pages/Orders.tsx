@@ -8,7 +8,7 @@ import type { Order } from "@/types/api/orders";
 const STATUS_TABS = [
   "pending",
   "processing",
-  "completed",
+  "delivered",
   "cancelled",
   "refunds",
 ] as const;
@@ -55,7 +55,7 @@ const Orders = () => {
   );
 
   return (
-    <div className="flex w-full flex-col items-center p-4 md:p-6">
+    <div className="bg- flex w-full flex-col items-center p-4 md:p-6">
       <div className="w-full max-w-2xl">
         <StatusTabs
           activeTab={activeTab}

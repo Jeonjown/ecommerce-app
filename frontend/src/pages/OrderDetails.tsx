@@ -3,7 +3,7 @@ import { useGetOrderById } from "@/hooks/useGetOrderById";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import OrderStatusProgress from "@/components/OrderStatusProgress";
-import { Button } from "@/components/ui/button";
+import RefundButton from "@/components/RefundButton";
 
 // Status color mapping
 const statusStyles: Record<string, { bg: string; text: string }> = {
@@ -23,21 +23,6 @@ const OrderDetails = () => {
   if (error) return <p className="text-red-500">{error.message}</p>;
   if (!order) return <p>No order found.</p>;
 
-  // Determine button type
-  const canCancelCOD =
-    order.payment_method === "cod" &&
-    ["pending", "processing"].includes(order.order_status);
-  const canRequestRefundOnline =
-    order.payment_method === "online" &&
-    order.payment_status === "paid" &&
-    ["pending", "processing", "shipped", "delivered"].includes(
-      order.order_status,
-    );
-
-  const handleCancel = () => alert(`Order #${order.order_id} cancelled`);
-  const handleRefund = () =>
-    alert(`Refund requested for Order #${order.order_id}`);
-
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <h2 className="mt-6 text-xl font-semibold">Order Details</h2>
@@ -46,13 +31,28 @@ const OrderDetails = () => {
         <CardHeader className="border-b pb-4">
           <CardTitle className="flex items-center justify-between">
             <span>Order #{order.order_id}</span>
-            <Badge
-              className={`${statusStyles[order.order_status]?.bg || "bg-gray-200"} ${
-                statusStyles[order.order_status]?.text || "text-black"
-              }`}
-            >
-              {order.order_status}
-            </Badge>
+            {order.refund_status && order.refund_status !== "none" && (
+              <>
+                <Badge
+                  className={`w-fit px-2 py-1 text-sm uppercase ${
+                    order.refund_status === "requested"
+                      ? "bg-yellow-200 text-yellow-800"
+                      : order.refund_status === "processing"
+                        ? "bg-blue-200 text-blue-800"
+                        : order.refund_status === "completed"
+                          ? "bg-green-200 text-green-800"
+                          : order.refund_status === "rejected"
+                            ? "bg-red-200 text-red-800"
+                            : "bg-gray-200 text-gray-800"
+                  }`}
+                >
+                  {`REFUND ${
+                    order.refund_status.charAt(0).toUpperCase() +
+                    order.refund_status.slice(1)
+                  }`}
+                </Badge>
+              </>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -92,27 +92,8 @@ const OrderDetails = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-4 flex gap-2">
-            {canCancelCOD && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleCancel}
-                className="ml-auto flex"
-              >
-                Cancel Order
-              </Button>
-            )}
-            {canRequestRefundOnline && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleRefund}
-                className="ml-auto flex"
-              >
-                Request Refund
-              </Button>
-            )}
+          <div className="mt-4 flex flex-col gap-2">
+            <RefundButton order={order} />
           </div>
         </CardContent>
       </Card>

@@ -1,10 +1,12 @@
 import express from 'express';
 import {
+  cancelOrderController,
   createCodOrderController,
   createStripeCheckoutSessionController,
   getAllOrdersController,
   getOrderByIdController,
   getOrdersByUserIdController,
+  requestCancelOrderController,
   updateOrderStatusesController,
 } from '../controllers/orderController';
 
@@ -18,5 +20,9 @@ router.get('/me', getOrdersByUserIdController);
 router.get('/:id', getOrderByIdController);
 
 router.patch('/:id/status', updateOrderStatusesController);
+
+router.post('/:id/request-cancel', requestCancelOrderController);
+
+router.post('/:id/cancel', cancelOrderController);
 
 export default router;

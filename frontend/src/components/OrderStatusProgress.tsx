@@ -46,7 +46,7 @@ const OrderStatusProgress: React.FC<Props> = ({
 
   if (isCancelled) {
     return (
-      <div className={`my-6 text-center ${className ?? ""}`}>
+      <div className={` ${className ?? ""}`}>
         <Badge className="bg-red-100 px-4 py-2 text-red-700">
           Order Cancelled
         </Badge>
