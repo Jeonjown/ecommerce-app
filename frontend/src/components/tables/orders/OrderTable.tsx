@@ -101,117 +101,83 @@ export function OrdersTable<TData extends OrderLike>({
     [data],
   );
 
+  const filters = [
+    {
+      key: "payment_method",
+      placeholder: "Payment Method",
+      options: paymentMethodOptions,
+    },
+    {
+      key: "payment_status",
+      placeholder: "Payment Status",
+      options: paymentStatusOptions,
+    },
+    {
+      key: "order_status",
+      placeholder: "Order Status",
+      options: orderStatusOptions,
+    },
+    {
+      key: "refund_status",
+      placeholder: "Refund Status",
+      options: refundStatusOptions,
+    },
+  ] as const;
+
   // ---- Render ----
   return (
     <div>
-      {/* Search + Filters */}
-      <div className="flex items-center gap-2 py-4">
+      {/* Search + Filters */}{" "}
+      <div className="flex flex-wrap items-center gap-2 py-4">
+        {" "}
         <Input
           placeholder="Search..."
-          value={globalFilter ?? ""}
+          value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          className="max-w-sm"
-        />
-
-        {/* Payment Method Filter */}
-        <Select
-          value={
-            (table.getColumn("payment_method")?.getFilterValue() as string) ??
-            ""
-          }
-          onValueChange={(value) =>
+          className="max-w-sm min-w-40"
+        />{" "}
+        {filters.map(({ key, placeholder, options }) => (
+          <Select
+            key={key}
+            value={String(table.getColumn(key)?.getFilterValue() ?? "")}
+            onValueChange={(value) =>
+              table
+                .getColumn(key)
+                ?.setFilterValue(value === "none" ? undefined : value)
+            }
+          >
+            {" "}
+            <SelectTrigger className="w-[170px]">
+              {" "}
+              <SelectValue placeholder={placeholder} />{" "}
+            </SelectTrigger>{" "}
+            <SelectContent>
+              {" "}
+              <SelectItem value="none">None</SelectItem>{" "}
+              {options.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {" "}
+                  {option}{" "}
+                </SelectItem>
+              ))}{" "}
+            </SelectContent>{" "}
+          </Select>
+        ))}{" "}
+        {/* Clear All Filters Button */}{" "}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setGlobalFilter("");
             table
-              .getColumn("payment_method")
-              ?.setFilterValue(value === "none" ? "" : value)
-          }
+              .getAllColumns()
+              .forEach((col) => col.setFilterValue(undefined));
+          }}
         >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Payment Method" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            {paymentMethodOptions.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Payment Status Filter */}
-        <Select
-          value={
-            (table.getColumn("payment_status")?.getFilterValue() as string) ??
-            ""
-          }
-          onValueChange={(value) =>
-            table
-              .getColumn("payment_status")
-              ?.setFilterValue(value === "none" ? "" : value)
-          }
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Payment Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            {paymentStatusOptions.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Order Status Filter */}
-        <Select
-          value={
-            (table.getColumn("order_status")?.getFilterValue() as string) ?? ""
-          }
-          onValueChange={(value) =>
-            table
-              .getColumn("order_status")
-              ?.setFilterValue(value === "none" ? "" : value)
-          }
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Order Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            {orderStatusOptions.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Refund Status Filter */}
-        <Select
-          value={
-            (table.getColumn("refund_status")?.getFilterValue() as string) ?? ""
-          }
-          onValueChange={(value) =>
-            table
-              .getColumn("refund_status")
-              ?.setFilterValue(value === "none" ? "" : value)
-          }
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Refund Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            {refundStatusOptions.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          {" "}
+          Clear All Filters{" "}
+        </Button>{" "}
       </div>
-
       {/* Table */}
       <div className="rounded-md border">
         <Table>
@@ -258,7 +224,6 @@ export function OrdersTable<TData extends OrderLike>({
           </TableBody>
         </Table>
       </div>
-
       {/* Pagination */}
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button

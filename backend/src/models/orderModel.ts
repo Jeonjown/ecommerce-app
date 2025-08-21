@@ -314,6 +314,7 @@ export const getAllOrders = async () => {
       o.payment_status,
       o.order_status,
       o.refund_status,
+      o.cancellation_reason,
       o.total_price AS order_total,
       o.delivery_address,
       o.created_at,

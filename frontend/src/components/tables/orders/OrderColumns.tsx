@@ -80,6 +80,16 @@ export const orderColumns: ColumnDef<OrderResponse>[] = [
       />
     ),
   },
+  {
+    accessorKey: "cancellation_reason",
+    header: "Refund / Cancel Reason",
+    cell: ({ getValue, row }) => {
+      const reason = getValue() as string | null;
+      return row.original.refund_status && row.original.refund_status !== "none"
+        ? reason || "No reason provided"
+        : "-";
+    },
+  },
 
   {
     accessorKey: "order_total",

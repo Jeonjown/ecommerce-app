@@ -23,10 +23,11 @@ export function ColumnSelectFilter<TData>({
   const current = (column.getFilterValue() as string | undefined) ?? undefined;
 
   const setValue = (v?: string) => {
-    if (v === "__none__")
-      column.setFilterValue(undefined); // reset
+    if (v === "__none__") column.setFilterValue(undefined);
     else column.setFilterValue(v);
   };
+
+  const filteredOptions = options.filter((opt) => opt !== "none");
 
   return (
     <Select value={current ?? "__none__"} onValueChange={(v) => setValue(v)}>
@@ -40,7 +41,7 @@ export function ColumnSelectFilter<TData>({
         {/* Reset option */}
         <SelectItem value="__none__">{placeholder}</SelectItem>
 
-        {options.map((opt) => (
+        {filteredOptions.map((opt) => (
           <SelectItem key={opt} value={opt}>
             {opt}
           </SelectItem>
@@ -49,5 +50,4 @@ export function ColumnSelectFilter<TData>({
     </Select>
   );
 }
-
 export default ColumnSelectFilter;
