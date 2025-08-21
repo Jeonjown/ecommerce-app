@@ -1,5 +1,5 @@
 // pages/Checkout.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import DeliveryAddress from "@/components/DeliveryAddress";
 import PaymentMethodSelector from "@/components/PaymentMethodSelector";
@@ -16,6 +16,8 @@ const Checkout = () => {
 
   const stripeMutation = useCreateStripeOrder();
   const codMutation = useCreateCODOrder();
+
+  useEffect(() => {}, []);
 
   const handlePlaceOrder = () => {
     const payload = {
@@ -54,7 +56,11 @@ const Checkout = () => {
           <Button
             size="lg"
             onClick={handlePlaceOrder}
-            disabled={stripeMutation.isPending || codMutation.isPending}
+            disabled={
+              !deliveryAddress ||
+              stripeMutation.isPending ||
+              codMutation.isPending
+            }
           >
             {stripeMutation.isPending || codMutation.isPending
               ? "Placing..."
