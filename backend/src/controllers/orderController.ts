@@ -195,6 +195,30 @@ export const getAllOrdersController = async (
   }
 };
 
+export const getOrderByIdForAdminController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new ApiError('Invalid order id', 400);
+    }
+
+    const order = await getOrderByIdForAdmin(id);
+
+    if (!order) {
+      throw new ApiError('Order not found', 404);
+    }
+
+    res.status(200).json(order);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateOrderStatusesController = async (
   req: Request,
   res: Response

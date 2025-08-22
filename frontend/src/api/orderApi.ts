@@ -125,3 +125,22 @@ export const requestCancelOrder = async (
     throw new Error("Unexpected error requesting cancellation.");
   }
 };
+
+export const getOrderByIdForAdmin = async (
+  orderId: number,
+): Promise<OrderResponse> => {
+  try {
+    const res = await api.get(`/orders/admin/${orderId}`, {
+      withCredentials: true,
+    });
+
+    return res.data as OrderResponse;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch admin order details.",
+      );
+    }
+    throw new Error("Unexpected error fetching admin order details.");
+  }
+};

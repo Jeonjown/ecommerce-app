@@ -123,6 +123,7 @@ export interface OrderResponse {
   payment_details: PaymentDetails | null; // reuse your existing PaymentDetails
   order_date: string; // ISO string
   last_updated: string; // ISO string
+  cancellation_reason: string;
   items: OrderItemResponse[];
 }
 

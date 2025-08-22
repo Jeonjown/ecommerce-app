@@ -264,11 +264,11 @@ export const getOrderByIdForAdmin = async (orderId: number) => {
       o.user_id,
       u.name AS customer_name,
       u.email AS customer_email,
-
       o.payment_method,
       o.payment_status,
       o.order_status,
       o.refund_status,
+      o.cancellation_reason,
       o.total_price,
       o.delivery_address,
       o.stripe_session_id,
@@ -276,12 +276,10 @@ export const getOrderByIdForAdmin = async (orderId: number) => {
       o.payment_details,
       o.created_at AS order_date,
       o.updated_at AS last_updated,
-
       -- Item details
       oi.id AS order_item_id,
       oi.quantity,
       oi.unit_price,
-
       -- Product details
       p.id AS product_id,
       p.name AS product_name,
@@ -291,7 +289,6 @@ export const getOrderByIdForAdmin = async (orderId: number) => {
       pv.name AS variant_name,
       pv.image_url,
       pv.price AS variant_price
-
     FROM orders o
     JOIN users u ON o.user_id = u.id
     LEFT JOIN order_items oi ON o.id = oi.order_id
@@ -302,7 +299,62 @@ export const getOrderByIdForAdmin = async (orderId: number) => {
     [orderId]
   );
 
-  return rows[0] || null;
+  if (rows.length === 0) return null;
+
+  const {
+    order_id,
+    user_id,
+    customer_name,
+    customer_email,
+    payment_method,
+    payment_status,
+    order_status,
+    refund_status,
+    cancellation_reason,
+    total_price,
+    delivery_address,
+    stripe_session_id,
+    stripe_payment_intent_id,
+    payment_details,
+    order_date,
+    last_updated,
+  } = rows[0];
+
+  const items = rows
+    .filter((row) => row.order_item_id)
+    .map((row) => ({
+      order_item_id: row.order_item_id,
+      quantity: row.quantity,
+      unit_price: row.unit_price,
+      product_id: row.product_id,
+      product_name: row.product_name,
+      brand: row.brand,
+      variant_id: row.variant_id,
+      sku: row.sku,
+      variant_name: row.variant_name,
+      image_url: row.image_url,
+      variant_price: row.variant_price,
+    }));
+
+  return {
+    order_id,
+    user_id,
+    customer_name,
+    customer_email,
+    payment_method,
+    payment_status,
+    order_status,
+    refund_status,
+    cancellation_reason, // <-- include here
+    total_price,
+    delivery_address,
+    stripe_session_id,
+    stripe_payment_intent_id,
+    payment_details,
+    order_date,
+    last_updated,
+    items,
+  };
 };
 
 export const getAllOrders = async () => {

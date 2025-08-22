@@ -5,6 +5,7 @@ import {
   createStripeCheckoutSessionController,
   getAllOrdersController,
   getOrderByIdController,
+  getOrderByIdForAdminController,
   getOrdersByUserIdController,
   requestCancelOrderController,
   updateOrderStatusesController,
@@ -18,6 +19,7 @@ router.post('/stripe', createStripeCheckoutSessionController);
 router.get('/', getAllOrdersController);
 router.get('/me', getOrdersByUserIdController);
 router.get('/:id', getOrderByIdController);
+router.get('/admin/:id', getOrderByIdForAdminController);
 
 router.patch('/:id/status', updateOrderStatusesController);
 
