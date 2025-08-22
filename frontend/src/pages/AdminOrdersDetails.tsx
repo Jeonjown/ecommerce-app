@@ -27,8 +27,6 @@ const AdminOrdersDetails: React.FC = () => {
 
   const { data: order, isLoading, error } = useGetOrderByIdForAdmin(orderId);
 
-  console.log(order);
-
   if (isLoading) {
     return (
       <div className="p-6">
@@ -61,37 +59,6 @@ const AdminOrdersDetails: React.FC = () => {
     );
   }
 
-  const canCancelCOD =
-    order.payment_method === "cod" &&
-    ["pending", "processing"].includes(order.order_status ?? "");
-
-  const canRefundOnline =
-    order.payment_method === "online" &&
-    order.payment_status === "paid" &&
-    ["pending", "processing", "shipped", "delivered"].includes(
-      order.order_status ?? "",
-    );
-
-  const handleEdit = () => navigate(`/admin/orders/${order.order_id}/edit`);
-
-  const handleCancel = () => {
-    if (!window.confirm("Cancel this order? This action may be irreversible."))
-      return;
-    console.info("Cancel order:", order.order_id);
-    window.alert("Cancel order action triggered (implement mutation).");
-  };
-
-  const handleRequestRefund = () => {
-    if (
-      !window.confirm(
-        "Request refund for this order? This will start the refund flow.",
-      )
-    )
-      return;
-    console.info("Request refund for order:", order.order_id);
-    window.alert("Refund request triggered (implement mutation).");
-  };
-
   const items = Array.isArray(order.items) ? order.items : [];
 
   return (
@@ -104,21 +71,6 @@ const AdminOrdersDetails: React.FC = () => {
           </Button>
           <h1 className="text-2xl font-semibold">Order #{order.order_id}</h1>
           <Badge>{order.order_status ?? "none"}</Badge>
-        </div>
-
-        <div className="flex gap-2">
-          <Link to="/admin/orders">
-            <Button variant="outline">Back to Orders</Button>
-          </Link>
-          <Button onClick={handleEdit}>Edit</Button>
-          {canCancelCOD && (
-            <Button variant="destructive" onClick={handleCancel}>
-              Cancel Order
-            </Button>
-          )}
-          {canRefundOnline && (
-            <Button onClick={handleRequestRefund}>Request Refund</Button>
-          )}
         </div>
       </div>
 
@@ -133,11 +85,18 @@ const AdminOrdersDetails: React.FC = () => {
               <div className="text-muted-foreground text-sm">Customer</div>
               <div>User #{order.user_id ?? "—"}</div>
             </div>
+            <div>
+              <div className="text-muted-foreground text-sm">
+                Payment Method
+              </div>
+              <span>{order.payment_method ?? "—"}</span>
+            </div>
 
             <div>
-              <div className="text-muted-foreground text-sm">Payment</div>
+              <div className="text-muted-foreground text-sm">
+                Payment Status
+              </div>
               <div className="flex items-center gap-3">
-                <span>{order.payment_method ?? "—"}</span>
                 <OrderStatusCell
                   orderId={order.order_id}
                   value={order.payment_status ?? "none"}
