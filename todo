@@ -1,5 +1,4 @@
 - make order details on admin
-- make the frontend for cancellation
-- make online cancellation feature for processing and paid online
-- make online cancellation feature for offline
-- make refund feature
+- make users table
+- make admin dashboard
+- cleanup ui

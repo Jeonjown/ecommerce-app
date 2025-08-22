@@ -253,11 +253,12 @@ export const requestCancelOrderController = async (
         conn
       );
       await insertOrderReason(Number(id), reason);
-      return res.status(200).json({
+      res.status(200).json({
         message: 'Order cancelled successfully',
         orderId: id,
         reason,
       });
+      return;
     }
 
     // Online orders
@@ -280,12 +281,13 @@ export const requestCancelOrderController = async (
         conn
       );
       await insertOrderReason(Number(id), reason);
-      return res.status(200).json({
+      res.status(200).json({
         message: 'Refund request submitted',
         orderId: id,
         reason,
       });
     }
+    return;
   } finally {
     conn.release();
   }
