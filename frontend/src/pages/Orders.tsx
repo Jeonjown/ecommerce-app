@@ -1,6 +1,5 @@
-// components/Orders.tsx
 import { useState } from "react";
-import { useGetOrdersByUserId } from "@/hooks/useGetOrdersByUserId";
+import { useGetOrdersByLoggedInUser } from "@/hooks/useGetOrdersByLoggedInUser";
 import { OrderCard } from "@/components/OrderCard";
 import { StatusTabs } from "@/components/StatusTabs";
 import type { Order } from "@/types/api/orders";
@@ -14,7 +13,7 @@ const STATUS_TABS = [
 ] as const;
 
 const Orders = () => {
-  const { data } = useGetOrdersByUserId();
+  const { data } = useGetOrdersByLoggedInUser();
   const [activeTab, setActiveTab] =
     useState<(typeof STATUS_TABS)[number]>("pending");
 

@@ -41,7 +41,7 @@ export const createCODOrder = async (payload: OrderPayload) => {
   }
 };
 
-export const getOrdersByUserId = async (): Promise<OrderItem[]> => {
+export const getOrdersByLoggedInUser = async (): Promise<OrderItem[]> => {
   try {
     const res = await api.get("/orders/me", { withCredentials: true });
     return res.data;
@@ -66,6 +66,25 @@ export const getOrderById = async (orderId: number): Promise<OrderResponse> => {
       );
     }
     throw new Error("Unexpected error fetching order details.");
+  }
+};
+
+export const getOrdersByUserId = async (
+  userId: number,
+): Promise<OrderItem[]> => {
+  try {
+    const res = await api.get<OrderItem[]>(`/orders/admin/user/${userId}`, {
+      withCredentials: true,
+    });
+    return res.data;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message ||
+          "Failed to fetch orders for this user.",
+      );
+    }
+    throw new Error("Unexpected error fetching orders for this user.");
   }
 };
 

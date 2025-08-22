@@ -48,3 +48,37 @@ export const getUserById = async (
   );
   return rows[0];
 };
+
+// promote user to admin
+export const promoteUserRole = async (
+  userId: number
+): Promise<User | undefined> => {
+  await pool.query<ResultSetHeader>(
+    "UPDATE users SET role = 'admin' WHERE id = ?",
+    [userId]
+  );
+
+  const [rows] = await pool.query<(User & RowDataPacket)[]>(
+    'SELECT id, name, email, role, created_at FROM users WHERE id = ?',
+    [userId]
+  );
+
+  return rows[0];
+};
+
+// demote user back to normal user
+export const demoteUserRole = async (
+  userId: number
+): Promise<User | undefined> => {
+  await pool.query<ResultSetHeader>(
+    "UPDATE users SET role = 'user' WHERE id = ?",
+    [userId]
+  );
+
+  const [rows] = await pool.query<(User & RowDataPacket)[]>(
+    'SELECT id, name, email, role, created_at FROM users WHERE id = ?',
+    [userId]
+  );
+
+  return rows[0];
+};

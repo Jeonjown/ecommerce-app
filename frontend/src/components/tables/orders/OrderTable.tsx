@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { IoSearch } from "react-icons/io5";
 
 // ---- Types ----
 interface OrderLike {
@@ -129,13 +130,18 @@ export function OrdersTable<TData extends OrderLike>({
     <div>
       {/* Search + Filters */}{" "}
       <div className="flex flex-wrap items-center gap-2 py-4">
-        {" "}
-        <Input
-          placeholder="Search..."
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          className="max-w-sm min-w-40"
-        />{" "}
+        <div className="relative mr-3 w-full max-w-xs">
+          <IoSearch
+            size={16}
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400"
+          />
+          <Input
+            placeholder="Search"
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            className="py-2 text-sm"
+          />
+        </div>
         {filters.map(({ key, placeholder, options }) => (
           <Select
             key={key}

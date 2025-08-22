@@ -134,7 +134,7 @@ export const createStripeCheckoutSessionController = async (
   }
 };
 
-export const getOrdersByUserIdController = async (
+export const getOrdersByLoggedInUserController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -146,6 +146,27 @@ export const getOrdersByUserIdController = async (
     }
 
     const orders = await getOrdersByUserId(user.id);
+    res.status(200).json(orders);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getOrdersByUserIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const userId = Number(id);
+
+    if (!userId || Number.isNaN(userId)) {
+      throw new ApiError('Invalid user ID.', 400);
+    }
+
+    const orders = await getOrdersByUserId(userId);
+
     res.status(200).json(orders);
   } catch (error) {
     next(error);

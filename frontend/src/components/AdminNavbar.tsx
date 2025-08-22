@@ -24,7 +24,7 @@ const AdminNavbar = () => {
     { label: "Products", to: "/admin/products" },
     { label: "Categories", to: "/admin/categories" },
     { label: "Orders", to: "/admin/orders" },
-    { label: "Users", to: "#" },
+    { label: "Users", to: "/admin/users" },
   ];
 
   return (

@@ -24,6 +24,8 @@ import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
 import AdminOrders from "./pages/AdminOrders";
 import AdminOrdersDetails from "./pages/AdminOrdersDetails";
+import AdminUsers from "./pages/AdminUsers";
+import UserDetails from "./pages/UserDetails";
 function App() {
   const { data } = useGetLoggedInUser();
 
@@ -37,6 +39,8 @@ function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="categories" element={<AdminCategories />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="users/:id" element={<UserDetails />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="orders/:id" element={<AdminOrdersDetails />} />
           </Route>

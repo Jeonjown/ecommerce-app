@@ -6,6 +6,7 @@ import {
   getAllOrdersController,
   getOrderByIdController,
   getOrderByIdForAdminController,
+  getOrdersByLoggedInUserController,
   getOrdersByUserIdController,
   requestCancelOrderController,
   updateOrderStatusesController,
@@ -16,10 +17,12 @@ const router = express.Router();
 router.post('/cod', createCodOrderController);
 router.post('/stripe', createStripeCheckoutSessionController);
 
-router.get('/', getAllOrdersController);
-router.get('/me', getOrdersByUserIdController);
-router.get('/:id', getOrderByIdController);
+router.get('/me', getOrdersByLoggedInUserController);
 router.get('/admin/:id', getOrderByIdForAdminController);
+router.get('/admin/user/:id', getOrdersByUserIdController);
+
+router.get('/:id', getOrderByIdController);
+router.get('/', getAllOrdersController);
 
 router.patch('/:id/status', updateOrderStatusesController);
 
