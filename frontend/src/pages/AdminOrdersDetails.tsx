@@ -1,6 +1,6 @@
 // src/pages/admin/AdminOrdersDetails.tsx
 import React from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -62,7 +62,7 @@ const AdminOrdersDetails: React.FC = () => {
   const items = Array.isArray(order.items) ? order.items : [];
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="h-full space-y-6">
       {/* Header / Actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -143,13 +143,6 @@ const AdminOrdersDetails: React.FC = () => {
             </div>
 
             <div>
-              <div className="text-muted-foreground text-sm">Total</div>
-              <div className="text-lg font-medium">
-                {formatMoney(order.total_price)}
-              </div>
-            </div>
-
-            <div>
               <div className="text-muted-foreground text-sm">Created At</div>
               <div>
                 {order.order_date
@@ -181,64 +174,77 @@ const AdminOrdersDetails: React.FC = () => {
               <div>{order.delivery_address ?? "—"}</div>
             </div>
 
-            <div>
-              <div className="text-muted-foreground mb-2 text-sm">Items</div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Image</TableHead> {/* New column */}
-                    <TableHead>Product</TableHead>
-                    <TableHead>Variant</TableHead>
-                    <TableHead>Qty</TableHead>
-                    <TableHead>Unit Price</TableHead>
-                    <TableHead>Subtotal</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.length === 0 && (
+            <div className="flex h-full flex-col">
+              <div>
+                <div className="text-muted-foreground mb-2 text-sm">Items</div>
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={6}>No items</TableCell>
+                      <TableHead>Image</TableHead>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Variant</TableHead>
+                      <TableHead>Qty</TableHead>
+                      <TableHead>Unit Price</TableHead>
+                      <TableHead>Subtotal</TableHead>
                     </TableRow>
-                  )}
-
-                  {items.map((it: OrderItemResponse) => {
-                    const productName = it.product_name ?? "Item";
-                    const variantName = it.variant_name ?? "-";
-                    const qty =
-                      typeof it.quantity === "number" ? it.quantity : 1;
-                    const unitPrice =
-                      typeof it.unit_price === "number" ? it.unit_price : 0;
-                    const subtotal = unitPrice * qty;
-
-                    return (
-                      <TableRow
-                        key={
-                          it.order_item_id ?? `${productName}-${Math.random()}`
-                        }
-                      >
-                        <TableCell>
-                          {it.image_url ? (
-                            <img
-                              src={it.image_url}
-                              alt={variantName}
-                              className="h-12 w-12 rounded object-cover"
-                            />
-                          ) : (
-                            "—"
-                          )}
-                        </TableCell>
-                        <TableCell>{productName}</TableCell>
-                        <TableCell className="max-w-sm truncate">
-                          {variantName}
-                        </TableCell>
-                        <TableCell>{qty}</TableCell>
-                        <TableCell>{formatMoney(unitPrice)}</TableCell>
-                        <TableCell>{formatMoney(subtotal)}</TableCell>
+                  </TableHeader>
+                  <TableBody>
+                    {items.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6}>No items</TableCell>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                    )}
+
+                    {items.map((it: OrderItemResponse) => {
+                      const productName = it.product_name ?? "Item";
+                      const variantName = it.variant_name ?? "-";
+                      const qty =
+                        typeof it.quantity === "number" ? it.quantity : 1;
+                      const unitPrice =
+                        typeof it.unit_price === "number" ? it.unit_price : 0;
+                      const subtotal = unitPrice * qty;
+
+                      return (
+                        <TableRow
+                          key={
+                            it.order_item_id ??
+                            `${productName}-${Math.random()}`
+                          }
+                        >
+                          <TableCell>
+                            {it.image_url ? (
+                              <img
+                                src={it.image_url}
+                                alt={variantName}
+                                className="h-12 w-12 rounded object-cover"
+                              />
+                            ) : (
+                              "—"
+                            )}
+                          </TableCell>
+                          <TableCell>{productName}</TableCell>
+                          <TableCell className="max-w-sm truncate">
+                            {variantName}
+                          </TableCell>
+                          <TableCell>{qty}</TableCell>
+                          <TableCell>{formatMoney(unitPrice)}</TableCell>
+                          <TableCell>{formatMoney(subtotal)}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* ✅ mt-auto now works */}
+              <div className="mt-auto flex justify-end pt-4">
+                <div className="text-right">
+                  <div className="text-muted-foreground text-sm">Total</div>
+                  <div className="text-lg font-medium">
+                    {formatMoney(order.total_price)}
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

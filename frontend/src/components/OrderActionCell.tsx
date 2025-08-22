@@ -14,17 +14,6 @@ interface OrderActionCellProps {
 }
 
 export function OrderActionCell({ order }: OrderActionCellProps) {
-  const canCancelCOD =
-    order.payment_method === "cod" &&
-    ["pending", "processing"].includes(order.order_status);
-
-  const canRefundOnline =
-    order.payment_method === "online" &&
-    order.payment_status === "paid" &&
-    ["pending", "processing", "shipped", "delivered"].includes(
-      order.order_status,
-    );
-
   return (
     <>
       <DropdownMenu>
@@ -37,11 +26,6 @@ export function OrderActionCell({ order }: OrderActionCellProps) {
           <DropdownMenuItem asChild>
             <Link to={`/admin/orders/${order.order_id}`}>View</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          {canCancelCOD && <DropdownMenuItem>Cancel Order</DropdownMenuItem>}
-          {canRefundOnline && (
-            <DropdownMenuItem>Request Refund</DropdownMenuItem>
-          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </>
