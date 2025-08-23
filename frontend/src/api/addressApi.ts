@@ -4,7 +4,7 @@ import { isAxiosError } from "axios";
 
 export const getAddresses = async (): Promise<{ addresses: Address[] }> => {
   try {
-    const res = await api.get("/users/address", { withCredentials: true });
+    const res = await api.get("/users/address/me", { withCredentials: true });
     return res.data;
   } catch (error) {
     if (isAxiosError(error)) {

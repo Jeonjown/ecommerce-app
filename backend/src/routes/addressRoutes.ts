@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post('/', createAddressController);
 
-router.get('/', getAddressesController);
+router.get('/me', getAddressesController);
 
 router.get('/:id', getAddressByIdController);
 
