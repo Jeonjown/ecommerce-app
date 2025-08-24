@@ -1,6 +1,8 @@
+import Footer from "@/components/Footer";
 import HeroBanner from "@/components/HeroBanner";
-import NewArrival from "@/components/NewArrival";
 import ProductCarousel from "@/components/ProductCarousel";
+import PromoBanner from "@/components/PromoBanner";
+import TopCategories from "@/components/TopCategories";
 
 const Home = () => {
   return (
@@ -8,7 +10,12 @@ const Home = () => {
       <HeroBanner />
       {/* <Filters /> */}
       <ProductCarousel />
-      <NewArrival />
+      <PromoBanner />
+      <TopCategories />
+
+      {/* <NewArrival /> */}
+
+      <Footer />
     </>
   );
 };

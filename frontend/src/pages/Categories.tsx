@@ -7,7 +7,7 @@ const Categories = () => {
     <SidebarProvider defaultOpen>
       <CategorySidebar />
 
-      <SidebarTrigger className="md:hidden" />
+      <SidebarTrigger className="absolute md:hidden" />
       <div className="w-full">
         <Outlet />
       </div>

@@ -98,7 +98,7 @@ const ProductDetails = () => {
             <div className="space-y-2">
               <h1 className="text-2xl font-semibold">{data.product.name}</h1>
               <p className="text-primary text-3xl font-bold">
-                ₱ {selectedVariant?.price}
+                ₱ {(Number(selectedVariant?.price) || 0).toFixed(2)}
               </p>
             </div>
             {/* Variants */}

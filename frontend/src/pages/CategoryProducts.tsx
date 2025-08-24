@@ -29,32 +29,33 @@ export const CategoryProducts = () => {
   if (isPending) {
     return (
       <div className="space-y-6 p-4">
-        {/* Header row */}
-        <div className="flex items-center justify-between">
-          {/* Category Title (e.g. Laptops) */}
+        {/* ProductHeader skeleton */}
+        <div className="mt-2 mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          {/* Category name */}
           <Skeleton className="h-8 w-40" />
 
-          {/* Filters on the right */}
+          {/* Filters (sort + price) */}
           <div className="flex gap-4">
-            <Skeleton className="h-6 w-24" /> {/* Sort by */}
-            <Skeleton className="h-6 w-32" /> {/* Price Range */}
+            <Skeleton className="h-8 w-28 rounded-md" /> {/* Sort */}
+            <Skeleton className="h-8 w-32 rounded-md" /> {/* Price */}
           </div>
         </div>
 
-        {/* Breadcrumbs */}
-        <div className="flex items-center gap-2">
+        {/* Breadcrumbs skeleton */}
+        <div className="mb-4 flex items-center gap-2">
           <Skeleton className="h-4 w-12" /> {/* Home */}
-          <Skeleton className="h-4 w-16" /> {/* Categories */}
+          <Skeleton className="h-4 w-16" /> {/* Category */}
+          <Skeleton className="h-4 w-20" /> {/* Subcategory */}
         </div>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {/* ProductGrid skeleton */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, i) => (
             <div
               key={i}
               className="flex flex-col space-y-3 rounded-xl border p-4 shadow-sm"
             >
-              {/* Product image */}
+              {/* Image */}
               <Skeleton className="h-48 w-full rounded-lg" />
 
               {/* Product name */}
@@ -63,9 +64,16 @@ export const CategoryProducts = () => {
               {/* Price */}
               <Skeleton className="h-4 w-1/2" />
 
-              {/* Optional brand/category line */}
+              {/* Extra line (brand/category) */}
               <Skeleton className="h-3 w-1/3" />
             </div>
+          ))}
+        </div>
+
+        {/* Pagination skeleton */}
+        <div className="mt-6 flex justify-center gap-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 w-8 rounded-md" />
           ))}
         </div>
       </div>

@@ -33,7 +33,7 @@ export default defineConfig([
       },
     },
     rules: {
-      "react/react-in-jsx-scope": "off", // ✅ fix for your error
+      "react/react-in-jsx-scope": "off",
     },
   },
 ]);

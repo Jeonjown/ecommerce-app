@@ -47,7 +47,7 @@ const Navbar = () => {
           <Link to="/categories">Categories</Link>
         </li>
         <li>
-          <Link to="/deals">New Deals</Link>
+          <Link to="/faqs">FAQs</Link>
         </li>
         <li>
           <Link to="/orders">Orders</Link>
@@ -133,7 +133,7 @@ const Navbar = () => {
           <Link to="/categories">Categories</Link>
         </li>
         <li>
-          <Link to="/deals">New Deals</Link>
+          <Link to="/faqs">FAQs</Link>
         </li>
         <li>
           <Link to="/orders">Orders</Link>
