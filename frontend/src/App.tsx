@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import PrivateRoutes from "./components/PrivateRoutes";
 import AdminRoutes from "./components/AdminRoutes";
-import AdminDashboard from "./components/AdminDashboard";
+
 import { useGetLoggedInUser } from "./hooks/useGetLoggedInUser";
 import AdminNavbar from "./components/AdminNavbar";
 
@@ -26,6 +26,8 @@ import AdminOrders from "./pages/AdminOrders";
 import AdminOrdersDetails from "./pages/AdminOrdersDetails";
 import AdminUsers from "./pages/AdminUsers";
 import UserDetails from "./pages/UserDetails";
+import AdminDashboard from "./pages/AdminDashboard";
+import Faqs from "./pages/FAQs";
 function App() {
   const { data } = useGetLoggedInUser();
 
@@ -59,6 +61,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/faqs" element={<Faqs />} />
           <Route path="/categories" element={<Categories />}>
             <Route index element={<CategoryProducts />} />
             <Route path=":slug" element={<CategoryProducts />} />

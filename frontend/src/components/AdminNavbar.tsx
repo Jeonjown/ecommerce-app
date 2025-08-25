@@ -20,7 +20,7 @@ const AdminNavbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const links = [
-    { label: "Dashboard", to: "#" },
+    { label: "Dashboard", to: "/admin/dashboard" },
     { label: "Products", to: "/admin/products" },
     { label: "Categories", to: "/admin/categories" },
     { label: "Orders", to: "/admin/orders" },
@@ -30,8 +30,13 @@ const AdminNavbar = () => {
   return (
     <nav className="relative container mx-auto flex flex-wrap items-center justify-between gap-4 p-4">
       {/* Logo */}
-      <div className="mr-5 text-2xl font-bold">LinTech</div>
-
+      <Link to={"/admin/dashboard"}>
+        <img
+          src="/techhaven-logo.svg"
+          alt="TechHaven"
+          className="h-10 w-auto"
+        />
+      </Link>
       {/* Desktop Nav Links */}
       <ul className="hidden space-x-6 font-semibold md:flex lg:mx-auto">
         {links.map((link) => (

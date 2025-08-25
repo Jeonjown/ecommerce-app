@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,7 +34,6 @@ interface VariantFormProps {
   onSuccess: () => void;
 }
 
-// this matches your API's expected payload type
 interface VariantOptionPayload {
   product_option_id: number;
   product_option_value_id: number;
@@ -44,11 +44,12 @@ export default function VariantForm({
   onSuccess,
 }: VariantFormProps) {
   const { data } = useGetOptionsByProductId(product_id);
-  const { mutate: createVariant, isPending: creating } =
+  const { mutateAsync: createVariantAsync, isPending: creating } =
     useCreateVariantByProductId(product_id);
   const { mutateAsync: uploadImage } = useUploadImage();
+  const [submitting, setSubmitting] = useState(false);
 
-  // Build a Zod schema piece for each option, but optional
+  // Build dynamic option fields schema
   const dynamicOptionFields =
     data?.options.reduce(
       (acc, option) => {
@@ -68,13 +69,11 @@ export default function VariantForm({
       is_active: z.boolean(),
       image_file: z
         .instanceof(File)
-        .refine((f) => f.size > 0, "Please select an image file"),
+        .refine((f) => f.size > 0, "Please select an image"),
       ...dynamicOptionFields,
     })
     .superRefine((values, ctx) => {
       if (!data) return;
-
-      // cast to a simple string map
       type OptionValuesMap = Record<string, string | undefined>;
       const opts = values as unknown as OptionValuesMap;
 
@@ -91,10 +90,12 @@ export default function VariantForm({
         });
       }
     });
+
   type FormValues = z.infer<typeof formSchema>;
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
     defaultValues: {
       product_id,
       price: 0,
@@ -104,29 +105,27 @@ export default function VariantForm({
   });
 
   const onSubmit = async (values: FormValues) => {
+    if (submitting) return;
+    setSubmitting(true);
+
     try {
       const imageUrl = await uploadImage(values.image_file);
 
-      // map into payload, skipping "none" or undefined
       const selectedOptions =
         data?.options
           .map((option) => {
-            const key = `option_${option.option_id}` as keyof FormValues;
-            // First read as unknown, then cast explicitly to string | undefined:
-            const raw = (values as Record<string, unknown>)[key] as
-              | string
-              | undefined;
-
-            // Now TS knows raw is string|undefined, so comparing to "none" is OK
+            const raw = values[
+              `option_${option.option_id}` as keyof FormValues
+            ] as string | undefined;
             if (!raw || raw === "none") return null;
-
             return {
               product_option_id: option.option_id,
               product_option_value_id: parseInt(raw, 10),
             } as VariantOptionPayload;
           })
           .filter((o): o is VariantOptionPayload => o !== null) ?? [];
-      createVariant(
+
+      await createVariantAsync(
         {
           product_id,
           name: values.name,
@@ -146,49 +145,50 @@ export default function VariantForm({
       );
     } catch (err) {
       console.error("Upload failed:", err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  if (creating) return <Loading />;
+  if (creating || submitting) return <Loading />;
 
   return (
     <FormProvider {...methods}>
       <Form {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-          {/* 1) Image upload */}
+          {/* Image Upload */}
           <UploadImageField name="image_file" label="Variant Image" />
 
-          {/* 2) Dynamic option selects */}
+          {/* Dynamic Option Selects */}
           <div className="flex flex-wrap gap-4">
             {data?.options.map((option) => (
               <FormField
                 key={option.option_id}
                 name={`option_${option.option_id}`}
                 render={({ field }) => (
-                  <FormItem className="">
-                    <FormLabel>{option.option_name} </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value ?? "none"}
-                    >
-                      <FormControl>
+                  <FormItem>
+                    <FormLabel>{option.option_name}</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value ?? "none"}
+                        onValueChange={field.onChange}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="None" />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {/* “None” must be a non-empty value for Radix */}
-                        <SelectItem value="none">None</SelectItem>
-                        {option.values.map((v) => (
-                          <SelectItem
-                            key={v.value_id}
-                            value={String(v.value_id)}
-                          >
-                            {v.value_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          {option.values.map((v) => (
+                            <SelectItem
+                              key={v.value_id}
+                              value={String(v.value_id)}
+                            >
+                              {v.value_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -196,7 +196,7 @@ export default function VariantForm({
             ))}
           </div>
 
-          {/* 3) Price */}
+          {/* Price */}
           <FormField
             control={methods.control}
             name="price"
@@ -241,7 +241,7 @@ export default function VariantForm({
             )}
           />
 
-          {/* 4) Stock */}
+          {/* Stock */}
           <FormField
             control={methods.control}
             name="stock"
@@ -256,7 +256,7 @@ export default function VariantForm({
             )}
           />
 
-          {/* 5) Active */}
+          {/* Active */}
           <FormField
             control={methods.control}
             name="is_active"
@@ -273,9 +273,12 @@ export default function VariantForm({
             )}
           />
 
-          {/* 6) Submit */}
-          <Button type="submit" disabled={creating}>
-            {creating ? "Submitting…" : "Create Variant"}
+          {/* Submit */}
+          <Button
+            type="submit"
+            disabled={creating || submitting || !methods.formState.isValid}
+          >
+            {creating || submitting ? "Submitting…" : "Create Variant"}
           </Button>
         </form>
       </Form>

@@ -18,6 +18,7 @@ import HamburgerMenu from "./Hamburger";
 import getTotalQuantity from "@/utils/getTotalQuantity";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { useGetUserCart } from "@/hooks/useGetUserCart";
+import { Button } from "./ui/button";
 
 const Navbar = () => {
   const { data: items } = useGetUserCart();
@@ -109,10 +110,10 @@ const Navbar = () => {
         ) : (
           <div className="space-x-2">
             <Link to="/login">
-              <button className="border px-2 py-1">Login</button>
+              <Button className="border px-2 py-1">Login</Button>
             </Link>
             <Link to="/signup">
-              <button className="border px-2 py-1">Signup</button>
+              <Button className="border px-2 py-1">Signup</Button>
             </Link>
           </div>
         )}

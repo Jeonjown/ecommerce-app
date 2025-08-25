@@ -11,12 +11,18 @@ export const useLoginUser = () => {
 
   return useMutation<AuthResponse, Error, LoginRequest>({
     mutationFn: loginUser,
-    onSuccess: async (data) => {
-      queryClient.invalidateQueries({ queryKey: ["loggedInUser"] });
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-      toast.success(data.message || "Login successful");
+    onSuccess: (data) => {
+      // Immediately update React Query cache
+      queryClient.setQueryData(["loggedInUser"], { user: data.user });
 
-      navigate("/");
+      // Navigate based on role
+      if (data.user?.role === "admin") {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
     onError: (error) => {
       if (isAxiosError(error)) {

@@ -3,13 +3,11 @@ import { useGetLoggedInUser } from "../hooks/useGetLoggedInUser";
 import Loading from "../pages/Loading";
 
 const AdminRoutes = () => {
-  const { data, isPending } = useGetLoggedInUser();
+  const { data, isPending, isError } = useGetLoggedInUser();
 
-  if (isPending) {
-    return <Loading />;
-  }
+  if (isPending) return <Loading />;
 
-  if (!data || data.user.role !== "admin") {
+  if (isError || !data || data.user.role !== "admin") {
     return <Navigate to="/login" replace />;
   }
 

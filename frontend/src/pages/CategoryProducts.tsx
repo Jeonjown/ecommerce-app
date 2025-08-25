@@ -3,7 +3,7 @@ import PaginationUI from "@/components/PaginationUi";
 import ProductBreadCrumbs from "@/components/ProductBreadCrumbs";
 import ProductGrid from "@/components/ProductGrid";
 import ProductHeader from "@/components/ProductHeader";
-import { Skeleton } from "@/components/ui/skeleton"; // 👈 shadcn skeleton
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePagination } from "@/hooks/usePagination";
 import { useProductsWithFilters } from "@/hooks/useProductsWithFilters";
 import { useParams } from "react-router-dom";

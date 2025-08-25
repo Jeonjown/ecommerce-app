@@ -14,7 +14,7 @@ export const useLogoutUser = () => {
       queryClient.setQueryData(["loggedInUser"], null);
       queryClient.invalidateQueries({ queryKey: ["cart"] });
 
-      navigate("/login");
+      navigate("/");
     },
     onError: (error) => {
       if (isAxiosError(error)) {
