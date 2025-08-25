@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { BsCartPlus } from "react-icons/bs";
 import { FaRegUser } from "react-icons/fa6";
-import { IoSearch } from "react-icons/io5";
 
 import { useGetLoggedInUser } from "../hooks/useGetLoggedInUser";
 import { useLogoutUser } from "../hooks/useLogoutUser";
@@ -19,6 +18,7 @@ import getTotalQuantity from "@/utils/getTotalQuantity";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { useGetUserCart } from "@/hooks/useGetUserCart";
 import { Button } from "./ui/button";
+import SearchProducts from "./SearchProducts";
 
 const Navbar = () => {
   const { data: items } = useGetUserCart();
@@ -48,23 +48,15 @@ const Navbar = () => {
           <Link to="/categories">Categories</Link>
         </li>
         <li>
-          <Link to="/faqs">FAQs</Link>
+          <Link to="/orders">Orders</Link>
         </li>
         <li>
-          <Link to="/orders">Orders</Link>
+          <Link to="/faqs">FAQs</Link>
         </li>
       </ul>
 
       {/* Search */}
-      <div className="border-input focus-within:ring-ring order-3 mx-2 flex w-full items-center gap-2 rounded-xl border bg-white px-3 py-2 focus-within:ring-2 md:order-none md:w-[400px] lg:mx-auto lg:w-[500px]">
-        <IoSearch size={20} className="text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Search products..."
-          className="placeholder:text-muted-foreground w-full bg-transparent text-sm outline-none"
-        />
-      </div>
-
+      <SearchProducts />
       {/* Icons */}
       <div className="mr-3 ml-auto flex items-center space-x-4">
         {/* Cart (unchanged) */}

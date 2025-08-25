@@ -1,3 +1,2 @@
-- add search bar functionality
-- admin dashboard
-- fix seed data
+seed data
+clean up status // clear pending, clear processing

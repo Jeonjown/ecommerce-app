@@ -17,6 +17,7 @@ import cartRoutes from './routes/cartRoutes';
 import addressRoutes from './routes/addressRoutes';
 import orderRoutes from './routes/orderRoutes';
 import webhook from './webhooks/stripeWebhook';
+import statRoutes from './routes/statRoutes';
 
 const app = express();
 
@@ -90,10 +91,10 @@ app.use(
   addressRoutes
 );
 
+app.use('/api/stats', authenticateUser, checkUserRole('admin'), statRoutes);
+
 app.use('/api/products', productRoutes);
-
 app.use('/api/images', imageRoutes);
-
 app.use('/api/auth', authRoutes);
 
 app.use(errorHandler);

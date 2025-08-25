@@ -1,7 +1,6 @@
 import { type ProductWithCategory } from "@/types/api/products";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FaCartPlus } from "react-icons/fa6";
 import { getLowestPrice } from "@/utils/getLowestPrice";
 import { Link } from "react-router-dom";
 
@@ -11,12 +10,12 @@ export const ProductCard = ({ product }: { product: ProductWithCategory }) => {
   if (!firstVariant) return null;
 
   return (
-    <Card className="hover:scale-105r flex h-full flex-col justify-between overflow-hidden pt-0 pb-2 transition-transform duration-300">
+    <Card className="flex h-full flex-col justify-between overflow-hidden pt-0 pb-2 transition-transform duration-300 hover:scale-105">
       {firstVariant.image_url && (
         <img
           src={firstVariant.image_url}
           alt={`Image of ${product.name}`}
-          className="h-48 w-full cursor-pointer bg-neutral-100 object-cover"
+          className="h-48 w-full bg-neutral-100 object-cover"
         />
       )}
 
@@ -41,14 +40,6 @@ export const ProductCard = ({ product }: { product: ProductWithCategory }) => {
             className="hover:bg-primary flex-1 hover:text-white"
           >
             <Link to={`/products/${product.slug}`}> Buy Now</Link>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="hover:bg-primary hover:text-white"
-          >
-            <FaCartPlus />
           </Button>
         </div>
       </CardContent>

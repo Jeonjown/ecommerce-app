@@ -165,9 +165,7 @@ const ProductDetails = () => {
                 Add to Cart
               </Button>
               {selectedVariant && quantity > selectedVariant.stock && (
-                <p className="pt-2 text-sm text-red-600">
-                  Quantity exceeds available stock.
-                </p>
+                <p className="pt-2 text-sm text-red-600">Insufficient stock.</p>
               )}
             </div>
           </div>
