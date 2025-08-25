@@ -27,7 +27,8 @@ import AdminOrdersDetails from "./pages/AdminOrdersDetails";
 import AdminUsers from "./pages/AdminUsers";
 import UserDetails from "./pages/UserDetails";
 import AdminDashboard from "./pages/AdminDashboard";
-import Faqs from "./pages/FAQs";
+import Faqs from "./pages/Faqs";
+
 function App() {
   const { data } = useGetLoggedInUser();
 
