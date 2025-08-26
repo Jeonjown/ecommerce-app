@@ -42,21 +42,16 @@ const OptionsList = ({ id: productId }: OptionListProps) => {
   // local UI state
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [optionName, setOptionName] = useState("");
-
   const [activeAddValueId, setActiveAddValueId] = useState<number | null>(null);
   const [newValueName, setNewValueName] = useState("");
-
-  // controlled delete dialog state: holds value_id that's being deleted (or null)
   const [deleteDialogOpenForValueId, setDeleteDialogOpenForValueId] = useState<
     number | null
   >(null);
 
-  // Create new option (name)
   const handleAddOption = () => {
     const trimmed = optionName.trim();
     if (!trimmed) return;
 
-    // use mutate with onSuccess to immediately close UI
     createOption(trimmed, {
       onSuccess: () => {
         setOptionName("");
@@ -65,7 +60,6 @@ const OptionsList = ({ id: productId }: OptionListProps) => {
     });
   };
 
-  // Create new option value for a particular option
   const handleAddValue = (optionId: number) => {
     const trimmed = newValueName.trim();
     if (!trimmed) return;
@@ -81,11 +75,9 @@ const OptionsList = ({ id: productId }: OptionListProps) => {
     );
   };
 
-  // Confirm delete: call mutate and close dialog via onSuccess
   const handleConfirmDelete = (valueId: number) => {
     deleteOptionValue(valueId, {
       onSuccess: () => {
-        // close the dialog immediately on success
         setDeleteDialogOpenForValueId(null);
       },
     });
@@ -136,8 +128,8 @@ const OptionsList = ({ id: productId }: OptionListProps) => {
       <CardContent className="space-y-4">
         {data?.options?.length ? (
           data.options.map((option: OptionGroup) => (
-            <div className="flex">
-              <div key={option.option_id} className="mb-4">
+            <div key={option.option_id} className="flex">
+              <div className="mb-4">
                 <div className="flex items-center space-x-3">
                   <p className="text-sm font-semibold">{option.option_name}:</p>
 
@@ -182,11 +174,9 @@ const OptionsList = ({ id: productId }: OptionListProps) => {
                   )}
                 </div>
 
-                {/* Values - badges */}
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {option.values.map((value) => (
                     <div key={value.value_id} className="inline-block">
-                      {/* controlled dialog */}
                       <Dialog
                         open={deleteDialogOpenForValueId === value.value_id}
                         onOpenChange={(open) => {
@@ -194,7 +184,6 @@ const OptionsList = ({ id: productId }: OptionListProps) => {
                         }}
                       >
                         <DialogTrigger asChild>
-                          {/* badge uses inline-flex and items-center so the X aligns */}
                           <Badge
                             variant="outline"
                             className="inline-flex cursor-pointer items-center gap-2 px-3 py-1 font-normal hover:scale-105 hover:font-semibold"
@@ -242,6 +231,7 @@ const OptionsList = ({ id: productId }: OptionListProps) => {
                   ))}
                 </div>
               </div>
+
               <div className="ml-auto">
                 <DeleteOptionModal
                   optionId={option.option_id}

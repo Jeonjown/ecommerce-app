@@ -93,68 +93,82 @@ const ProductDetails = () => {
           </div>
 
           {/* Product Info */}
-          <div className="flex-1 space-y-6">
-            {/* Title + Price */}
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold">{data.product.name}</h1>
-              <p className="text-primary text-3xl font-bold">
-                ₱ {(Number(selectedVariant?.price) || 0).toFixed(2)}
-              </p>
-            </div>
-            {/* Variants */}
-            <div>
-              <p className="mb-2 text-sm font-medium text-gray-700">
-                Variants:
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {data.product.variants.map((variant) => {
-                  const isSelected = selectedVariant?.id === variant.id;
-                  const isOutOfStock = variant.stock === 0;
-
-                  return (
-                    <button
-                      key={variant.id}
-                      onClick={() =>
-                        !isOutOfStock &&
-                        setSelectedVariant(variant as ProductVariantWithOptions)
-                      }
-                      disabled={isOutOfStock}
-                      className={`rounded border px-3 py-1 text-sm transition ${isSelected ? "border-primary text-primary bg-neutral-100" : ""} ${isOutOfStock ? "cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400" : "border-gray-300 text-gray-700 hover:bg-neutral-100"} `}
-                    >
-                      {variant.name}
-                    </button>
-                  );
-                })}
+          <div className="flex flex-1 flex-col">
+            <div className="flex-1 space-y-6">
+              {/* Title + Price */}
+              <div className="space-y-2">
+                <h1 className="text-2xl font-semibold">{data.product.name}</h1>
+                <p className="text-primary text-3xl font-bold">
+                  ₱ {(Number(selectedVariant?.price) || 0).toFixed(2)}
+                </p>
               </div>
-            </div>
 
-            {/* Quantity Counter */}
-            <div className="flex items-center">
-              <p className="mr-5 text-sm font-medium text-gray-700">
-                Quantity:
-              </p>
-              <div className="flex justify-center">
+              {/* Variants */}
+              <div>
+                <p className="mb-2 text-sm font-medium text-gray-700">
+                  Variants:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {data.product.variants.map((variant) => {
+                    const isSelected = selectedVariant?.id === variant.id;
+                    const isOutOfStock = variant.stock === 0;
+
+                    return (
+                      <button
+                        key={variant.id}
+                        onClick={() =>
+                          !isOutOfStock &&
+                          setSelectedVariant(
+                            variant as ProductVariantWithOptions,
+                          )
+                        }
+                        disabled={isOutOfStock}
+                        className={`rounded border px-3 py-1 text-sm transition ${
+                          isSelected
+                            ? "border-primary text-primary bg-neutral-100"
+                            : ""
+                        } ${
+                          isOutOfStock
+                            ? "cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
+                            : "border-gray-300 text-gray-700 hover:bg-neutral-100"
+                        }`}
+                      >
+                        {variant.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Quantity Counter */}
+              <div className="flex items-center">
+                <p className="mr-5 text-sm font-medium text-gray-700">
+                  Quantity:
+                </p>
                 <Counter quantity={quantity} setQuantity={setQuantity} />
+                <div className="flex items-center gap-2">
+                  <span className="ml-5 text-sm font-medium text-gray-700">
+                    Available:
+                  </span>
+                  <span className="text-gray-800">
+                    {selectedVariant?.stock}
+                  </span>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="ml-5 text-sm font-medium text-gray-700">
-                  Available:
-                </span>
-                {/* Stock */}
-                <span className="text-gray-800">{selectedVariant?.stock}</span>
+              {/* Description */}
+              <div>
+                <h2 className="mb-2 text-lg font-semibold text-gray-800">
+                  Description
+                </h2>
+                <div className="max-h-45 space-y-2 overflow-y-auto pr-2 text-sm leading-relaxed whitespace-pre-line text-gray-700">
+                  {selectedVariant?.description || "No description available."}
+                </div>
               </div>
             </div>
 
-            {/* Description */}
-            <div>
-              <p className="text-sm text-gray-600">
-                {selectedVariant?.description}
-              </p>
-            </div>
-
-            {/* Add to Cart */}
-            <div className="pt-4">
+            {/* Add to Cart Button pinned at bottom */}
+            <div className="mt-auto pt-4">
               <Button
                 className="bg-primary w-full text-white"
                 disabled={

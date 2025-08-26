@@ -30,6 +30,8 @@ import { useUploadImage } from "@/hooks/useUploadImage";
 import Loading from "@/pages/Loading";
 import { useGetVariantById } from "@/hooks/useGetVariantById";
 import { useGetVariantOptions } from "@/hooks/useGetVariantOptions";
+import { useEffect } from "react";
+import { Textarea } from "../ui/textarea";
 
 interface VariantOptionPayload {
   product_option_id: number;
@@ -63,6 +65,7 @@ const UpdateVariantForm = ({
 
   const isEdit = !!variant_id;
 
+  // Dynamically build option fields
   const dynamicOptionFields =
     optionsData?.options.reduce(
       (acc, option) => {
@@ -90,11 +93,27 @@ const UpdateVariantForm = ({
     [key: `option_${number}`]: string | undefined;
   };
 
+  // ✅ Map by option_name instead of option_id
   const variantDefaults =
     selectedVariantOptions?.reduce(
       (acc, option) => {
-        const value = option.values?.[0]?.value_id;
-        if (value) acc[`option_${option.option_id}`] = String(value);
+        const matchingOption = optionsData?.options.find(
+          (o) => o.option_name === option.option_name,
+        );
+
+        if (matchingOption) {
+          const selectedValueName = option.values?.[0]?.value_name;
+          const matchingValue = matchingOption.values.find(
+            (v) => v.value_name === selectedValueName,
+          );
+
+          if (matchingValue) {
+            acc[`option_${matchingOption.option_id}`] = String(
+              matchingValue.value_id,
+            );
+          }
+        }
+
         return acc;
       },
       {} as Record<string, string>,
@@ -104,7 +123,7 @@ const UpdateVariantForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       product_id,
-      price: Number(variant?.price ?? 0),
+      price: variant ? Number(variant.price) / 100 : 0, // ✅ divide by 100 on preload
       stock: Number(variant?.stock ?? 0),
       is_active: Boolean(variant?.is_active ?? true),
       sku: variant?.sku ?? "",
@@ -113,6 +132,47 @@ const UpdateVariantForm = ({
       ...variantDefaults,
     },
   });
+
+  useEffect(() => {
+    if (!variant || !optionsData) return;
+
+    // rebuild defaults after data loads
+    const variantDefaults =
+      selectedVariantOptions?.reduce(
+        (acc, option) => {
+          const matchingOption = optionsData?.options.find(
+            (o) => o.option_name === option.option_name,
+          );
+
+          if (matchingOption) {
+            const selectedValueName = option.values?.[0]?.value_name;
+            const matchingValue = matchingOption.values.find(
+              (v) => v.value_name === selectedValueName,
+            );
+
+            if (matchingValue) {
+              acc[`option_${matchingOption.option_id}`] = String(
+                matchingValue.value_id,
+              );
+            }
+          }
+
+          return acc;
+        },
+        {} as Record<string, string>,
+      ) ?? {};
+
+    methods.reset({
+      product_id,
+      price: variant ? Number(variant.price) / 100 : 0,
+      stock: Number(variant?.stock ?? 0),
+      is_active: Boolean(variant?.is_active ?? true),
+      sku: variant?.sku ?? "",
+      name: variant?.name ?? "",
+      description: variant?.description ?? "",
+      ...variantDefaults,
+    });
+  }, [variant, optionsData, selectedVariantOptions, product_id, methods]);
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -134,7 +194,7 @@ const UpdateVariantForm = ({
 
       const payload = {
         product_id,
-        price: values.price,
+        price: values.price * 100, // ✅ multiply by 100 on payload
         stock: values.stock,
         is_active: values.is_active,
         image_url,
@@ -188,12 +248,21 @@ const UpdateVariantForm = ({
           />
 
           <FormField
+            control={methods.control}
             name="description"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Input type="text" {...field} />
+                  <Textarea
+                    {...field}
+                    className="w-full rounded-md border p-2"
+                    placeholder="Enter variant description..."
+                    value={
+                      field.value ||
+                      "Value-focused 5G phone with powerful performance, long-lasting battery, and modern design at an affordable price."
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -255,7 +324,7 @@ const UpdateVariantForm = ({
               <FormItem>
                 <FormLabel>Price</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <Input type="number" step="0.01" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

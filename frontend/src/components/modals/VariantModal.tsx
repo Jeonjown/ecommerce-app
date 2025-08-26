@@ -140,7 +140,7 @@ export function VariantModal({ product }: VariantModalProps) {
 
                         <div className="mt-4 flex items-center justify-between">
                           <p className="text-primary text-sm font-semibold">
-                            ₱{Number(variant.price).toFixed(2)}
+                            ₱{Number(variant.price / 100).toFixed(2)}
                           </p>
                           <p className="text-sm text-gray-600">
                             Stock: {variant.stock}
