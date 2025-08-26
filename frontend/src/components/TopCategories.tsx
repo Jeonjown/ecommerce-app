@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import smartphones from "../assets/smartphones.png";
 import laptops from "../assets/laptops.png";
-import gaming_console from "../assets/gaming-console.png";
-import pc_components from "../assets/pc-components.png";
+import gaming_console from "../assets/gaming_console.png";
+import pc_components from "../assets/pc_components.png";
 import tablets from "../assets/tablets.png";
 import audio from "../assets/audio.png";
 
