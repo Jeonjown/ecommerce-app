@@ -22,7 +22,7 @@ const SearchProducts = () => {
   }, [query, data]);
 
   return (
-    <div className="relative w-full md:w-[400px] lg:w-[500px]">
+    <div className="relative mx-2 w-full md:mx-0 md:w-[400px] xl:w-[500px]">
       {/* Search Input */}
       <div className="border-input focus-within:ring-ring flex items-center gap-2 rounded-xl border bg-white px-3 py-2 focus-within:ring-2">
         <IoSearch size={20} className="text-muted-foreground" />

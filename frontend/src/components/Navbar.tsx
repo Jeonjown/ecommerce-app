@@ -42,41 +42,29 @@ const Navbar = () => {
         </Link>
       </div>
 
-      {/* Desktop Nav Links */}
-      <ul className="hidden space-x-6 font-semibold md:flex lg:mx-auto">
-        <li>
-          <Link to="/categories">Categories</Link>
-        </li>
-        <li>
-          <Link to="/orders">Orders</Link>
-        </li>
-        <li>
-          <Link to="/faqs">FAQs</Link>
-        </li>
-      </ul>
-
-      {/* Search */}
-      <SearchProducts />
-      {/* Icons */}
-      <div className="mr-3 ml-auto flex items-center space-x-4">
+      <div className="mr-3 ml-auto flex items-center space-x-4 md:hidden">
         {/* Cart (unchanged) */}
-        <Link to="cart" className="hover:bg-muted relative">
-          <button className="flex items-center space-x-1 md:cursor-pointer">
-            <BsCartPlus size={24} />
-            <span className="hidden font-semibold sm:block">Cart</span>
-            {totalQuantity !== 0 && (
-              <span className="bg-destructive absolute -top-2 -left-2 flex h-5 w-5 items-center justify-center rounded-full text-xs text-white">
-                {totalQuantity}
+        {data && (
+          <Link to="cart" className="group relative">
+            <button className="flex cursor-pointer items-center space-x-1">
+              <BsCartPlus size={24} className="group-hover:font-semibold" />
+              <span className="hidden group-hover:font-semibold sm:block">
+                Cart
               </span>
-            )}
-          </button>
-        </Link>
+              {totalQuantity !== 0 && (
+                <span className="bg-destructive absolute -top-2 -left-2 flex h-5 w-5 items-center justify-center rounded-full text-xs text-white">
+                  {totalQuantity}
+                </span>
+              )}
+            </button>
+          </Link>
+        )}
 
         {/* User Dropdown (shadcn styled) */}
         {data ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="hover:bg-muted flex items-center gap-1 hover:cursor-pointer">
+              <div className="flex items-center gap-1 hover:cursor-pointer hover:font-semibold">
                 <FaRegUser size={22} />
                 <span className="hidden font-medium sm:block">
                   {data.user.name}
@@ -109,10 +97,83 @@ const Navbar = () => {
             </Link>
           </div>
         )}
+
+        <HamburgerMenu isOpen={menuOpen} toggle={toggleMenu} />
       </div>
 
-      {/* Hamburger Menu */}
-      <HamburgerMenu isOpen={menuOpen} toggle={toggleMenu} />
+      {/* Desktop Nav Links */}
+      <ul className="hidden space-x-6 font-semibold md:flex lg:mx-auto">
+        <li>
+          <Link to="/categories">Categories</Link>
+        </li>
+        <li>
+          <Link to="/orders">Orders</Link>
+        </li>
+        <li>
+          <Link to="/faqs">FAQs</Link>
+        </li>
+      </ul>
+
+      {/* Search */}
+      <SearchProducts />
+      {/* Icons */}
+      <div className="ml-auto hidden items-center space-x-4 md:flex">
+        {/* Cart (unchanged) */}
+        <Link
+          to="cart"
+          className="relative hover:cursor-pointer hover:font-semibold"
+        >
+          <button className="flex items-center space-x-1 md:cursor-pointer">
+            <BsCartPlus size={24} />
+            <span className="hidden font-semibold sm:block">Cart</span>
+            {totalQuantity !== 0 && (
+              <span className="bg-destructive absolute -top-2 -left-2 flex h-5 w-5 items-center justify-center rounded-full text-xs text-white">
+                {totalQuantity}
+              </span>
+            )}
+          </button>
+        </Link>
+
+        {/* User Dropdown (shadcn styled) */}
+        {data ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="m-0 flex items-center gap-1 hover:cursor-pointer hover:font-semibold">
+                <FaRegUser size={22} />
+                <span className="hidden font-medium sm:block">
+                  {data.user.name}
+                </span>
+                <MdOutlineKeyboardArrowDown className="hidden sm:block" />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/profile">Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/settings">Settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => mutate()}
+                className="text-destructive"
+              >
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="space-x-2">
+            <Link to="/login">
+              <Button className="border px-2 py-1">Login</Button>
+            </Link>
+            <Link to="/signup">
+              <Button className="border px-2 py-1">Signup</Button>
+            </Link>
+          </div>
+        )}
+
+        <HamburgerMenu isOpen={menuOpen} toggle={toggleMenu} />
+      </div>
 
       {/* Mobile Menu */}
       <ul
@@ -126,10 +187,10 @@ const Navbar = () => {
           <Link to="/categories">Categories</Link>
         </li>
         <li>
-          <Link to="/faqs">FAQs</Link>
+          <Link to="/orders">Orders</Link>
         </li>
         <li>
-          <Link to="/orders">Orders</Link>
+          <Link to="/faqs">FAQs</Link>
         </li>
       </ul>
     </nav>

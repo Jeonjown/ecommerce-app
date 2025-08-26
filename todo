@@ -1,2 +1,4 @@
-seed data
-clean up status // clear pending, clear processing
+- seed data
+- carousel products instead of variant
+  clean up status // clear pending, clear processing
+- fix mobile responsiveness
