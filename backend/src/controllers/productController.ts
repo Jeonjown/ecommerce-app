@@ -23,17 +23,22 @@ export const createProductController = async (
   next: NextFunction
 ) => {
   try {
-    const { category_id, name, description, is_active } = req.body;
+    const { category_id, name, brand, description, is_active } = req.body;
 
     const isActiveBool = !!is_active;
 
-    if (!category_id || !name || !description) {
+    if (!category_id || !name || !brand || !description) {
       throw new ApiError('Missing required product fields', 400);
     }
 
     const cleanedName = name.trim();
+    const cleanedBrand = brand.trim();
+
     if (!cleanedName) {
       throw new ApiError('Invalid product name', 400);
+    }
+    if (!cleanedBrand) {
+      throw new ApiError('Invalid product brand', 400);
     }
 
     const category = await getCategoryById(category_id);
@@ -43,15 +48,18 @@ export const createProductController = async (
 
     const slugToUse = await generateSlug(cleanedName, 'products');
 
-    const product = await createProduct(
+    const productId = await createProduct(
       category_id,
       cleanedName,
+      cleanedBrand,
       slugToUse,
       description,
       isActiveBool
     );
 
-    res.status(200).json({ message: 'Product Created Successfully', product });
+    res
+      .status(200)
+      .json({ message: 'Product Created Successfully', productId });
     return;
   } catch (error) {
     next(error);

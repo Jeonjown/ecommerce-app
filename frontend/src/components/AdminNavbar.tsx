@@ -20,7 +20,6 @@ const AdminNavbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const links = [
-    { label: "Dashboard", to: "/admin/dashboard" },
     { label: "Products", to: "/admin/products" },
     { label: "Categories", to: "/admin/categories" },
     { label: "Orders", to: "/admin/orders" },

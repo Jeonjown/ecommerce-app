@@ -22,14 +22,15 @@ import { getOptionValuesByOptionId } from './optionValueModel';
 export const createProduct = async (
   category_id: number,
   name: string,
+  brand: string,
   slug: string,
   description: string,
   is_active: boolean
 ): Promise<number> => {
   const [result] = await pool.query<ResultSetHeader>(
-    `INSERT INTO products (category_id, name, slug, description, is_active)
-  VALUES (?, ?, ?, ?, ?)`,
-    [category_id, name, slug, description, is_active]
+    `INSERT INTO products (category_id, name, brand, slug, description, is_active)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [category_id, name, brand, slug, description, is_active]
   );
   return result.insertId;
 };
