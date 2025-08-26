@@ -1,56 +1,94 @@
+// OptionsList.tsx
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useGetOptionsByProductId } from "@/hooks/useGetOptionsByProductId";
-import type { OptionGroup } from "@/types/api/options";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { IoMdClose } from "react-icons/io";
 import { FaCirclePlus } from "react-icons/fa6";
-import { useCreateOptions } from "@/hooks/useCreateOptions";
-import { useState } from "react";
-import { useCreateOptionValue } from "@/hooks/useCreateOptionValue";
-import { useDeleteOptionValue } from "@/hooks/useDeleteOptionValue";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+
+import type { OptionGroup } from "@/types/api/options";
+import { useGetOptionsByProductId } from "@/hooks/useGetOptionsByProductId";
+import { useCreateOptions } from "@/hooks/useCreateOptions";
+import { useCreateOptionValue } from "@/hooks/useCreateOptionValue";
+import { useDeleteOptionValue } from "@/hooks/useDeleteOptionValue";
 import DeleteOptionModal from "./modals/DeleteOptionModal";
 
 interface OptionListProps {
   id: number;
 }
 
-const OptionsList = ({ id }: OptionListProps) => {
-  const { data } = useGetOptionsByProductId(Number(id));
-  const { mutate } = useCreateOptions(String(id));
-  const { mutate: createOptionValues } = useCreateOptionValue(String(id));
+const OptionsList = ({ id: productId }: OptionListProps) => {
+  // queries & mutations
+  const { data } = useGetOptionsByProductId(productId);
 
-  const { mutate: deleteOptionValue } = useDeleteOptionValue(String(id));
+  const { mutate: createOption, isPending: isCreatingOption } =
+    useCreateOptions(productId);
 
-  const [isAdding, setIsAdding] = useState(false);
+  const { mutate: createOptionValue, isPending: isCreatingOptionValue } =
+    useCreateOptionValue(productId);
+
+  const { mutate: deleteOptionValue, isPending: isDeletingOptionValue } =
+    useDeleteOptionValue(productId);
+
+  // local UI state
+  const [isAddingOption, setIsAddingOption] = useState(false);
   const [optionName, setOptionName] = useState("");
 
   const [activeAddValueId, setActiveAddValueId] = useState<number | null>(null);
   const [newValueName, setNewValueName] = useState("");
 
+  // controlled delete dialog state: holds value_id that's being deleted (or null)
+  const [deleteDialogOpenForValueId, setDeleteDialogOpenForValueId] = useState<
+    number | null
+  >(null);
+
+  // Create new option (name)
   const handleAddOption = () => {
-    if (!optionName.trim()) return;
-    mutate(optionName);
-    setOptionName("");
-    setIsAdding(false);
+    const trimmed = optionName.trim();
+    if (!trimmed) return;
+
+    // use mutate with onSuccess to immediately close UI
+    createOption(trimmed, {
+      onSuccess: () => {
+        setOptionName("");
+        setIsAddingOption(false);
+      },
+    });
   };
 
+  // Create new option value for a particular option
   const handleAddValue = (optionId: number) => {
-    if (!newValueName.trim()) return;
-    createOptionValues({ id: optionId, value: newValueName }); // expects shape { optionId, value }
-    setNewValueName("");
-    setActiveAddValueId(null);
+    const trimmed = newValueName.trim();
+    if (!trimmed) return;
+
+    createOptionValue(
+      { id: optionId, value: trimmed },
+      {
+        onSuccess: () => {
+          setNewValueName("");
+          setActiveAddValueId(null);
+        },
+      },
+    );
+  };
+
+  // Confirm delete: call mutate and close dialog via onSuccess
+  const handleConfirmDelete = (valueId: number) => {
+    deleteOptionValue(valueId, {
+      onSuccess: () => {
+        // close the dialog immediately on success
+        setDeleteDialogOpenForValueId(null);
+      },
+    });
   };
 
   return (
@@ -58,20 +96,24 @@ const OptionsList = ({ id }: OptionListProps) => {
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-lg">
           Available Options
-          {!isAdding ? (
-            <Button size="sm" onClick={() => setIsAdding(true)}>
+          {!isAddingOption ? (
+            <Button size="sm" onClick={() => setIsAddingOption(true)}>
               Add Option
             </Button>
           ) : (
             <div className="flex items-center gap-2">
-              <Button size="sm" onClick={handleAddOption}>
+              <Button
+                size="sm"
+                onClick={handleAddOption}
+                disabled={isCreatingOption}
+              >
                 Save
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => {
-                  setIsAdding(false);
+                  setIsAddingOption(false);
                   setOptionName("");
                 }}
               >
@@ -81,7 +123,7 @@ const OptionsList = ({ id }: OptionListProps) => {
           )}
         </CardTitle>
 
-        {isAdding && (
+        {isAddingOption && (
           <Input
             value={optionName}
             onChange={(e) => setOptionName(e.target.value)}
@@ -92,102 +134,120 @@ const OptionsList = ({ id }: OptionListProps) => {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {data && data?.options?.length > 0 ? (
+        {data?.options?.length ? (
           data.options.map((option: OptionGroup) => (
-            <div key={option.option_id}>
-              <div className="flex items-center space-x-1">
-                <p className="text-sm font-semibold">
-                  {`${option.option_name}:`}
-                </p>
+            <div className="flex">
+              <div key={option.option_id} className="mb-4">
+                <div className="flex items-center space-x-3">
+                  <p className="text-sm font-semibold">{option.option_name}:</p>
 
-                {activeAddValueId !== option.option_id ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <FaCirclePlus
-                        className="cursor-pointer"
-                        onClick={() => setActiveAddValueId(option.option_id)}
+                  {activeAddValueId !== option.option_id ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <FaCirclePlus
+                          className="cursor-pointer"
+                          onClick={() => setActiveAddValueId(option.option_id)}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        Add Option Value
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <div className="ml-2 flex items-center gap-2">
+                      <Input
+                        value={newValueName}
+                        onChange={(e) => setNewValueName(e.target.value)}
+                        placeholder="New value"
+                        className="h-8 w-40"
                       />
-                    </TooltipTrigger>
-                    <TooltipContent side="right">
-                      Add Option Value
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <div className="ml-2 flex items-center gap-2">
-                    <Input
-                      value={newValueName}
-                      onChange={(e) => setNewValueName(e.target.value)}
-                      placeholder="New value"
-                      className="h-8 w-40"
-                    />
-                    <Button
-                      size="sm"
-                      onClick={() => handleAddValue(option.option_id)}
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setActiveAddValueId(null);
-                        setNewValueName("");
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                )}
-              </div>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddValue(option.option_id)}
+                        disabled={isCreatingOptionValue}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setActiveAddValueId(null);
+                          setNewValueName("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </div>
 
-              <div className="flex items-center">
+                {/* Values - badges */}
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {option.values.map((value) => (
-                    <Dialog key={value.value_id}>
-                      <DialogTrigger asChild>
-                        <Badge
-                          variant="outline"
-                          className="cursor-pointer font-normal hover:scale-105 hover:font-semibold"
-                        >
-                          {value.value_name}
-                          <IoMdClose className="ml-1" />
-                        </Badge>
-                      </DialogTrigger>
-
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Are you absolutely sure?</DialogTitle>
-                          <DialogDescription>
-                            This action cannot be undone. This will permanently
-                            delete this option value and all associated items
-                            into it.
-                          </DialogDescription>
-                        </DialogHeader>
-
-                        <div className="mt-4 flex justify-end gap-2">
-                          <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
-                          </DialogClose>
-
-                          <Button
-                            variant="destructive"
-                            onClick={() => deleteOptionValue(value.value_id)}
+                    <div key={value.value_id} className="inline-block">
+                      {/* controlled dialog */}
+                      <Dialog
+                        open={deleteDialogOpenForValueId === value.value_id}
+                        onOpenChange={(open) => {
+                          if (!open) setDeleteDialogOpenForValueId(null);
+                        }}
+                      >
+                        <DialogTrigger asChild>
+                          {/* badge uses inline-flex and items-center so the X aligns */}
+                          <Badge
+                            variant="outline"
+                            className="inline-flex cursor-pointer items-center gap-2 px-3 py-1 font-normal hover:scale-105 hover:font-semibold"
+                            onClick={() =>
+                              setDeleteDialogOpenForValueId(value.value_id)
+                            }
                           >
-                            Confirm
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                            <span className="truncate">{value.value_name}</span>
+                            <IoMdClose className="text-xs" />
+                          </Badge>
+                        </DialogTrigger>
+
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Are you absolutely sure?</DialogTitle>
+                            <p className="text-muted-foreground text-sm">
+                              This action cannot be undone. This will
+                              permanently delete this option value.
+                            </p>
+                          </DialogHeader>
+
+                          <div className="mt-4 flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() =>
+                                setDeleteDialogOpenForValueId(null)
+                              }
+                            >
+                              Cancel
+                            </Button>
+
+                            <Button
+                              variant="destructive"
+                              onClick={() =>
+                                handleConfirmDelete(value.value_id)
+                              }
+                              disabled={isDeletingOptionValue}
+                            >
+                              Confirm
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   ))}
                 </div>
-
-                <div className="ml-auto">
-                  <DeleteOptionModal
-                    optionId={option.option_id}
-                    optionName={option.option_name}
-                    productId={id}
-                  />
-                </div>
+              </div>
+              <div className="ml-auto">
+                <DeleteOptionModal
+                  optionId={option.option_id}
+                  optionName={option.option_name}
+                  productId={productId}
+                />
               </div>
             </div>
           ))

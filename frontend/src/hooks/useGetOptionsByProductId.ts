@@ -1,13 +1,12 @@
+import { useQuery } from "@tanstack/react-query";
 import { getOptionsByProductId } from "@/api/optionsApi";
 import type { OptionResponse } from "@/types/api/options";
 
-import { useQuery } from "@tanstack/react-query";
-
-export const useGetOptionsByProductId = (id: number) => {
+export const useGetOptionsByProductId = (productId: number) => {
   return useQuery<OptionResponse>({
-    queryKey: ["optionsByProductId", id],
-    queryFn: () => getOptionsByProductId(id),
-    enabled: !!id,
+    queryKey: ["product_options", productId],
+    queryFn: () => getOptionsByProductId(productId),
+    enabled: !!productId,
     retry: false,
     refetchOnWindowFocus: false,
   });

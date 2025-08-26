@@ -22,7 +22,7 @@ const DeleteOptionModal = ({
   optionName,
   productId,
 }: DeleteOptionModalProps) => {
-  const { mutate: deleteOption } = useDeleteOptionByOptionId(String(productId));
+  const { mutate: deleteOption } = useDeleteOptionByOptionId(productId);
 
   return (
     <Dialog>

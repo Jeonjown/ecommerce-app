@@ -3,14 +3,14 @@ import { toast } from "sonner";
 import { isAxiosError } from "axios";
 import { deleteOptionValue } from "@/api/optionsValueApi";
 
-export const useDeleteOptionValue = (productId: string) => {
+export const useDeleteOptionValue = (productId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: deleteOptionValue,
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["optionsByProductId", productId],
+        queryKey: ["product_options", productId],
       });
       toast.success(data.message || "Option Deleted successfully");
     },

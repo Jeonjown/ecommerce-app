@@ -36,7 +36,7 @@ export const deleteOptionByOptionId = async (id: number) => {
   }
 };
 
-export const createOptionByProductId = async (id: string, name: string) => {
+export const createOptionByProductId = async (id: number, name: string) => {
   try {
     const response = await api.post(
       `/products/options/${id}`,

@@ -3,20 +3,22 @@ import { toast } from "sonner";
 import { isAxiosError } from "axios";
 import { createOptionValue } from "@/api/optionsValueApi";
 
-export const useCreateOptionValue = (productId: string) => {
+export const useCreateOptionValue = (productId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: createOptionValue,
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["optionsByProductId", productId],
+        queryKey: ["product_options", productId],
       });
-      toast.success(data.message || "Option Created successfully");
+      toast.success(data.message || "Option value created successfully");
     },
     onError: (error) => {
       if (isAxiosError(error)) {
-        toast.error(error.response?.data?.message || "Creating options failed");
+        toast.error(
+          error.response?.data?.message || "Creating option value failed",
+        );
       } else {
         toast.error("An unexpected error occurred");
       }

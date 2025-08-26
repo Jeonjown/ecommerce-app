@@ -104,6 +104,7 @@ export const getProducts = async (
   if (!rows.length) return [];
 
   const productIds = rows.map((r) => r.id);
+  if (productIds.length === 0) return [];
 
   // Fetch all variants for all products
   const [variantRows] = await pool.query<RowDataPacket[]>(
@@ -111,37 +112,44 @@ export const getProducts = async (
     [productIds]
   );
 
-  // Fetch all variant option values for all variants
   const variantIds = variantRows.map((v) => v.id);
-  const [variantOptionRows] = await pool.query<RowDataPacket[]>(
-    `SELECT 
-       pvv.product_variant_id,
-       po.id AS option_id,
-       po.name AS option_name,
-       pov.id AS option_value_id,
-       pov.value AS option_value
-     FROM product_variant_values pvv
-     JOIN product_options po ON po.id = pvv.product_option_id
-     JOIN product_option_values pov ON pov.id = pvv.product_option_value_id
-     WHERE pvv.product_variant_id IN (?)`,
-    [variantIds]
-  );
+
+  // Fetch all variant options for these variants
+  let variantOptionRows: RowDataPacket[] = [];
+  if (variantIds.length > 0) {
+    [variantOptionRows] = await pool.query<RowDataPacket[]>(
+      `SELECT 
+         pvv.product_variant_id,
+         po.id AS option_id,
+         po.name AS option_name,
+         pov.id AS option_value_id,
+         pov.value AS option_value
+       FROM product_variant_values pvv
+       JOIN product_options po ON po.id = pvv.product_option_id
+       JOIN product_option_values pov ON pov.id = pvv.product_option_value_id
+       WHERE pvv.product_variant_id IN (?)`,
+      [variantIds]
+    );
+  }
 
   // Fetch all product options & values for all products
-  const [productOptionRows] = await pool.query<RowDataPacket[]>(
-    `SELECT 
-       po.product_id,
-       po.id AS option_id,
-       po.name AS option_name,
-       pov.id AS option_value_id,
-       pov.value AS option_value
-     FROM product_options po
-     JOIN product_option_values pov ON pov.product_option_id = po.id
-     WHERE po.product_id IN (?)`,
-    [productIds]
-  );
+  let productOptionRows: RowDataPacket[] = [];
+  if (productIds.length > 0) {
+    [productOptionRows] = await pool.query<RowDataPacket[]>(
+      `SELECT 
+         po.product_id,
+         po.id AS option_id,
+         po.name AS option_name,
+         pov.id AS option_value_id,
+         pov.value AS option_value
+       FROM product_options po
+       JOIN product_option_values pov ON pov.product_option_id = po.id
+       WHERE po.product_id IN (?)`,
+      [productIds]
+    );
+  }
 
-  // Group data
+  // Group variants
   const variantsMap: Record<number, ProductVariant[]> = {};
   variantRows.forEach((v) => {
     variantsMap[v.product_id] = variantsMap[v.product_id] || [];
@@ -166,6 +174,7 @@ export const getProducts = async (
     });
   });
 
+  // Group product options
   const optionsMap: Record<number, ProductOptionWithValues[]> = {};
   productOptionRows.forEach((o) => {
     optionsMap[o.product_id] = optionsMap[o.product_id] || [];

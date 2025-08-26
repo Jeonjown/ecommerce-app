@@ -8,14 +8,14 @@ interface DeleteOptionResponse {
   success?: boolean;
 }
 
-export const useDeleteOptionByOptionId = (productId: string) => {
+export const useDeleteOptionByOptionId = (productId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation<DeleteOptionResponse, unknown, number>({
     mutationFn: (id: number) => deleteOptionByOptionId(id),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["optionsByProductId", productId],
+        queryKey: ["product_options", productId],
       });
       toast.success(data.message || "Option Deleted successfully");
     },
