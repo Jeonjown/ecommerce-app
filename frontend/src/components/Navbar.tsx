@@ -76,9 +76,6 @@ const Navbar = () => {
               <DropdownMenuItem asChild>
                 <Link to="/profile">Profile</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/settings">Settings</Link>
-              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => mutate()}
                 className="text-destructive"
@@ -149,9 +146,6 @@ const Navbar = () => {
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <Link to="/profile">Profile</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/settings">Settings</Link>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => mutate()}
