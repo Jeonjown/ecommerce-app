@@ -8,12 +8,10 @@ const Home = () => {
   return (
     <>
       <HeroBanner />
-      {/* <Filters /> */}
+
       <ProductCarousel />
       <PromoBanner />
       <TopCategories />
-
-      {/* <NewArrival /> */}
 
       <Footer />
     </>

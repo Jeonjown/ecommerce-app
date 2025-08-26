@@ -16,25 +16,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 const ProductCarousel = () => {
   const { data, isPending } = useGetProducts();
 
-  const flattenedVariants = data?.products.flatMap((product) =>
-    product.variants.map((variant) => ({
-      ...variant,
-      productName: product.name,
-      productDescription: product.description,
-      productSlug: product.slug,
-    })),
-  );
-
   if (isPending) {
     return (
       <div className="relative mt-8 mb-10">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <Skeleton className="m-5 h-7 w-52" />
           <Skeleton className="m-5 h-5 w-20" />
         </div>
 
-        {/* Carousel Skeleton */}
         <Carousel>
           <CarouselContent>
             {Array.from({ length: 4 }).map((_, index) => (
@@ -43,21 +32,14 @@ const ProductCarousel = () => {
                 className="basis-[80%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
               >
                 <Card className="flex h-full flex-col justify-between overflow-hidden pt-0 pb-2">
-                  {/* Image skeleton */}
                   <Skeleton className="h-48 w-full bg-neutral-200" />
-
                   <CardContent className="flex flex-1 flex-col justify-between gap-y-4 px-5 pb-4">
-                    {/* Title + Price */}
                     <div className="flex items-center justify-between">
                       <Skeleton className="h-5 w-32" />
                       <Skeleton className="h-5 w-16" />
                     </div>
-
-                    {/* Description */}
                     <Skeleton className="h-4 w-full" />
                     <Skeleton className="h-4 w-2/3" />
-
-                    {/* Button */}
                     <Skeleton className="h-9 w-full rounded-md" />
                   </CardContent>
                 </Card>
@@ -71,6 +53,17 @@ const ProductCarousel = () => {
       </div>
     );
   }
+
+  // Only take first variant of each product
+  const firstVariants = data?.products
+    .map((product) => product.variants[0])
+    .filter(Boolean)
+    .map((variant, idx) => ({
+      ...variant,
+      productName: data.products[idx].name,
+      productDescription: data.products[idx].description,
+      productSlug: data.products[idx].slug,
+    }));
 
   return (
     <motion.div
@@ -86,15 +79,9 @@ const ProductCarousel = () => {
         </h2>
       </div>
 
-      <Carousel
-        plugins={[
-          Autoplay({
-            delay: 3000,
-          }),
-        ]}
-      >
+      <Carousel plugins={[Autoplay({ delay: 3000 })]}>
         <CarouselContent>
-          {flattenedVariants?.map((variant, index) => (
+          {firstVariants?.map((variant, index) => (
             <CarouselItem
               key={index}
               className="basis-[80%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
