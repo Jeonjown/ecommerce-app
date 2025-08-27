@@ -88,11 +88,13 @@ const ProductCarousel = () => {
             >
               <Card className="flex h-full flex-col justify-between overflow-hidden pt-0 pb-2">
                 {variant.image_url && (
-                  <img
-                    src={variant.image_url}
-                    alt={`Image of ${variant.productName}`}
-                    className="h-48 w-full bg-neutral-100 object-cover"
-                  />
+                  <div className="flex h-48 w-full items-center justify-center bg-neutral-100">
+                    <img
+                      src={variant.image_url}
+                      alt={`Image of ${variant.productName}`}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
                 )}
                 <CardContent className="flex flex-1 flex-col justify-between gap-y-4 px-5 pb-4">
                   <div className="flex items-center justify-between">

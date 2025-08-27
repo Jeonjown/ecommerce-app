@@ -12,11 +12,13 @@ export const ProductCard = ({ product }: { product: ProductWithCategory }) => {
   return (
     <Card className="flex h-full flex-col justify-between overflow-hidden pt-0 pb-2 transition-transform duration-300 hover:scale-105">
       {firstVariant.image_url && (
-        <img
-          src={firstVariant.image_url}
-          alt={`Image of ${product.name}`}
-          className="h-48 w-full bg-neutral-100 object-cover"
-        />
+        <div className="flex h-48 w-full items-center justify-center bg-neutral-100">
+          <img
+            src={firstVariant.image_url}
+            alt={`Image of ${product.name}`}
+            className="max-h-full max-w-full object-contain transition-transform duration-500 hover:scale-110"
+          />
+        </div>
       )}
 
       <CardContent className="flex flex-1 flex-col justify-between gap-y-4 px-5 pb-4">

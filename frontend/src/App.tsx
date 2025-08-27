@@ -50,7 +50,6 @@ function App() {
           {/* Private Routes */}
           <Route element={<PrivateRoutes />}>
             <Route path="/cart" element={<Cart />} />
-            <Route path="/products/:slug" element={<ProductDetails />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/order-success" element={<SuccessOrder />} />
@@ -59,6 +58,7 @@ function App() {
             <Route path="/orders/:id" element={<OrderDetails />} />
           </Route>
           {/* Public Routes */}
+          <Route path="/products/:slug" element={<ProductDetails />} />
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
