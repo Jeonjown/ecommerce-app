@@ -51,14 +51,39 @@ export const updateVariant = async (
   name: string,
   description: string
 ) => {
-  const [result] = await pool.query(
-    `UPDATE product_variants
+  // Build sql and values first
+  const sql = `UPDATE product_variants
      SET sku = ?, price = ?, stock = ?, image_url = ?, is_active = ?, name = ?, description = ?
-     WHERE id = ?`,
-    [sku, price, stock, image_url, is_active, name, description, id]
-  );
+     WHERE id = ?`;
 
-  return (result as any).affectedRows > 0;
+  const values = [
+    sku,
+    price,
+    stock,
+    image_url,
+    is_active,
+    name,
+    description,
+    id,
+  ];
+
+  try {
+    const [result] = await pool.query<ResultSetHeader>(sql, values);
+    return result.affectedRows > 0;
+  } catch (err) {
+    // Log DB error details (mysql2 often provides err.sql / err.code / err.errno)
+    console.error(
+      '[variantModel.updateVariant] DB error:',
+      (err as any).message
+    );
+    console.error('[variantModel.updateVariant] err.sql:', (err as any).sql);
+    console.error(
+      '[variantModel.updateVariant] err.code/errno:',
+      (err as any).code,
+      (err as any).errno
+    );
+    throw err;
+  }
 };
 
 export const deleteVariantById = async (id: number) => {

@@ -25,12 +25,16 @@ export const deleteImage = async (
   next: NextFunction
 ) => {
   const { public_id } = req.body;
-  if (!public_id) throw new ApiError('public_id required.', 400);
+
+  if (!public_id) {
+    console.warn('No public_id provided. Skipping deletion.');
+    res.status(200).json({ message: 'No image to delete.' });
+    return;
+  }
 
   try {
     await cloudinary.uploader.destroy(public_id);
     res.status(200).json({ message: 'Image deleted successfully.' });
-    return;
   } catch (error) {
     next(error);
   }

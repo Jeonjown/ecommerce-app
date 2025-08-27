@@ -166,27 +166,26 @@ export const updateVariantController = async (
       variant_options,
       name,
       description,
+      sku,
+      product_id,
     } = req.body as {
-      price: number;
-      stock: number;
-      image_url: string;
-      is_active: boolean;
-      variant_options: {
+      price?: number;
+      stock?: number;
+      image_url?: string | null;
+      is_active?: boolean;
+      variant_options?: {
         product_option_id: number;
         product_option_value_id: number;
       }[];
-      name: string;
-      description: string;
+      name?: string;
+      description?: string;
+      sku?: string;
+      product_id?: number;
     };
 
-    if (
-      price == null ||
-      stock == null ||
-      typeof image_url !== 'string' ||
-      typeof is_active !== 'boolean' ||
-      !Array.isArray(variant_options)
-    ) {
-      throw new ApiError('Missing or invalid required fields', 400);
+    // optional: ensure variant_options is an array if provided
+    if (variant_options !== undefined && !Array.isArray(variant_options)) {
+      throw new ApiError('variant_options must be an array', 400);
     }
 
     const existing = await getVariantById(variantId);
@@ -194,57 +193,103 @@ export const updateVariantController = async (
       throw new ApiError('Variant not found', 404);
     }
 
-    // ✅ Delete old image if image_url changed
-    if (existing.image_url !== image_url) {
-      await deleteImageByUrl(existing.image_url);
-    }
-
-    // ✅ Validate variant option pairs
-    const optionDetails = await Promise.all(
-      variant_options.map(
-        async ({ product_option_id, product_option_value_id }) => {
-          const detail = await getOptionNameAndValue(
-            product_option_id,
-            product_option_value_id
-          );
-          if (!detail) {
-            throw new ApiError(
-              `Invalid option/value pair: option ${product_option_id}, value ${product_option_value_id}`,
-              400
+    // If variant_options provided, validate them
+    let optionDetails: any[] = [];
+    if (Array.isArray(variant_options) && variant_options.length > 0) {
+      optionDetails = await Promise.all(
+        variant_options.map(
+          async ({ product_option_id, product_option_value_id }) => {
+            const detail = await getOptionNameAndValue(
+              product_option_id,
+              product_option_value_id
             );
+            if (!detail) {
+              throw new ApiError(
+                `Invalid option/value pair: option ${product_option_id}, value ${product_option_value_id}`,
+                400
+              );
+            }
+            return detail;
           }
-          return detail;
-        }
-      )
-    );
-
-    // ✅ Generate new SKU
-    const newSku = await generateSku(existing.sku.split('-')[0], optionDetails);
-
-    // ✅ Update variant
-    const updated = await updateVariant(
-      variantId,
-      newSku,
-      price,
-      stock,
-      image_url,
-      is_active,
-      name,
-      description
-    );
-
-    if (!updated) {
-      throw new ApiError('Failed to update variant', 500);
+        )
+      );
     }
 
-    // ✅ Replace variant option values
-    await deleteVariantValuesByVariantId(variantId);
-    await createVariantValues(variantId, variant_options);
+    // generate sku if options changed, otherwise keep provided sku or existing
+    const baseSku = existing.sku?.split('-')[0] ?? sku ?? 'SKU';
+    const newSku =
+      optionDetails.length > 0
+        ? await generateSku(baseSku, optionDetails)
+        : (sku ?? existing.sku);
+
+    // ensure image_url won't be set to empty string (use existing if empty or omitted)
+    const imageToUse =
+      typeof image_url === 'string' && image_url.trim() !== ''
+        ? image_url
+        : existing.image_url;
+
+    // sanitize sku (allow letters, numbers, underscore, hyphen)
+    const sanitizeSku = (s?: string) =>
+      s ? String(s).replace(/[^\w-]/g, '-') : existing.sku;
+
+    // Build the exact args we will pass to updateVariant (matching your model signature)
+    const callArgs = {
+      id: variantId,
+      sku: sanitizeSku(newSku),
+      price:
+        price !== undefined && price !== null ? Number(price) : existing.price,
+      stock:
+        stock !== undefined && stock !== null ? Number(stock) : existing.stock,
+      image_url: imageToUse,
+      is_active:
+        typeof is_active === 'boolean' ? is_active : existing.is_active,
+      name: name !== undefined ? name : existing.name,
+      description:
+        description !== undefined ? description : existing.description,
+    };
+
+    // Call updateVariant and log DB-level errors if they occur
+    try {
+      const updated = await updateVariant(
+        callArgs.id,
+        callArgs.sku,
+        callArgs.price,
+        callArgs.stock,
+        callArgs.image_url,
+        callArgs.is_active,
+        callArgs.name,
+        callArgs.description
+      );
+
+      if (!updated) {
+        throw new ApiError('Failed to update variant', 500);
+      }
+    } catch (err) {
+      console.error(
+        '[updateVariantController] updateVariant threw:',
+        (err as any).message
+      );
+      console.error('[updateVariantController] err.sql:', (err as any).sql);
+      console.error(
+        '[updateVariantController] err.code/errno:',
+        (err as any).code,
+        (err as any).errno
+      );
+      throw err;
+    }
+
+    // Replace variant option values if provided (delete then create)
+    if (Array.isArray(variant_options)) {
+      await deleteVariantValuesByVariantId(variantId);
+      if (variant_options.length > 0) {
+        await createVariantValues(variantId, variant_options);
+      }
+    }
 
     res.status(200).json({
       message: 'Variant updated successfully',
       variantId,
-      sku: newSku,
+      sku: callArgs.sku,
     });
   } catch (err) {
     next(err);

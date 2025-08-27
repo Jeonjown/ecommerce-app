@@ -37,7 +37,7 @@ export const UploadImageField: React.FC<UploadImageFieldProps> = ({
   const onDrop = React.useCallback(
     (accepted: File[], rejections: FileRejection[]) => {
       if (rejections.length > 0) {
-        toast.error("Image must be <2MB and PNG/JPG/JPEG");
+        toast.error("Image must be <5MB and PNG/JPG/JPEG");
         resetField(name);
         setLocalPreview(null);
         return;
@@ -57,7 +57,7 @@ export const UploadImageField: React.FC<UploadImageFieldProps> = ({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     maxFiles: 1,
-    maxSize: 2_000_000,
+    maxSize: 5_000_000,
     accept: { "image/png": [], "image/jpg": [], "image/jpeg": [] },
   });
 

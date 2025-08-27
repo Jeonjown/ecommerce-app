@@ -1,7 +1,10 @@
 import { v2 as cloudinary } from 'cloudinary';
 
-export const deleteImageByUrl = async (imageUrl: string) => {
-  if (!imageUrl) throw new Error('Image URL is required.');
+export const deleteImageByUrl = async (imageUrl?: string | null) => {
+  if (!imageUrl) {
+    console.warn('No image provided. Skipping deletion.');
+    return;
+  }
 
   const isCloudinary = imageUrl.includes('res.cloudinary.com');
   if (!isCloudinary) {
@@ -14,10 +17,9 @@ export const deleteImageByUrl = async (imageUrl: string) => {
   );
 
   const publicId = matches?.[1];
-  console.log(publicId);
-
   if (!publicId) {
-    throw new Error('Failed to extract public_id from image URL.');
+    console.warn('Could not extract public_id from URL. Skipping deletion.');
+    return;
   }
 
   await cloudinary.uploader.destroy(publicId);
