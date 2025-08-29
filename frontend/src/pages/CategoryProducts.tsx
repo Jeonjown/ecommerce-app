@@ -30,7 +30,7 @@ export const CategoryProducts = () => {
     return (
       <div className="space-y-6 p-4">
         {/* ProductHeader skeleton */}
-        <div className="mt-2 mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Category name */}
           <Skeleton className="h-8 w-40" />
 
