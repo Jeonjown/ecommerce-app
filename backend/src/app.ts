@@ -28,6 +28,7 @@ app.use(
       'http://localhost:5173',
       'https://techhaven-backend.onrender.com',
       'https://ecommerce-app-two-dun.vercel.app',
+      'https://techhaven-project.vercel.app',
     ],
     credentials: true,
   })
