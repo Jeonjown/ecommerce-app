@@ -80,11 +80,9 @@ export const getProductsByCategoryId = async (
       stock: row.stock,
       image_url: row.image_url,
       is_active: !!row.is_active,
-      // note: don't include DB timestamps here to remain compatible with your ProductVariant type
     });
   }
 
-  // 3. Bulk fetch product options + values and produce flattened rows (ProductOptionWithValues[])
   const [optionRows] = await pool.query<RowDataPacket[]>(
     `
     SELECT po.id AS option_id, po.product_id, po.name AS option_name,
@@ -131,7 +129,6 @@ export const getProductsByCategoryId = async (
     options: optionsMap[row.id] || [],
   }));
 
-  // 5. Apply filters
   return filterProducts(fullProducts, filters);
 };
 

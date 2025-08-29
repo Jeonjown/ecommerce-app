@@ -1,3 +1,3 @@
-- seed data
-- carousel products instead of variant
-  clean up status // clear pending, clear processing
+- change price rannge
+- clean up status // clear pending, clear processing
+- add permissions to routes

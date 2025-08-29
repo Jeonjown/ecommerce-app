@@ -79,6 +79,7 @@ export const getProductsByCategorySlugController = async (
     next(error);
   }
 };
+
 export const createCategoryController = async (
   req: Request,
   res: Response,

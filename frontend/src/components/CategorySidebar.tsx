@@ -19,7 +19,11 @@ export function CategorySidebar() {
     <Sidebar variant="floating" className="relative w-64 shrink-0">
       <SidebarContent className="border bg-white">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xl">Categories</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xl">
+            <Link to="/categories" className="flex items-center gap-2">
+              Categories
+            </Link>
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="mt-5">
               {data?.categories?.map((category) => (
