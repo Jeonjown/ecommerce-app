@@ -39,54 +39,100 @@ export const getProductsByCategoryId = async (
   categoryId: number,
   filters: ProductFilters = {}
 ): Promise<ProductWithCategory[]> => {
+  // 1. Fetch products + category
   const [rows] = await pool.query<RowDataPacket[]>(
     `
-  SELECT 
-    p.id, p.name, p.slug, p.description, p.is_active, p.created_at,
-    c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
-    c.created_at AS category_created_at, c.updated_at AS category_updated_at
-  FROM products p
-  JOIN categories c ON p.category_id = c.id
-  WHERE p.category_id = ?
+    SELECT 
+      p.id, p.category_id, p.name, p.slug, p.description, p.is_active, p.created_at, p.updated_at,
+      c.id AS category_id, c.name AS category_name, c.slug AS category_slug,
+      c.created_at AS category_created_at, c.updated_at AS category_updated_at
+    FROM products p
+    JOIN categories c ON p.category_id = c.id
+    WHERE p.category_id = ?
     `,
     [categoryId]
   );
 
-  const fullProducts: ProductWithCategory[] = [];
+  if (rows.length === 0) return [];
 
-  for (const row of rows) {
-    const product: ProductWithCategory = {
+  const productIds = rows.map((r) => r.id);
+
+  // 2. Bulk fetch variants for all products
+  const [variantRows] = await pool.query<RowDataPacket[]>(
+    `
+    SELECT id, product_id, sku, name, description, price, stock, image_url, is_active
+    FROM product_variants
+    WHERE product_id IN (?)
+    `,
+    [productIds]
+  );
+
+  const variantsMap: Record<number, ProductVariant[]> = {};
+  for (const row of variantRows) {
+    if (!variantsMap[row.product_id]) variantsMap[row.product_id] = [];
+    variantsMap[row.product_id].push({
       id: row.id,
+      product_id: row.product_id,
       name: row.name,
-      slug: row.slug,
       description: row.description,
+      sku: row.sku,
+      price: row.price,
+      stock: row.stock,
+      image_url: row.image_url,
       is_active: !!row.is_active,
-      created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at),
-      category: {
-        id: row.category_id,
-        name: row.category_name,
-        slug: row.category_slug,
-        created_at: row.category_created_at,
-        updated_at: row.category_updated_at,
-      },
-      variants: [],
-      options: [],
-    };
-
-    const variants = await getProductVariants(product.id);
-    const options = await getProductOptions(product.id);
-
-    fullProducts.push({
-      ...product,
-      variants,
-      options,
+      // note: don't include DB timestamps here to remain compatible with your ProductVariant type
     });
   }
 
-  const filtered = filterProducts(fullProducts, filters);
+  // 3. Bulk fetch product options + values and produce flattened rows (ProductOptionWithValues[])
+  const [optionRows] = await pool.query<RowDataPacket[]>(
+    `
+    SELECT po.id AS option_id, po.product_id, po.name AS option_name,
+           pov.id AS option_value_id, pov.value AS option_value
+    FROM product_options po
+    LEFT JOIN product_option_values pov ON po.id = pov.product_option_id
+    WHERE po.product_id IN (?)
+    `,
+    [productIds]
+  );
 
-  return filtered;
+  const optionsMap: Record<number, ProductOptionWithValues[]> = {};
+  for (const row of optionRows) {
+    // skip rows that don't have a value (option without values) — keep consistent with flattened shape
+    if (!row.option_value_id) continue;
+
+    if (!optionsMap[row.product_id]) optionsMap[row.product_id] = [];
+
+    optionsMap[row.product_id].push({
+      option_id: row.option_id,
+      option_name: row.option_name,
+      option_value_id: row.option_value_id,
+      option_value: row.option_value,
+    });
+  }
+
+  // 4. Assemble final products array using same ProductWithCategory shape
+  const fullProducts: ProductWithCategory[] = rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description,
+    is_active: !!row.is_active,
+    created_at: new Date(row.created_at),
+    updated_at: new Date(row.updated_at),
+    category: {
+      id: row.category_id,
+      name: row.category_name,
+      slug: row.category_slug,
+      created_at: row.category_created_at,
+      updated_at: row.category_updated_at,
+    },
+    variants: variantsMap[row.id] || [],
+    options: optionsMap[row.id] || [],
+  }));
+
+  // 5. Apply filters
+  return filterProducts(fullProducts, filters);
 };
 
 export const getProducts = async (
