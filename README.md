@@ -1,4 +1,4 @@
-# 🛒 Live Link:
+# Live Link:
 
 ## https://techhaven-project.vercel.app/
 
