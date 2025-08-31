@@ -1,8 +1,6 @@
-Got it 👍 You want to remove the **“Background & Overview”** section.
+# 🛒 Live Link:
 
-Here’s the cleaned-up version of your README with that part removed:
-
----
+## https://techhaven-project.vercel.app/
 
 # 🛒 Ecommerce App
 
@@ -127,3 +125,4 @@ npm run dev
 ![alt text](./frontend/public/image.png)
 ![alt text](./frontend/public/image-1.png)
 ![alt text](./frontend/public/image-2.png)
+![alt text](./frontend/public/image-3.png)
