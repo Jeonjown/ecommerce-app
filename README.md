@@ -45,9 +45,11 @@ Admin Features
   ![alt text](<frontend/public/Variant CRUD - Made with Clipchamp.gif>)
 
 - Order Management (view and update order status)
+
   ![alt text](<frontend/public/Product CRUD - Made with Clipchamp.gif>)
 
 - User Management (manage registered users, roles)
+
   ![alt text](<frontend/public/User CRUD - Made with Clipchamp.gif>)
 
 ---
