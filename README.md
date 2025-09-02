@@ -111,12 +111,6 @@ CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-Run database seed (optional):
-
-```bash
-npm run seed
-```
-
 Start backend server:
 
 ```bash
