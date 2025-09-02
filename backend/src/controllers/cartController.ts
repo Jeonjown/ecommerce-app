@@ -59,6 +59,8 @@ export const addItemtoCartController = async (
     const { user } = req as Request & { user: User };
     const cartItem = req.body;
 
+    console.log(cartItem);
+
     if (!user) {
       throw new ApiError('Unauthorized', 401);
     }

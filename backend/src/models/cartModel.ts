@@ -25,6 +25,7 @@ export const addItemtoCart = async (userId: number, cartItem: CartItem) => {
          quantity = quantity + ?, 
          stock = ?, 
          price = ?, 
+         product_name = ?, 
          name = ?, 
          image_url = ?, 
          product_id = ? 
@@ -34,6 +35,7 @@ export const addItemtoCart = async (userId: number, cartItem: CartItem) => {
         cartItem.quantity,
         cartItem.stock,
         cartItem.price,
+        cartItem.product_name,
         cartItem.name,
         cartItem.image_url,
         cartItem.product_id,
@@ -46,12 +48,13 @@ export const addItemtoCart = async (userId: number, cartItem: CartItem) => {
   } else {
     const [result] = await pool.query<ResultSetHeader>(
       `INSERT INTO cart 
-        (user_id, product_id, variant_id, name, price, image_url, quantity, stock) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        (user_id, product_id, variant_id, product_name, name, price, image_url, quantity, stock) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         userId,
         cartItem.product_id,
         cartItem.variant_id,
+        cartItem.product_name,
         cartItem.name,
         cartItem.price,
         cartItem.image_url,
@@ -63,9 +66,10 @@ export const addItemtoCart = async (userId: number, cartItem: CartItem) => {
     return result.insertId;
   }
 };
+
 export const getCartItemsByLoggedUser = async (userId: number) => {
   const [rows] = await pool.query<RowDataPacket[]>(
-    ' SELECT * FROM cart WHERE user_id = ? ORDER BY created_at DESC',
+    `SELECT * FROM cart WHERE user_id = ? ORDER BY created_at DESC`,
     [userId]
   );
 
@@ -77,7 +81,7 @@ export const findExistingCartitem = async (
   cartItem: CartItem
 ) => {
   const [existingRows] = await pool.query<RowDataPacket[]>(
-    'SELECT * FROM cart WHERE user_id = ? AND variant_id = ?',
+    `SELECT * FROM cart WHERE user_id = ? AND variant_id = ?`,
     [userId, cartItem.variant_id]
   );
 
@@ -87,19 +91,21 @@ export const findExistingCartitem = async (
 export const updateCartItem = async (userId: number, cartItem: CartItem) => {
   const [result] = await pool.query<ResultSetHeader>(
     `UPDATE cart 
-   SET 
-    quantity = ?, 
-     stock = ?, 
-     price = ?, 
-     name = ?, 
-     image_url = ?, 
-     product_id = ? 
-   WHERE 
-     user_id = ? AND variant_id = ?`,
+     SET 
+       quantity = ?, 
+       stock = ?, 
+       price = ?, 
+       product_name = ?, 
+       name = ?, 
+       image_url = ?, 
+       product_id = ? 
+     WHERE 
+       user_id = ? AND variant_id = ?`,
     [
       cartItem.quantity,
       cartItem.stock,
       cartItem.price,
+      cartItem.product_name,
       cartItem.name,
       cartItem.image_url,
       cartItem.product_id,
@@ -122,7 +128,7 @@ export const removeCartItem = async (userId: number, variantId: number) => {
 
 export const clearCartItem = async (userId: number) => {
   const [result] = await pool.query<ResultSetHeader>(
-    `DELETE FROM cart WHERE user_id = ? `,
+    `DELETE FROM cart WHERE user_id = ?`,
     [userId]
   );
 

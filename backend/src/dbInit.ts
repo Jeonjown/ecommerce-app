@@ -107,6 +107,7 @@ export async function initDb() {
       user_id INT,
       product_id INT NOT NULL,
       variant_id INT NOT NULL,
+      product_name VARCHAR(255) NOT NULL,
       name VARCHAR(255) NOT NULL,
       price INT NOT NULL,
       image_url VARCHAR(255),

@@ -32,13 +32,13 @@ const ProductDetails = () => {
     if (!selectedVariant) return;
 
     if (!user) {
-      navigate("/login"); // 👈 redirect if not logged in
+      navigate("/login");
       return;
     }
-
     mutate({
       product_id: selectedVariant.product_id,
       variant_id: selectedVariant.id,
+      product_name: data?.product.name,
       name: selectedVariant.name,
       price: +selectedVariant.price,
       image_url: selectedVariant.image_url,

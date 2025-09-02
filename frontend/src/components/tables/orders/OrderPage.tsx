@@ -6,11 +6,9 @@ import { orderColumns } from "./OrderColumns";
 
 const OrdersPage = () => {
   const { data, isPending, error } = useGetAllOrders();
-  console.log(data);
 
   if (isPending) return <Loading />;
   if (error) return <div className="text-red-600">{error.message}</div>;
-  console.log(data);
   return (
     <div className="container mx-auto">
       <OrdersTable columns={orderColumns} data={data ?? []} />

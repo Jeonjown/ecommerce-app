@@ -20,7 +20,6 @@ const Cart = () => {
   if (isError || !items) return <Error />;
 
   const totalPrice = getTotalPrice(items);
-
   const totalQuantity = getTotalQuantity(items);
   if (items.length === 0)
     return (
@@ -58,7 +57,12 @@ const Cart = () => {
 
             <div className="w-full flex-1 space-y-2">
               <CardHeader className="p-0">
-                <CardTitle className="text-lg">{item.name}</CardTitle>
+                {/* ✅ Product Name */}
+                <h2 className="text-xl font-semibold">{item.product_name}</h2>
+                {/* ✅ Variant Name */}
+                <CardTitle className="text-muted-foreground text-lg">
+                  {item.name}
+                </CardTitle>
               </CardHeader>
 
               <CardContent className="space-y-2 p-0">
@@ -68,7 +72,6 @@ const Cart = () => {
 
                 <p className="text-sm text-gray-600">Stock: {item.stock}</p>
 
-                {/* ✅ Total Price - looks more balanced here */}
                 <div className="flex items-center gap-2 text-sm">
                   <p>Total Price:</p>
                   <p className="text-muted-foreground">

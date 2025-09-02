@@ -12,13 +12,20 @@ It showcases real-world e-commerce features: authentication, product & variant m
 
 ## 🚀 Features
 
-- 🔐 **Authentication & Authorization** (JWT, bcrypt, cookies)
-- 👤 **User Management** (register, login, profile)
-- 📦 **Products & Variants** (CRUD with images, Cloudinary uploads)
-- 🛍️ **Shopping Cart & Checkout** (with Stripe integration)
-- 📂 **Categories & Filtering** (sort by newest/oldest, variants by options)
-- 📊 **Admin Dashboard** (products, categories, orders, users)
-- 🎨 **Responsive Frontend** with Tailwind + shadcn/ui + animations
+👤 User Features
+
+- Authentication & Authorization (JWT, bcrypt, cookies)
+- Browse Products & Variants (view details, images from Cloudinary)
+- Shopping Cart & Checkout (secure payments with Stripe)
+- Categories & Filtering (sort by newest/oldest, filter variants by options)
+
+🛠️ Admin Features
+
+- Admin Dashboard (overview of products, categories, orders, users)
+- Product & Variant Management (CRUD with images via Cloudinary)
+- Category Management (create, update, delete, filter options)
+- Order Management (view and update order status)
+- User Management (manage registered users, roles)
 
 ---
 
