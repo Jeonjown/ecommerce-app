@@ -15,13 +15,13 @@ It showcases real-world e-commerce features: authentication, product & variant m
 👤 User Features
 
 - Authentication & Authorization (JWT, bcrypt, cookies)
-  <video controls src="./frontend/public/Authentication.mp4" title="Title"></video>
+  ![alt text](frontend/public/Authentication.gif)
 - Browse Products, Categories, Filtering & Variants (view details, images from Cloudinary)
-  <video controls src="./frontend/public/Browse.mp4" title="Title"></video>
+  ![alt text](frontend/public/Browse.gif)
 - Shopping Cart & Checkout (secure payments with Stripe)
-  <video controls src="./frontend/public/Checkout.mp4" title="Title"></video>
+  ![alt text](frontend/public/Checkout.gif)
 - Order Refunds, Cancellation Reqeuest
-  <video controls src="./frontend/public/Request Cancel.mp4" title="Title"></video>
+  ![alt text](<frontend/public/Request Cancel.gif>)
 
 🛠️ Admin Features
 
