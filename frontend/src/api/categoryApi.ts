@@ -58,7 +58,7 @@ export const createCategory = async (name: string): Promise<Category> => {
       { name },
       { withCredentials: true },
     );
-    return res.data;
+    return res.data.category;
   } catch (error) {
     if (isAxiosError(error)) {
       throw new Error(
@@ -80,7 +80,7 @@ export const editCategory = async (
       { name },
       { withCredentials: true },
     );
-    return res.data;
+    return res.data.updatedCategory;
   } catch (error) {
     if (isAxiosError(error)) {
       throw new Error(

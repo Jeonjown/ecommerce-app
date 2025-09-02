@@ -17,6 +17,7 @@ export const useUpdateCategory = () => {
     mutationFn: ({ id, name }) => editCategory(id, name),
     onSuccess: (category, variables) => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
+      console.log(category);
       toast.success(`Category "${category.name}" updated successfully.`);
       variables.reset?.();
     },

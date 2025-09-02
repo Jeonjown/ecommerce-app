@@ -2,7 +2,7 @@
 
 ## https://techhaven-project.vercel.app/
 
-# 🛒 Ecommerce App
+# Ecommerce App
 
 A full-stack **E-commerce platform** built with modern web technologies. This project includes a **Node.js + Express + MySQL backend** and a **React + Vite + Tailwind frontend**.
 
@@ -10,9 +10,9 @@ It showcases real-world e-commerce features: authentication, product & variant m
 
 ---
 
-## 🚀 Features
+## Features
 
-👤 User Features
+User Features
 
 - Authentication & Authorization (JWT, bcrypt, cookies)
 
@@ -27,21 +27,32 @@ It showcases real-world e-commerce features: authentication, product & variant m
 
   ![alt text](frontend/public/Checkout.gif)
 
-- Order Refunds, Cancellation Reqeuest
+- Order Refunds, Cancellation Request
 
   ![alt text](<frontend/public/Request Cancel.gif>)
 
-🛠️ Admin Features
+Admin Features
 
 - Admin Dashboard (overview of products, categories, orders, users)
+
+  ![alt text](<frontend/public/Admin Dashboard.gif>)
+
 - Product & Variant Management (CRUD with images via Cloudinary)
+
+  ![alt text](<frontend/public/Product CRUD - Made with Clipchamp.gif>)
+
 - Category Management (create, update, delete, filter options)
+  ![alt text](<frontend/public/Variant CRUD - Made with Clipchamp.gif>)
+
 - Order Management (view and update order status)
+  ![alt text](<frontend/public/Product CRUD - Made with Clipchamp.gif>)
+
 - User Management (manage registered users, roles)
+  ![alt text](<frontend/public/User CRUD - Made with Clipchamp.gif>)
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### **Frontend**
 
@@ -67,7 +78,7 @@ It showcases real-world e-commerce features: authentication, product & variant m
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 ### 1. Clone the repository
 
@@ -120,14 +131,13 @@ npm run dev
 
 ---
 
-## 📖 Scripts
+## Scripts
 
 ### Backend
 
 - `npm run dev` – Start dev server with ts-node-dev
 - `npm run build` – Compile TypeScript
 - `npm run start` – Run compiled build
-- `npm run seed` – Seed database
 - `npm run test` – Run Jest tests
 
 ### Frontend
