@@ -276,13 +276,6 @@ export const requestCancelOrderController = async (
     const order = await getOrderById(user.id, +id);
     if (!order) throw new ApiError('Order not found', 404);
 
-    if (order.refund_status !== 'none') {
-      throw new ApiError(
-        'A refund/cancellation request already exists for this order',
-        400
-      );
-    }
-
     if (order.payment_method === 'cod') {
       if (!['pending', 'processing'].includes(order.order_status)) {
         throw new ApiError(
